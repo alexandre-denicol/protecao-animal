@@ -1,110 +1,154 @@
-# DESIGN.md — Diretrizes Visuais (baseado em Refactoring UI)
+# DESIGN.md — Diretrizes Visuais da Associação Amiga Miau
 
-## Princípio Central
-Hierarquia visual é mais importante que estilo.
-Antes de escolher cores ou fontes, definir o que é primário,
-secundário e terciário em cada tela.
+## Identidade Visual Oficial
 
-## Paleta de Cores
+### Logo
+- Ilustração de gato e cachorro se abraçando em formato de coração
+- Fundo circular lilás
+- Arquivo: /public/logo.png (subir arquivo da logo real)
+- Usar em: header (versão compacta), footer, página sobre
 
-### Estrutura (HSL recomendado)
-- Primary: tom âmbar/laranja quente — transmite acolhimento
-  Exemplo: hsl(30, 80%, 50%) como base, com 8-9 shades definidos
-- Neutral: cinza com leve toque quente (não cinza puro)
-  Exemplos: dark hsl(220, 10%, 15%), medium hsl(220, 8%, 46%), light hsl(220, 14%, 96%)
-- Accent: verde musgo suave para status positivos (adotado, vacinado)
-  Exemplo: hsl(150, 40%, 40%)
-- Danger: vermelho suave apenas para ações destrutivas confirmadas
+### Personalidade Visual
+- Acolhedora, alegre e confiável
+- Cartoon fofo sem ser infantil — profissional mas humano
+- Inspira afeto e confiança, não frieza institucional
 
-### Regra de uso
-- Máximo 3 tons de texto: escuro (principal), cinza médio (secundário),
-  cinza claro (terciário/labels)
-- Nunca usar cinza sobre fundo colorido — ajustar hue para manter legibilidade
-- Definir todos os shades da paleta no tailwind.config.js antes de começar
+## Paleta de Cores Oficial
+
+### Definir no tailwind.config.js:
+```javascript
+colors: {
+  primary: {
+    50:  '#F5F0FF',
+    100: '#EDE0FF',
+    200: '#DCC8FF',
+    300: '#C8A8E8', // cor principal da logo
+    400: '#B088D4',
+    500: '#9868C0',
+    600: '#7A4EA0',
+    700: '#5C3880',
+    800: '#3E2460',
+    900: '#201040',
+  },
+  amber: {
+    300: '#F5C878',
+    400: '#F0A850',
+    500: '#E8934A', // laranja do gato
+    600: '#D07830',
+    700: '#B05820',
+  },
+  salmon: {
+    300: '#F8A898',
+    400: '#F48878',
+    500: '#F07850', // rosa salmão bochecha
+    600: '#D05838',
+  },
+  // Neutrals com leve tom quente
+  neutral: {
+    50:  '#FAFAF8',
+    100: '#F5F4F0',
+    200: '#E8E6E0',
+    300: '#D0CEC8',
+    400: '#A8A49C',
+    500: '#807C74',
+    600: '#58544C',
+    700: '#383430',
+    800: '#201E1A',
+    900: '#100E0C',
+  }
+}
+```
+
+### Uso das cores
+- **primary-300** (#C8A8E8): cor de marca, botões primários, badges, destaques
+- **amber-500** (#E8934A): CTAs secundários, ícones de ação, hover states
+- **salmon-500** (#F07850): alertas positivos, tags especiais
+- **neutral-50**: background padrão das páginas
+- **neutral-100**: background de seções alternadas, cards
+- **neutral-700/800**: texto principal
+- **neutral-500**: texto secundário
 
 ## Tipografia
 
-### Fonte
-- Família: Inter ou Plus Jakarta Sans (Google Fonts)
-- Filtrar por 10+ estilos disponíveis para ter todas as variações
+### Fonte Principal
+- Família: **Plus Jakarta Sans** (Google Fonts)
+- Import: weights 400, 500, 600, 700, 800
 
-### Escala de tamanho (type scale fixo — não inventar tamanhos)
-- xs: 12px, sm: 14px, base: 16px, lg: 18px, xl: 20px,
-  2xl: 24px, 3xl: 30px, 4xl: 36px, 5xl: 48px
+### Escala de tamanho (definir no tailwind.config.js)
+- xs: 12px | sm: 14px | base: 16px | lg: 18px
+- xl: 20px | 2xl: 24px | 3xl: 30px | 4xl: 36px | 5xl: 48px
 
-### Pesos
-- Usar apenas dois: 400 (normal) e 600-700 (ênfase)
-- Nunca usar peso abaixo de 400 em textos de interface
-
-### Linha e espaçamento
-- Parágrafos: 45-75 caracteres por linha (usar max-w-prose ou max-w-xl)
-- Line-height proporcional: maior para textos menores, menor para headings grandes
+### Regras
+- Dois pesos apenas: 400 (normal) e 600-700 (ênfase)
 - Headings grandes: letter-spacing levemente negativo (-0.02em)
-- Textos em maiúsculas: letter-spacing positivo (+0.05em a +0.1em)
+- Parágrafos: max-w-prose (65ch) para boa leitura
+- Line-height: 1.5 para body, 1.2 para headings grandes
 
 ## Espaçamento
+- Sistema base 4px (Tailwind padrão)
+- Começar generoso, reduzir se necessário
+- Seções da página: padding vertical py-16 (desktop) py-10 (mobile)
+- Espaço entre grupos sempre maior que espaço interno
 
-### Sistema de base 4px (Tailwind já usa isso)
-- Usar escala do Tailwind: 1=4px, 2=8px, 4=16px, 8=32px, 16=64px
-- Começar com espaçamento generoso e reduzir — nunca adicionar mínimo
+## Header e Navegação
 
-### Regra de agrupamento
-- Espaço entre grupos sempre maior que espaço dentro do grupo
-- Labels de formulário mais próximos do input abaixo do que do input acima
+### Desktop
+- Logo à esquerda + nome "Amiga Miau" em texto
+- Links de navegação centralizados ou à direita
+- Botão "Quero adotar" destacado com primary-300
+- Fundo branco com sombra suave ao rolar (shadow-sm)
+- Posição: sticky no topo
 
-## Hierarquia de Ações
-
-### Botões
-- Primário: fundo sólido com cor de destaque, alto contraste
-- Secundário: outline ou fundo com baixo contraste
-- Terciário: estilo de link, sem fundo
-- Destrutivo: tratamento secundário até a tela de confirmação,
-  somente na confirmação usar vermelho/primário
+### Mobile (breakpoint < 768px)
+- Logo + nome à esquerda
+- Ícone hamburger (3 linhas) à direita
+- Menu abre como drawer lateral ou dropdown suave
+- Botão "Quero adotar" visível dentro do menu mobile
 
 ## Cards de Animais
+- Foto em aspect-ratio 4/3, object-cover, rounded-xl
+- Nome: font-semibold text-lg text-neutral-800
+- Metadados (espécie, idade): text-sm text-neutral-500
+- Badge de status: rounded-full, cores por status:
+  - Disponível: bg-green-100 text-green-700
+  - Em processo: bg-amber-100 text-amber-700
+  - Adotado: bg-neutral-100 text-neutral-500
+- Box-shadow suave (shadow-md), sem borda
+- Hover: shadow-lg + translateY(-2px), transition 200ms ease-out
 
-- Foto em destaque no topo (aspect-ratio fixo, object-cover)
-- Nome em peso 600, tamanho lg
-- Metadados (espécie, idade) em cinza médio, tamanho sm
-- Status de adoção com badge colorido (accent para disponível)
-- Box-shadow suave em vez de borda — shadow-sm ou shadow-md
-- Hover com leve elevação (shadow-lg + translateY(-2px), transition suave)
+## Botões
+- Primário: bg-primary-300 text-white font-semibold
+  hover:bg-primary-400, rounded-xl, px-6 py-3
+- Secundário: border-2 border-primary-300 text-primary-500
+  hover:bg-primary-50, rounded-xl
+- Terciário: text-primary-500 underline, sem fundo
+- Destrutivo: só vermelho na tela de confirmação
+
+## Seções da Home
+- Alternar: fundo branco e fundo neutral-50
+- Hero: imagem com overlay gradient sutil para legibilidade do texto
+- Seção de destaque (animais em destaque): fundo neutral-100
+- Seção PIX/doação: fundo primary-50 com accent border top primary-300
 
 ## Imagens
+- Sempre object-cover com aspect-ratio definido
+- Hero: overlay `bg-black/30` para texto legível
+- Empty states: ilustração simples + título + CTA
+  (nunca deixar estado vazio sem tratamento visual)
 
-### Fotos de animais
-- Sempre object-cover com aspect-ratio definido (não deixar esticar)
-- Em hero sections: adicionar overlay escuro semitransparente para
-  garantir legibilidade do texto por cima
-- Nunca usar placeholder genérico — sempre empty state desenhado
-
-### Empty States
-- Todo estado vazio deve ter: ícone/ilustração + título + chamada para ação
-- Não mostrar filtros e abas quando não há conteúdo para exibir
-
-## Profundidade e Camadas
-
-- Preferir box-shadow a bordas para separar elementos
-- Sombras em dois níveis: pequena (cards em repouso) e maior (hover/modal)
-- Usar backgrounds ligeiramente diferentes para separar seções sem borda
-- Sobreposição de elementos (overlap) em hero e seções destaque
-  cria sensação de profundidade sem perder estilo flat
-
-## Seções da Página
-
-- Alternar background branco e cinza muito claro entre seções
-- Usar accent border (4px de cor primária) no topo de cards ou seções especiais
-- Não encher toda a largura — limitar conteúdo com max-w-7xl centralizado
+## Profundidade
+- Preferir shadow a border para separar elementos
+- Dois níveis: shadow-md (repouso) e shadow-lg (hover/foco)
+- Seções separadas por background diferente, não por linha/borda
 
 ## Animações
+- Somente fade-in e slide suave (translateY)
+- Duração máxima 300ms, ease-out
+- Não usar animações em ações destrutivas ou alertas de erro
 
-- Apenas animações funcionais e sutis: fade-in, slide suave em modais
-- Duração máxima: 300ms
-- Usar transition-all com ease-out
-
-## Acessibilidade Visual
-
-- Contraste mínimo WCAG AA em todos os textos
-- Foco visível em todos os elementos interativos (outline customizado,
-  não remover o padrão sem substituir)
+## Acessibilidade
+- Contraste WCAG AA obrigatório em todos os textos
+- Focus ring visível em todos os elementos interativos
+  (outline-2 outline-primary-300 outline-offset-2)
 - Alt descritivo em todas as imagens de animais
+- Links externos: sempre rel="noopener noreferrer"
