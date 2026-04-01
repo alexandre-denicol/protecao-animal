@@ -2,35 +2,44 @@
 
 ## Visão Geral
 Site piloto para ONG de proteção a animais de rua.
-Stack: Next.js 14 (App Router), Tailwind CSS, Supabase, Vercel.
+Stack: Next.js 14 (App Router), Tailwind CSS, Supabase (banco + auth + storage), Vercel.
+Este arquivo deve ser lido antes de qualquer geração de código.
 
-## Padrões de Código
-- Seguir os princípios de Clean Code: funções pequenas, nomes claros e descritivos
+## Padrões de Código (Clean Code)
+- Funções pequenas, com responsabilidade única e nomes descritivos
+- Nunca repetir lógica — extrair funções reutilizáveis (DRY)
+- Comentários apenas quando a intenção não é óbvia pelo código
 - Componentes React separados por responsabilidade
-- Nunca repetir lógica (DRY) — extrair funções reutilizáveis sempre que possível
-- Comentários apenas quando a intenção do código não for óbvia
+- Nomes de variáveis e funções que revelam intenção — evitar abreviações
 
-## Design e Visual
-- Visual profissional, moderno e acolhedor
-- Paleta suave: tons terrosos, bege, verde musgo e branco
-- Tipografia limpa (Inter ou Plus Jakarta Sans)
-- Animações sutis: fade e slide suave nos elementos
-- Mobile first — responsivo em todos os breakpoints
+## Design e Visual (Refactoring UI)
+- Hierarquia visual é a prioridade: nem tudo tem a mesma importância
+- Usar peso da fonte (600-700) e cor para criar hierarquia — não só tamanho
+- Paleta de cores: máximo 3 níveis — cor escura (conteúdo principal),
+  cinza médio (secundário), cinza claro (terciário)
+- Começar com espaçamento generoso e reduzir — nunca o contrário
+- Usar sistema de espaçamento consistente (múltiplos de 4px)
+- Evitar bordas desnecessárias — preferir box-shadow ou background diferente
+- Linha de texto entre 45-75 caracteres para boa leitura
+- Mobile first, responsivo em todos os breakpoints
 - Imagens sempre com next/image para otimização automática
+- Estados vazios (empty states) devem ser tratados com atenção, nunca ignorados
 
 ## Segurança (OWASP)
-- Nunca colocar credenciais ou chaves no código — sempre em variáveis de ambiente (.env)
-- Validar e sanitizar todos os inputs no frontend e no backend antes de qualquer operação
-- Upload de arquivos: validar tipo (apenas imagens) e tamanho máximo
-- Row Level Security (RLS) ativo em todas as tabelas do Supabase
-- Leitura pública apenas para dados de animais e adoções
-- Escrita restrita a usuários autenticados da ONG
+- NUNCA colocar credenciais no código — sempre em variáveis de ambiente (.env)
+- Validar e sanitizar todos os inputs no frontend E no backend
+- Upload de imagens: validar tipo (somente image/*) e tamanho máximo (5MB)
+- Row Level Security (RLS) ativo em TODAS as tabelas do Supabase
+- Leitura pública apenas para animais e adoções aprovadas
+- Escrita restrita a usuários autenticados
+- Queries parametrizadas — NUNCA concatenar strings em SQL
 - Nunca expor mensagens de erro detalhadas ao usuário final
+- Sessões com expiração configurada adequadamente
 
 ## Banco de Dados
-- Usar queries parametrizadas — nunca concatenar strings em queries SQL
-- Princípio do menor privilégio nas permissões do Supabase
+- Princípio do menor privilégio nas permissões
 - RLS obrigatório em todas as tabelas
+- Usar apenas prepared statements / queries parametrizadas
 
 ## Estrutura de Pastas
 - /app — páginas e rotas (App Router)
@@ -39,6 +48,6 @@ Stack: Next.js 14 (App Router), Tailwind CSS, Supabase, Vercel.
 - /docs — documentação e referências do projeto
 - /public — assets estáticos
 
-## Referências
-- REQUISITOS.md — funcionalidades e escopo do projeto
-- /docs — guias OWASP e referências de segurança
+## Referências no Repositório
+- REQUISITOS.md — funcionalidades e escopo
+- DESIGN.md — diretrizes visuais detalhadas
