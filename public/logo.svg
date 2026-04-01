@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Fundo circular lilás -->
+  <circle cx="32" cy="32" r="30" fill="#C8A8E8"/>
+
+  <!-- Forma de coração formada por gato e cachorro estilizados -->
+  <!-- Corpo do coração -->
+  <path d="M32 46 C20 38, 14 30, 16 22 C18 14, 26 14, 32 22 C38 14, 46 14, 48 22 C50 30, 44 38, 32 46Z"
+        fill="#F07850" opacity="0.9"/>
+
+  <!-- Orelhas do gato (esquerda) -->
+  <polygon points="19,17 16,10 23,14" fill="#E8934A"/>
+
+  <!-- Orelhas do cachorro (direita) -->
+  <ellipse cx="45" cy="16" rx="4" ry="6" fill="#E8934A" transform="rotate(15 45 16)"/>
+
+  <!-- Olhos -->
+  <circle cx="26" cy="26" r="2" fill="white"/>
+  <circle cx="38" cy="26" r="2" fill="white"/>
+  <circle cx="26.5" cy="26.5" r="1" fill="#201040"/>
+  <circle cx="38.5" cy="26.5" r="1" fill="#201040"/>
+
+  <!-- Nariz -->
+  <ellipse cx="32" cy="31" rx="2" ry="1.5" fill="#F07850"/>
+</svg>
