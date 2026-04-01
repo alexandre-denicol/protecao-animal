@@ -33,9 +33,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={plusJakartaSans.variable}>
+      {/*
+        Header é fixed (z-50), então main precisa de pt-16 para que
+        o conteúdo das páginas internas não fique escondido abaixo do header.
+        A HeroSection da home usa -mt-16 para se estender por baixo do header.
+      */}
       <body className="flex min-h-screen flex-col font-sans antialiased">
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pt-16">{children}</main>
         <Footer />
       </body>
     </html>
