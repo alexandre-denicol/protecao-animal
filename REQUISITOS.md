@@ -1,77 +1,72 @@
-# Projeto: Site ONG Proteção Animal
+# Requisitos do Projeto — ONG Proteção Animal
 
-## Visão Geral
-Site institucional e operacional para ONG de proteção a animais de rua.
-Stack: Next.js 14, Tailwind CSS, Supabase (banco, auth e storage).
-Hospedagem: Vercel.
+## Contexto
+Site piloto institucional e operacional para ONG de proteção a animais de rua.
+Foco em funcionalidade, segurança e visual profissional e acolhedor.
 
-## Identidade Visual
-- Design limpo, moderno e profissional
-- Paleta de cores: tons terrosos e naturais (âmbar, verde musgo, bege)
-  combinados com branco e cinza escuro
-- Tipografia elegante: fonte sans-serif moderna (ex: Inter ou Plus Jakarta Sans)
-- Fotos dos animais em destaque, com cards bem espaçados e sombras suaves
-- Totalmente responsivo (mobile first)
-- Animações sutis de entrada nos elementos (fade, slide suave)
+## Stack Técnica
+- Framework: Next.js 14 (App Router)
+- Estilização: Tailwind CSS
+- Backend e banco: Supabase (PostgreSQL + Auth + Storage)
+- Hospedagem: Vercel
 
-## Páginas
+## Páginas e Funcionalidades
 
 ### 1. Home
 - Hero com imagem impactante e chamada para adoção
-- Contador de animais resgatados, adotados e em espera
-- Seção de animais em destaque (cards com foto, nome e botão "Conhecer")
-- Seção institucional resumida com missão da ONG
-- Call to action para doação ou contato
+- Contador animado: animais resgatados, adotados, em espera
+- Grid de animais em destaque (máximo 6 cards)
+- Seção institucional resumida (missão da ONG)
+- Call to action para adoção e doação
 
-### 2. Animais para Adoção
-- Grid de cards com foto, nome, espécie, idade, sexo e status de saúde
-- Filtros por espécie (cão, gato), idade e status
-- Ao clicar no card, abre página de perfil completo do animal
+### 2. Catálogo de Animais
+- Grid responsivo de cards (foto, nome, espécie, idade, sexo, status)
+- Filtros por espécie (cão, gato) e status de adoção
+- Paginação ou scroll infinito
 
 ### 3. Perfil do Animal
-- Foto principal + galeria de fotos
-- Dados completos: nome, espécie, raça, idade, sexo, peso,
-  status de saúde, vacinação, castração, temperamento
-- Status de adoção (disponível, em processo, adotado)
+- Foto principal em destaque
+- Ficha completa: nome, espécie, raça, idade, sexo, peso,
+  saúde, vacinação, castração, temperamento, descrição
+- Status de adoção (disponível / em processo / adotado)
 - Botão "Quero adotar" com formulário de interesse
 
 ### 4. Cadastro de Animal (área restrita)
-- Formulário completo de cadastro
-- Upload de múltiplas fotos
-- Todos os campos do perfil acima
-- Apenas usuários autenticados da ONG podem acessar
+- Acesso apenas para usuários autenticados da ONG
+- Formulário: todos os campos do perfil acima
+- Upload de foto com preview antes de salvar
+- Validação de tipo (somente imagens) e tamanho (máx 5MB)
 
 ### 5. Portfólio de Adoções
-- Galeria de casos de sucesso com foto antes/depois ou foto atual
-- Nome do animal, nome do adotante (opcional), mensagem/depoimento
+- Galeria de casos de sucesso
+- Foto, nome do animal, depoimento do adotante (opcional)
 - Visual em estilo magazine, elegante
 
 ### 6. Sobre / Contato
-- História da ONG
-- Equipe (foto e nome)
+- História da ONG e equipe
 - Formulário de contato
-- Links de redes sociais e doação (PIX ou link externo)
+- Links para redes sociais e doação
 
 ## Banco de Dados (Supabase)
 
-### Tabelas principais
+### Tabelas
 - `animals`: id, nome, espécie, raça, idade, sexo, peso, saúde,
-  vacinado, castrado, temperamento, status, created_at
+  vacinado (bool), castrado (bool), temperamento, descricao,
+  status (disponível/em_processo/adotado), created_at
 - `animal_photos`: id, animal_id, url, is_cover
-- `adoptions`: id, animal_id, adotante_nome, depoimento,
-  foto_url, data_adocao
+- `adoptions`: id, animal_id, adotante_nome, depoimento, foto_url, data_adocao
 - `contact_messages`: id, nome, email, mensagem, created_at
 
 ### Segurança
-- Row Level Security (RLS) ativado em todas as tabelas
-- Leitura pública apenas para dados de animais e adoções
-- Escrita restrita a usuários autenticados (equipe da ONG)
-- Upload de fotos apenas por usuários autenticados
+- RLS ativo em todas as tabelas
+- Leitura pública: animals e adoptions
+- Escrita restrita a usuários autenticados
 
 ## Requisitos Técnicos
-- Variáveis de ambiente para credenciais do Supabase (nunca no código)
-- Validação de formulários no frontend e backend
-- Sanitização de inputs antes de qualquer query ao banco
-- Imagens otimizadas com next/image
+- Variáveis sensíveis apenas em .env (nunca no código)
+- Validação de formulários no frontend e no servidor
+- Inputs sanitizados antes de qualquer operação no banco
+- Imagens via next/image
 - SEO básico com meta tags em cada página
-- Acessibilidade básica (alt em imagens, contraste adequado, navegação por teclado)
+- Acessibilidade: alt em todas as imagens, contraste adequado,
+  navegação por teclado funcional
