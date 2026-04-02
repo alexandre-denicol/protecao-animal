@@ -1,14 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ExternalLink } from './ExternalLink'
-import { PixCopyButton } from './ui/PixCopyButton'
 
 const PIX_CNPJ = '49728609000170'
 
-const linksInstitucionais = [
-  { href: '/sobre', label: 'Sobre a Associação' },
+const linksNavegacao = [
   { href: '/animais', label: 'Animais para adoção' },
   { href: '/adocoes', label: 'Histórias de adoção' },
+  { href: '/sobre', label: 'Sobre a Associação' },
   { href: '/contato', label: 'Contato' },
 ]
 
@@ -16,8 +15,8 @@ const redesSociais = [
   {
     href: 'https://instagram.com/amigamiau',
     label: 'Instagram',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    icone: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2" />
         <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
         <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
@@ -27,12 +26,21 @@ const redesSociais = [
   {
     href: 'https://facebook.com/amigamiau',
     label: 'Facebook',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    icone: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
-          d="M18 2H15C13.6739 2 12.4021 2.52678 11.4645 3.46447C10.5268 4.40215 10 5.67392 10 7V10H7V14H10V22H14V14H17L18 10H14V7C14 6.73478 14.1054 6.48043 14.2929 6.29289C14.4804 6.10536 14.7348 6 15 6H18V2Z"
+          d="M18 2H15C13.67 2 12.4 2.53 11.46 3.46C10.53 4.4 10 5.67 10 7V10H7V14H10V22H14V14H17L18 10H14V7C14 6.73 14.1 6.48 14.29 6.29C14.48 6.1 14.73 6 15 6H18V2Z"
           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         />
+      </svg>
+    ),
+  },
+  {
+    href: 'https://wa.me/5500000000000',
+    label: 'WhatsApp',
+    icone: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -42,54 +50,55 @@ export default function Footer() {
   const anoAtual = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-neutral-200 bg-neutral-100">
-      {/* Seção principal */}
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <footer className="bg-neutral-800">
+      {/* Corpo principal */}
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
 
-          {/* Identidade */}
-          <div className="lg:col-span-2">
+          {/* Identidade — col larga */}
+          <div className="sm:col-span-2 lg:col-span-2">
             <Link
               href="/"
-              className="mb-4 inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-primary-300"
+              className="mb-5 inline-flex items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-primary-300"
               aria-label="Associação Amiga Miau — Página inicial"
             >
               <div className="relative h-10 w-10 flex-shrink-0">
                 <Image src="/logo.svg" alt="Logo Amiga Miau" fill className="object-contain" />
               </div>
-              <span className="text-lg font-bold text-neutral-800">Amiga Miau</span>
+              <span className="text-lg font-bold text-white">Amiga Miau</span>
             </Link>
-            <p className="max-w-xs text-sm leading-relaxed text-neutral-500">
-              Associação sem fins lucrativos dedicada a resgatar, cuidar e encontrar
-              lares amorosos para animais de rua.
+
+            <p className="max-w-xs text-sm leading-relaxed text-white/50">
+              Associação sem fins lucrativos dedicada a resgatar, cuidar e
+              encontrar lares amorosos para animais de rua desde 2018.
             </p>
 
             {/* Redes sociais */}
-            <div className="mt-5 flex items-center gap-3">
+            <div className="mt-6 flex items-center gap-2">
               {redesSociais.map((rede) => (
                 <ExternalLink
                   key={rede.href}
                   href={rede.href}
                   aria-label={rede.label}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white hover:text-primary-500 focus-visible:outline-2 focus-visible:outline-primary-300"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300"
                 >
-                  {rede.icon}
+                  {rede.icone}
                 </ExternalLink>
               ))}
             </div>
           </div>
 
-          {/* Links institucionais */}
+          {/* Links de navegação */}
           <div>
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-neutral-400">
+            <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-white/30">
               Navegação
             </h3>
-            <ul className="flex flex-col gap-2.5">
-              {linksInstitucionais.map((link) => (
+            <ul className="flex flex-col gap-3">
+              {linksNavegacao.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-neutral-500 transition-colors hover:text-primary-500 focus-visible:outline-2 focus-visible:outline-primary-300"
+                    className="text-sm text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300"
                   >
                     {link.label}
                   </Link>
@@ -98,30 +107,27 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Doação PIX */}
+          {/* PIX resumido */}
           <div>
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-neutral-400">
-              Faça uma doação
+            <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-white/30">
+              Doação PIX
             </h3>
-            <div className="rounded-xl border border-primary-200 bg-primary-50 p-4">
-              <p className="mb-1 text-xs font-medium text-primary-600">Chave PIX (CNPJ)</p>
-              <p className="mb-3 break-all font-mono text-sm font-semibold text-neutral-700">
-                {PIX_CNPJ}
-              </p>
-              <PixCopyButton chavePix={PIX_CNPJ} />
-            </div>
-            <p className="mt-3 text-xs text-neutral-400">
-              Sua doação vai direto para ração, vacinas e cuidados veterinários.
+            <p className="mb-2 text-xs text-white/40">Chave PIX — CNPJ</p>
+            <p className="break-all font-mono text-sm font-semibold text-primary-300">
+              {PIX_CNPJ}
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-white/30">
+              100% destinado ao cuidado dos animais resgatados.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Rodapé inferior */}
-      <div className="border-t border-neutral-200">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-neutral-400 sm:flex-row sm:px-6 lg:px-8">
-          <p>© {anoAtual} Associação Amiga Miau. CNPJ 49.728.609/0001-70</p>
-          <p>Feito com amor por quem ama os animais 🐾</p>
+      {/* Barra inferior */}
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-white/30 sm:flex-row sm:px-6 lg:px-8">
+          <p>© {anoAtual} Associação Amiga Miau · CNPJ 49.728.609/0001-70</p>
+          <p>Feito com ❤️ por quem ama os animais</p>
         </div>
       </div>
     </footer>
