@@ -91,7 +91,54 @@ function ItemContador({ dados, iniciar }: { dados: DadosContador; iniciar: boole
   )
 }
 
-export default function ContadoresSection() {
+interface ContadoresSectionProps {
+  resgatados: number
+  adotados: number
+  emEspera: number
+}
+
+function buildContadores(resgatados: number, adotados: number, emEspera: number): DadosContador[] {
+  return [
+    {
+      valor: resgatados,
+      sufixo: '+',
+      label: 'Animais resgatados',
+      descricao: 'Das ruas para o cuidado e amor que merecem',
+      icone: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+    {
+      valor: adotados,
+      sufixo: '+',
+      label: 'Adotados com amor',
+      descricao: 'Histórias felizes que continuam acontecendo',
+      icone: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+    {
+      valor: emEspera,
+      sufixo: '',
+      label: 'Aguardando um lar',
+      descricao: 'Prontos para se tornar parte da sua família',
+      icone: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+          <polyline points="12 6 12 12 16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+  ]
+}
+
+export default function ContadoresSection({ resgatados, adotados, emEspera }: ContadoresSectionProps) {
+  const contadores = buildContadores(resgatados, adotados, emEspera)
   const [iniciar, setIniciar] = useState(false)
   const refSecao = useRef<HTMLElement>(null)
 

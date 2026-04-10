@@ -7,7 +7,11 @@ const valores = [
   { icone: '❤️', texto: 'Adoção acompanhada e segura' },
 ]
 
-export default function SobreSection() {
+interface SobreSectionProps {
+  missao?: string
+}
+
+export default function SobreSection({ missao }: SobreSectionProps) {
   return (
     <section className="bg-white py-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -30,18 +34,23 @@ export default function SobreSection() {
               </div>
             </div>
 
-            <p className="text-base leading-relaxed text-neutral-600">
-              Desde 2018, a Associação Amiga Miau resgata animais em situação de
-              vulnerabilidade nas ruas e os prepara para um novo lar. Cada animal
-              recebe tratamento veterinário, carinho e toda a atenção que merece
-              antes de ser adotado.
-            </p>
-
-            <p className="mt-4 text-base leading-relaxed text-neutral-600">
-              Acreditamos que adoção responsável é um compromisso de vida. Por isso,
-              acompanhamos cada processo com cuidado, garantindo que tanto o adotante
-              quanto o animal estejam prontos para essa nova fase.
-            </p>
+            {missao ? (
+              <p className="text-base leading-relaxed text-neutral-600">{missao}</p>
+            ) : (
+              <>
+                <p className="text-base leading-relaxed text-neutral-600">
+                  Desde 2018, a Associação Amiga Miau resgata animais em situação de
+                  vulnerabilidade nas ruas e os prepara para um novo lar. Cada animal
+                  recebe tratamento veterinário, carinho e toda a atenção que merece
+                  antes de ser adotado.
+                </p>
+                <p className="mt-4 text-base leading-relaxed text-neutral-600">
+                  Acreditamos que adoção responsável é um compromisso de vida. Por isso,
+                  acompanhamos cada processo com cuidado, garantindo que tanto o adotante
+                  quanto o animal estejam prontos para essa nova fase.
+                </p>
+              </>
+            )}
 
             {/* Lista de valores */}
             <ul className="mt-8 flex flex-col gap-3">

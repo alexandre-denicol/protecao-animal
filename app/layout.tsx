@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
+import ConditionalLayout from '@/components/ConditionalLayout'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
@@ -39,9 +40,9 @@ export default function RootLayout({
         A HeroSection da home usa -mt-16 para se estender por baixo do header.
       */}
       <body className="flex min-h-screen flex-col font-sans antialiased">
-        <Header />
-        <main className="flex-1 pt-16">{children}</main>
-        <Footer />
+        <ConditionalLayout header={<Header />} footer={<Footer />}>
+          {children}
+        </ConditionalLayout>
       </body>
     </html>
   )

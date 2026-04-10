@@ -31,3 +31,5 @@ yarn-error.log*
 # dwyt
 .claude/
 .mcp.json
+.codex/
+AGENTS.md

@@ -6,6 +6,7 @@ export interface Animal {
   id: string
   slug: string
   nome: string
+  created_by: string | null
   especie: AnimalEspecie
   raca: string | null
   idade_anos: number | null
@@ -67,4 +68,14 @@ export interface Adoption {
   adotante_nome: string | null
   data_adocao: string
   created_at: string
+}
+
+export type UserRole = 'admin' | 'editor' | 'viewer'
+
+export interface Profile {
+  id: string
+  nome: string
+  email: string
+  role: UserRole
+  ativo: boolean
 }

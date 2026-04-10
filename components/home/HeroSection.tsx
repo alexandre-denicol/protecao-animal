@@ -1,7 +1,15 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  titulo: string
+  subtitulo: string
+  resgatados: number
+  adotados: number
+  emEspera: number
+}
+
+export default function HeroSection({ titulo, subtitulo, resgatados, adotados, emEspera }: HeroSectionProps) {
   return (
     <section className="relative -mt-16 min-h-screen overflow-hidden">
       {/* Imagem de fundo */}
@@ -66,9 +74,9 @@ export default function HeroSection() {
             {/* Mini stats */}
             <div className="mt-12 flex flex-wrap gap-6">
               {[
-                { numero: '847+', label: 'Animais resgatados' },
-                { numero: '623+', label: 'Adotados com amor' },
-                { numero: '24', label: 'Aguardando um lar' },
+                { numero: `${resgatados}+`, label: 'Animais resgatados' },
+                { numero: `${adotados}+`, label: 'Adotados com amor' },
+                { numero: String(emEspera), label: 'Aguardando um lar' },
               ].map((stat) => (
                 <div key={stat.label} className="flex items-center gap-2.5">
                   <div className="h-8 w-0.5 rounded-full bg-primary-300/60" />

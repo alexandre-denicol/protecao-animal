@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { getPublicSiteSettings } from '@/lib/site-settings'
+import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import { ExternalLink } from './ExternalLink'
 
 const PIX_CNPJ = '49728609000170'
@@ -11,43 +13,69 @@ const linksNavegacao = [
   { href: '/contato', label: 'Contato' },
 ]
 
-const redesSociais = [
-  {
-    href: 'https://instagram.com/amigamiau',
-    label: 'Instagram',
-    icone: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2" />
-        <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
-        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
-    href: 'https://facebook.com/amigamiau',
-    label: 'Facebook',
-    icone: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path
-          d="M18 2H15C13.67 2 12.4 2.53 11.46 3.46C10.53 4.4 10 5.67 10 7V10H7V14H10V22H14V14H17L18 10H14V7C14 6.73 14.1 6.48 14.29 6.29C14.48 6.1 14.73 6 15 6H18V2Z"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: 'https://wa.me/5500000000000',
-    label: 'WhatsApp',
-    icone: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-]
+function redesSociais({
+  instagramUrl,
+  facebookUrl,
+  whatsappUrl,
+}: {
+  instagramUrl: string
+  facebookUrl: string
+  whatsappUrl: string | null
+}) {
+  return [
+    instagramUrl
+      ? {
+          href: instagramUrl,
+          label: 'Instagram',
+          icone: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2" />
+              <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
+            </svg>
+          ),
+        }
+      : null,
+    facebookUrl
+      ? {
+          href: facebookUrl,
+          label: 'Facebook',
+          icone: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M18 2H15C13.67 2 12.4 2.53 11.46 3.46C10.53 4.4 10 5.67 10 7V10H7V14H10V22H14V14H17L18 10H14V7C14 6.73 14.1 6.48 14.29 6.29C14.48 6.1 14.73 6 15 6H18V2Z"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              />
+            </svg>
+          ),
+        }
+      : null,
+    whatsappUrl
+      ? {
+          href: whatsappUrl,
+          label: 'WhatsApp',
+          icone: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ),
+        }
+      : null,
+  ].filter((rede): rede is NonNullable<typeof rede> => rede !== null)
+}
 
-export default function Footer() {
+export default async function Footer() {
   const anoAtual = new Date().getFullYear()
+  const settings = await getPublicSiteSettings()
+  const whatsappUrl = buildWhatsAppUrl(
+    settings.whatsapp_numero,
+    'Olá! Gostaria de falar com a Amiga Miau.',
+  )
+  const redes = redesSociais({
+    instagramUrl: settings.instagram_url,
+    facebookUrl: settings.facebook_url,
+    whatsappUrl,
+  })
 
   return (
     <footer className="bg-neutral-800">
@@ -74,18 +102,20 @@ export default function Footer() {
             </p>
 
             {/* Redes sociais */}
-            <div className="mt-6 flex items-center gap-2">
-              {redesSociais.map((rede) => (
-                <ExternalLink
-                  key={rede.href}
-                  href={rede.href}
-                  aria-label={rede.label}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300"
-                >
-                  {rede.icone}
-                </ExternalLink>
-              ))}
-            </div>
+            {redes.length > 0 && (
+              <div className="mt-6 flex items-center gap-2">
+                {redes.map((rede) => (
+                  <ExternalLink
+                    key={rede.href}
+                    href={rede.href}
+                    aria-label={rede.label}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300"
+                  >
+                    {rede.icone}
+                  </ExternalLink>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Links de navegação */}

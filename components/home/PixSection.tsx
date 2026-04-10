@@ -1,8 +1,10 @@
 import { PixCopyButton } from '@/components/ui/PixCopyButton'
 
-const PIX_CNPJ = '49728609000170'
+interface PixSectionProps {
+  pixChave?: string
+}
 
-export default function PixSection() {
+export default function PixSection({ pixChave = '49728609000170' }: PixSectionProps) {
   return (
     <section className="bg-primary-50 py-20">
       {/* Accent border no topo */}
@@ -59,12 +61,12 @@ export default function PixSection() {
                   Chave PIX — CNPJ
                 </p>
                 <p className="mt-1.5 break-all font-mono text-lg font-bold text-neutral-800">
-                  {PIX_CNPJ}
+                  {pixChave}
                 </p>
               </div>
 
               <div className="mt-4">
-                <PixCopyButton chavePix={PIX_CNPJ} />
+                <PixCopyButton chavePix={pixChave} />
               </div>
 
               <p className="mt-5 text-center text-xs leading-relaxed text-neutral-400">
