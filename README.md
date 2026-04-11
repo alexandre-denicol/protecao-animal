@@ -1,47 +1,55 @@
-# 🐾 Associação Amiga Miau — Site Institucional
+🐾 Associação Amiga MiAu — Plataforma Web
 
-Site institucional e operacional da Associação Amiga Miau,
-organização de proteção a animais de rua.
-Projeto desenvolvido com foco em visual profissional,
-segurança e boas práticas de código.
+Aplicação web para gestão de adoção de animais, captação de sócios e comunicação institucional da Associação Amiga MiAu.
 
-## Stack
+Versão: v0.9 (Release Candidate)
 
-- **Framework:** Next.js 14 (App Router)
-- **Estilização:** Tailwind CSS
-- **Backend / Banco / Storage:** Supabase
-- **Hospedagem:** Vercel
-- **Email:** Resend (notificações de contato e adoção)
+🎯 Escopo
+Catálogo público de animais para adoção
+Registro de interesse de adoção
+Gestão de sócios e contribuições
+Controle de pagamentos
+Comunicação com usuários (email e WhatsApp)
+Painel administrativo completo
+🧱 Stack
+Next.js 14 (App Router)
+React 18
+Tailwind CSS
+Supabase (PostgreSQL, Auth, Storage)
+Resend (envio de emails)
+Playwright (testes E2E)
+Vercel (deploy)
+🏗️ Arquitetura
+Frontend e backend unificados via Server Actions
+Supabase como backend principal (dados, autenticação e storage)
+Camada de comunicação desacoplada (lib/email.ts)
+Separação por domínio:
+app/ → rotas
+components/ → UI
+lib/ → integrações e lógica
+🔐 Segurança
+Variáveis sensíveis isoladas via .env (não versionado)
+Uso controlado de NEXT_PUBLIC_*
+Chaves administrativas restritas ao server
+RLS ativo no banco
+Logs sanitizados (sem exposição de dados sensíveis)
+🗄️ Domínio de dados
 
-## Funcionalidades
+Principais entidades:
 
-- Página inicial com apresentação da Associação e animais em destaque
-- Catálogo de animais disponíveis para adoção com filtros
-- Perfil completo de cada animal com galeria de fotos
-- Formulário de interesse em adoção com notificação por email
-- Área restrita para cadastro e gestão de animais (equipe)
-- Portfólio de adoções realizadas com sucesso
-- Página institucional, contato com notificação por email
-- Doação via PIX (CNPJ 49728609000170)
+animals
+adoption_interests
+contact_messages
+membership_interests
+members
+member_payments
+member_contact_history
+🎨 Direção visual
+Tema dark premium
+Paleta baseada em âmbar e verde petróleo
+Ênfase em contraste, hierarquia e legibilidade
+Experiência responsiva (mobile-first)
+📌 Status
 
-## Documentação do Projeto
-
-| Arquivo | Descrição |
-|---|---|
-| `CLAUDE.md` | Diretrizes gerais de código, design e segurança |
-| `REQUIREMENTS.md` | Escopo completo de páginas e funcionalidades |
-| `DESIGN.md` | Diretrizes visuais baseadas em Refactoring UI |
-| `SECURITY.md` | Instruções técnicas de segurança operacional |
-| `SCHEMA.md` | Schema SQL completo do banco Supabase |
-| `SETUP.md` | Guia de configuração de infraestrutura |
-
-## Identidade Visual
-
-- **Cor primária:** Lilás `#C8A8E8`
-- **Cor secundária:** Laranja âmbar `#E8934A`
-- **Cor de destaque:** Rosa salmão `#F07850`
-- **Fonte:** Plus Jakarta Sans (Google Fonts)
-
-## Doação
-
+Aplicação funcional e estável, pronta para uso real em ambiente controlado, com base sólida para evolução incremental.
 PIX — CNPJ: `49728609000170`
