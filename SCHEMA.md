@@ -419,6 +419,126 @@ CREATE TRIGGER members_updated_at
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "members_auth_read" ON members
+## 6. Tabela: profiles (RBAC)
+```sql
+CREATE TABLE profiles (
+  id            UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  nome          TEXT NOT NULL CHECK (char_length(nome) BETWEEN 2 AND 100),
+  email         TEXT NOT NULL,
+  role          TEXT NOT NULL DEFAULT 'viewer'
+                CHECK (role IN ('admin', 'editor', 'viewer')),
+  ativo         BOOLEAN NOT NULL DEFAULT TRUE,
+  convidado_por UUID REFERENCES profiles(id),
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_profiles_role ON profiles(role);
+CREATE INDEX idx_profiles_ativo ON profiles(ativo);
+
+CREATE TRIGGER profiles_updated_at
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+```
+
+---
+
+## 7. Row Level Security (RLS)
+```sql
+ALTER TABLE animals            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE animal_photos      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE adoption_interests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contact_messages   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE adoptions          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles           ENABLE ROW LEVEL SECURITY;
+
+-- ANIMALS
+CREATE POLICY "animals_public_read" ON animals
+  FOR SELECT USING (true);
+
+CREATE POLICY "animals_auth_insert" ON animals
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND role IN ('admin', 'editor')
+    )
+  );
+
+CREATE POLICY "animals_auth_update" ON animals
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND (
+        role = 'admin'
+        OR (role = 'editor' AND animals.created_by = auth.uid())
+      )
+    )
+  );
+
+CREATE POLICY "animals_auth_delete" ON animals
+  FOR DELETE USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND (
+        role = 'admin'
+        OR (role = 'editor' AND animals.created_by = auth.uid())
+      )
+    )
+  );
+
+-- ANIMAL_PHOTOS
+CREATE POLICY "photos_public_read" ON animal_photos
+  FOR SELECT USING (true);
+
+CREATE POLICY "photos_auth_write" ON animal_photos
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND role IN ('admin', 'editor')
+    )
+  );
+
+-- ADOPTION_INTERESTS
+CREATE POLICY "interests_public_insert" ON adoption_interests
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "interests_auth_read" ON adoption_interests
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.ativo = TRUE
+      AND (
+        p.role IN ('admin', 'viewer')
+        OR (
+          p.role = 'editor'
+          AND EXISTS (
+            SELECT 1 FROM animals a
+            WHERE a.id = adoption_interests.animal_id
+            AND a.created_by = auth.uid()
+          )
+        )
+      )
+    )
+  );
+
+CREATE POLICY "interests_auth_update" ON adoption_interests
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND role IN ('admin', 'viewer')
+    )
+  );
+
+-- CONTACT_MESSAGES
+CREATE POLICY "contact_public_insert" ON contact_messages
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "contact_auth_read" ON contact_messages
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM profiles
@@ -487,6 +607,9 @@ ALTER TABLE member_payments ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "member_payments_auth_read" ON member_payments
   FOR SELECT USING (
+
+CREATE POLICY "contact_auth_update" ON contact_messages
+  FOR UPDATE USING (
     EXISTS (
       SELECT 1 FROM profiles
       WHERE id = auth.uid() AND ativo = TRUE
@@ -609,6 +732,11 @@ CREATE POLICY "settings_public_read" ON site_settings
   FOR SELECT USING (true);
 
 CREATE POLICY "settings_admin_write" ON site_settings
+-- ADOPTIONS
+CREATE POLICY "adoptions_public_read" ON adoptions
+  FOR SELECT USING (true);
+
+CREATE POLICY "adoptions_auth_write" ON adoptions
   FOR ALL USING (
     EXISTS (
       SELECT 1 FROM profiles
@@ -667,6 +795,63 @@ ON CONFLICT (id) DO NOTHING;
 ---
 
 ## 12. Storage Buckets
+      AND role IN ('admin', 'editor')
+    )
+  );
+
+-- PROFILES
+CREATE POLICY "profiles_trigger_insert" ON profiles
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "profiles_self_read" ON profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "profiles_admin_read" ON profiles
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE POLICY "profiles_admin_write" ON profiles
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+```
+
+---
+
+## 8. Trigger de criação automática de perfil
+```sql
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, nome, email, role)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'nome', 'Novo membro'),
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'role', 'viewer')
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+   SET search_path = public;
+
+ALTER FUNCTION handle_new_user() OWNER TO postgres;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+```
+
+---
+
+## 9. Storage Buckets
 
 Criar no painel Supabase > Storage > New Bucket:
 
