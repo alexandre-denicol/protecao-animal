@@ -35,7 +35,7 @@ export default function DeleteAnimalButton({ id, nome }: Props) {
     <button
       disabled={isPending}
       onClick={handleClick}
-      className="rounded-lg border border-salmon-200 px-3 py-1.5 text-xs font-semibold text-salmon-600 transition-colors hover:bg-salmon-50 focus:outline-2 focus:outline-salmon-300 focus:outline-offset-2 disabled:opacity-50"
+      className="rounded-lg border border-[rgba(252,165,165,0.22)] px-3 py-1.5 text-xs font-semibold text-[#fca5a5] transition-colors hover:bg-[rgba(248,113,113,0.12)] focus:outline-2 focus:outline-[#fca5a5] focus:outline-offset-2 disabled:opacity-50"
     >
       {isPending ? 'Excluindo…' : 'Excluir'}
     </button>

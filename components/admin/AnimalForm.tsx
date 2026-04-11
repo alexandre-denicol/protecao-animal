@@ -34,25 +34,27 @@ const MAX_FOTOS = 5
 
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null
-  return <p className="mt-0.5 text-xs text-salmon-600">{msg}</p>
+  return <p className="mt-1 text-xs text-[#fca5a5]">{msg}</p>
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="mb-4 border-b border-neutral-100 pb-2 text-sm font-bold uppercase tracking-wider text-neutral-400">
+    <h3 className="mb-4 border-b border-white/10 pb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
       {children}
     </h3>
   )
 }
 
 function inputClass(hasError?: boolean) {
-  return `w-full rounded-xl border px-3 py-2.5 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 ${
-    hasError ? 'border-salmon-400 bg-salmon-50' : 'border-neutral-200 bg-white'
+  return `w-full rounded-xl border px-3 py-2.5 text-sm text-[var(--color-text-main)] focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 ${
+    hasError
+      ? 'border-salmon-400 bg-[rgba(248,113,113,0.12)]'
+      : 'border-white/10 bg-[rgba(13,17,23,0.56)]'
   }`
 }
 
 function labelClass() {
-  return 'block text-sm font-semibold text-neutral-700'
+  return 'block text-sm font-semibold text-[var(--color-text-main)]'
 }
 
 function isNextRedirectError(err: unknown): boolean {
@@ -83,7 +85,7 @@ function PhotoGrid({
   return (
     <div className="flex flex-col gap-3">
       {error && (
-        <p className="text-xs text-salmon-600" role="alert">
+        <p className="text-xs text-[#fca5a5]" role="alert">
           {error}
         </p>
       )}
@@ -95,11 +97,11 @@ function PhotoGrid({
             className={`relative aspect-square overflow-hidden rounded-xl border-2 transition-all ${
               photo.isCover
                 ? 'border-primary-400 shadow-md'
-                : 'border-neutral-200'
+                : 'border-white/10'
             }`}
           >
             {/* Preview */}
-            <div className="relative h-full w-full bg-neutral-100">
+            <div className="relative h-full w-full bg-[rgba(255,255,255,0.04)]">
               <Image
                 src={photo.previewUrl}
                 alt="Foto do animal"
@@ -111,20 +113,20 @@ function PhotoGrid({
 
             {/* Overlay de loading */}
             {photo.uploading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+              <div className="absolute inset-0 flex items-center justify-center bg-[rgba(13,17,23,0.82)]">
                 <span className="h-6 w-6 animate-spin rounded-full border-2 border-primary-400 border-t-transparent" />
               </div>
             )}
 
             {/* Overlay de erro */}
             {photo.uploadError && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-salmon-50/90 p-2 text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[rgba(127,29,29,0.82)] p-2 text-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-salmon-600">
                   <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
                   <path d="M8 5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                   <circle cx="8" cy="11" r="0.75" fill="currentColor" />
                 </svg>
-                <span className="text-xs text-salmon-700">Erro ao enviar</span>
+                <span className="text-xs text-[#fecaca]">Erro ao enviar</span>
               </div>
             )}
 
@@ -171,7 +173,7 @@ function PhotoGrid({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 text-neutral-400 transition-colors hover:border-primary-300 hover:bg-primary-50 hover:text-primary-500"
+            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/10 bg-white/5 text-[var(--color-text-muted)] transition-colors hover:border-primary-300 hover:bg-[rgba(244,184,96,0.12)] hover:text-[var(--color-primary)]"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -181,7 +183,7 @@ function PhotoGrid({
         )}
       </div>
 
-      <p className="text-xs text-neutral-400">
+      <p className="text-xs text-[var(--color-text-muted)]">
         Máximo {MAX_FOTOS} fotos · JPG, PNG ou WebP · até 5 MB cada · A foto marcada com ★ será a capa.
       </p>
 
@@ -423,7 +425,7 @@ export default function AnimalForm({ mode, animal, action }: Props) {
       {globalError && (
         <div
           role="alert"
-          className="rounded-xl border border-salmon-200 bg-salmon-50 px-4 py-3 text-sm text-salmon-700"
+          className="rounded-xl border border-[rgba(252,165,165,0.22)] bg-[rgba(248,113,113,0.12)] px-4 py-3 text-sm text-[#fca5a5]"
         >
           {globalError}
         </div>
@@ -584,7 +586,7 @@ export default function AnimalForm({ mode, animal, action }: Props) {
                 defaultChecked={item.checked}
                 className="h-4 w-4 rounded border-neutral-300 accent-primary-400 focus:ring-2 focus:ring-primary-100"
               />
-              <span className="text-sm font-semibold text-neutral-700">{item.label}</span>
+              <span className="text-sm font-semibold text-[var(--color-text-main)]">{item.label}</span>
             </label>
           ))}
         </div>
@@ -670,7 +672,7 @@ export default function AnimalForm({ mode, animal, action }: Props) {
               defaultChecked={animal?.destaque ?? false}
               className="h-4 w-4 rounded border-neutral-300 accent-primary-400 focus:ring-2 focus:ring-primary-100"
             />
-            <span className="text-sm font-semibold text-neutral-700">
+            <span className="text-sm font-semibold text-[var(--color-text-main)]">
               Destaque na página inicial
             </span>
           </label>
@@ -690,10 +692,10 @@ export default function AnimalForm({ mode, animal, action }: Props) {
       </section>
 
       {/* ── Ações ── */}
-      <div className="flex flex-col gap-3 border-t border-neutral-100 pt-6 sm:flex-row sm:justify-end">
+      <div className="flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:justify-end">
         <Link
           href="/admin/animais"
-          className="inline-flex items-center justify-center rounded-xl border border-neutral-200 px-5 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+          className="admin-button-muted"
         >
           Cancelar
         </Link>
@@ -701,7 +703,7 @@ export default function AnimalForm({ mode, animal, action }: Props) {
           type="submit"
           disabled={isPending}
           data-testid="admin-animal-submit"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-300 px-6 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-semibold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-[var(--color-primary)] focus:outline-offset-2 disabled:opacity-50"
         >
           {isPending && (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

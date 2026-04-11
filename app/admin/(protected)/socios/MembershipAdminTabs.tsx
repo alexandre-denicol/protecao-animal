@@ -19,7 +19,7 @@ export default function MembershipAdminTabs({
       aria-label="Navegação do módulo de sócios"
       className="mb-6 overflow-x-auto"
     >
-      <div className="flex min-w-max gap-2 rounded-2xl border border-neutral-100 bg-white p-2 shadow-sm">
+      <div className="admin-panel flex min-w-max gap-2 p-2">
         {tabs.map((tab) => {
           const isActive = tab.label === active
 
@@ -28,10 +28,10 @@ export default function MembershipAdminTabs({
               key={tab.href}
               href={tab.href}
               aria-current={isActive ? 'page' : undefined}
-              className={`rounded-xl px-4 py-2 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-primary-300 ${
+              className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary-300 ${
                 isActive
-                  ? 'bg-primary-300 text-primary-900'
-                  : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800'
+                  ? 'border border-[rgba(244,184,96,0.24)] bg-[rgba(244,184,96,0.16)] text-[var(--color-primary)]'
+                  : 'text-[var(--color-text-muted)] hover:bg-white/5 hover:text-[var(--color-text-main)]'
               }`}
             >
               {tab.label}
@@ -42,4 +42,3 @@ export default function MembershipAdminTabs({
     </nav>
   )
 }
-

@@ -44,8 +44,8 @@ export default function SendInterestReplyEmailButton({
         onClick={handleClick}
         className={`inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold transition-colors focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
           disabled
-            ? 'bg-neutral-100 text-neutral-400'
-            : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+            ? 'border border-white/10 bg-white/5 text-[var(--color-text-muted)]'
+            : 'border border-white/10 bg-white/5 text-[var(--color-text-main)] hover:bg-white/10'
         }`}
       >
         {isPending && (
@@ -59,7 +59,7 @@ export default function SendInterestReplyEmailButton({
 
       {message && (
         <p
-          className={`max-w-44 text-xs ${isError ? 'text-salmon-600' : 'text-green-700'}`}
+          className={`max-w-44 text-xs ${isError ? 'text-[#fca5a5]' : 'text-[#8de0d9]'}`}
           role={isError ? 'alert' : 'status'}
         >
           {message}

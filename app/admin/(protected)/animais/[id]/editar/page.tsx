@@ -4,6 +4,8 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/auth/roles'
 import type { Animal, AnimalPhoto } from '@/types'
+import AdminPanel from '@/components/admin/AdminPanel'
+import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
 import AnimalForm from '@/components/admin/AnimalForm'
 import { atualizarAnimalAction } from '../../actions'
 
@@ -40,23 +42,24 @@ export default async function EditarAnimalPage({ params }: PageProps) {
   const boundAction = atualizarAnimalAction.bind(null, id)
 
   return (
-    <div className="mx-auto max-w-2xl">
-      {/* Breadcrumb */}
-      <nav aria-label="Navegação" className="mb-6 flex items-center gap-2 text-sm text-neutral-500">
-        <Link href="/admin/animais" className="hover:text-neutral-700">
+    <div className="admin-page mx-auto max-w-4xl">
+      <nav aria-label="Navegação" className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+        <Link href="/admin/animais" className="hover:text-[var(--color-text-main)]">
           Animais
         </Link>
         <span aria-hidden="true">/</span>
-        <span className="text-neutral-800">Editar</span>
+        <span className="text-[var(--color-text-main)]">Editar</span>
       </nav>
 
-      <h1 className="mb-8 text-2xl font-bold tracking-tight text-neutral-800">
-        Editar: {animal.nome}
-      </h1>
+      <AdminSectionHeading
+        eyebrow="Cadastro"
+        title={`Editar: ${animal.nome}`}
+        description="Atualize dados, fotos, status e destaque sem perder o contexto do cadastro."
+      />
 
-      <div className="rounded-2xl bg-white p-6 shadow-md sm:p-8">
+      <AdminPanel className="p-6 sm:p-8">
         <AnimalForm mode="edit" animal={animal} action={boundAction} />
-      </div>
+      </AdminPanel>
     </div>
   )
 }

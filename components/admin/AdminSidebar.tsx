@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { logoutAction } from '@/app/admin/login/actions'
 import type { UserProfile, UserRole } from '@/lib/auth/roles'
+import BrandLogo from '@/components/BrandLogo'
 
 interface NavItem {
   href: string
@@ -129,21 +129,21 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
 
   const navContent = (
     <nav aria-label="Navegação do painel">
-      <ul className="flex flex-col gap-0.5">
+      <ul className="flex flex-col gap-1.5">
         {visibleItems.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              className={`flex items-center gap-3 rounded-[var(--radius-button)] px-3.5 py-3 text-sm font-medium transition duration-200 ${
                 isActive(item.href)
-                  ? 'bg-primary-100 text-primary-700'
-                  : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
+                  ? 'border border-[rgba(244,184,96,0.22)] bg-[rgba(244,184,96,0.14)] text-[var(--color-primary)] shadow-[0_12px_28px_rgba(0,0,0,0.18)]'
+                  : 'border border-transparent text-[var(--color-text-muted)] hover:border-white/8 hover:bg-white/5 hover:text-[var(--color-text-main)]'
               }`}
               aria-current={isActive(item.href) ? 'page' : undefined}
             >
               <span
-                className={isActive(item.href) ? 'text-primary-600' : 'text-neutral-400'}
+                className={isActive(item.href) ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'}
               >
                 {item.icon}
               </span>
@@ -156,18 +156,18 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
   )
 
   const userInfo = (
-    <div className="border-t border-neutral-200 pt-4">
+    <div className="border-t border-white/10 pt-5">
       <div className="mb-3 px-3">
-        <p className="truncate text-sm font-semibold text-neutral-800">{profile.nome}</p>
-        <p className="truncate text-xs text-neutral-500">{profile.email}</p>
-        <span className="mt-1 inline-block rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-700">
+        <p className="truncate text-sm font-semibold text-[var(--color-text-main)]">{profile.nome}</p>
+        <p className="truncate text-xs text-[var(--color-text-muted)]">{profile.email}</p>
+        <span className="mt-1 inline-block rounded-full border border-[rgba(244,184,96,0.2)] bg-[rgba(244,184,96,0.12)] px-2 py-0.5 text-xs font-medium text-[var(--color-primary)]">
           {profile.role}
         </span>
       </div>
       <form action={logoutAction}>
         <button
           type="submit"
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-600 transition hover:bg-red-50 hover:text-red-600"
+          className="flex w-full items-center gap-2 rounded-[var(--radius-button)] px-3 py-2.5 text-sm font-medium text-[var(--color-text-muted)] transition duration-200 hover:bg-[rgba(255,255,255,0.06)] hover:text-[#fca5a5]"
         >
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
             <path d="M13 7L17 10M17 10L13 13M17 10H7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -183,18 +183,15 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
     <>
       {/* Sidebar desktop */}
       <aside
-        className="hidden w-60 flex-shrink-0 flex-col border-r border-neutral-200 bg-white px-3 py-6 lg:flex"
+        className="hidden w-72 flex-shrink-0 flex-col border-r border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.96),rgba(13,17,23,1))] px-4 py-6 lg:flex"
         aria-label="Menu lateral"
       >
         <Link
           href="/"
-          className="mb-8 flex items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-primary-300"
-          aria-label="Associação Amiga Miau — Página inicial"
+          className="mb-8 rounded-2xl px-2 py-1 transition duration-200 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
+          aria-label="Associação Amiga MiAu — Página inicial"
         >
-          <div className="relative h-8 w-8 flex-shrink-0">
-            <Image src="/logo.svg" alt="Logo Amiga Miau" fill className="object-contain" />
-          </div>
-          <span className="text-sm font-bold text-neutral-800">Amiga Miau</span>
+          <BrandLogo compact />
         </Link>
 
         <div className="flex flex-1 flex-col justify-between">
@@ -204,16 +201,13 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
       </aside>
 
       {/* Header mobile */}
-      <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 lg:hidden">
+      <header className="flex items-center justify-between border-b border-white/10 bg-[rgba(13,17,23,0.92)] px-4 py-3 lg:hidden">
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-lg py-1 pr-2 transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-primary-300"
-          aria-label="Associação Amiga Miau — Página inicial"
+          className="rounded-2xl py-1 pr-2 transition duration-200 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
+          aria-label="Associação Amiga MiAu — Página inicial"
         >
-          <div className="relative h-7 w-7">
-            <Image src="/logo.svg" alt="Logo Amiga Miau" fill className="object-contain" />
-          </div>
-          <span className="text-sm font-bold text-neutral-800">Amiga Miau</span>
+          <BrandLogo compact labelClassName="hidden min-[420px]:block" />
         </Link>
 
         <button
@@ -222,7 +216,7 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
           aria-expanded={mobileOpen}
           aria-controls="admin-mobile-menu"
           onClick={() => setMobileOpen((v) => !v)}
-          className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-100"
+          className="rounded-[var(--radius-button)] border border-white/10 bg-white/5 p-2 text-[var(--color-text-main)] hover:bg-white/10"
         >
           {mobileOpen ? (
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -249,18 +243,15 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
             role="dialog"
             aria-modal="true"
             aria-label="Menu de navegação"
-            className="fixed inset-y-0 left-0 z-30 flex w-72 flex-col border-r border-neutral-200 bg-white px-3 py-6 lg:hidden"
+            className="fixed inset-y-0 left-0 z-30 flex w-72 flex-col border-r border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.98),rgba(13,17,23,1))] px-4 py-6 lg:hidden"
           >
             <Link
               href="/"
               onClick={() => setMobileOpen(false)}
-              className="mb-8 flex items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-primary-300"
-              aria-label="Associação Amiga Miau — Página inicial"
+              className="mb-8 rounded-2xl px-2 py-1 transition duration-200 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
+              aria-label="Associação Amiga MiAu — Página inicial"
             >
-              <div className="relative h-8 w-8 flex-shrink-0">
-                <Image src="/logo.svg" alt="Logo Amiga Miau" fill className="object-contain" />
-              </div>
-              <span className="text-sm font-bold text-neutral-800">Amiga Miau</span>
+              <BrandLogo compact />
             </Link>
             <div className="flex flex-1 flex-col justify-between">
               {navContent}

@@ -5,6 +5,9 @@ import { getUserProfile } from '@/lib/auth/roles'
 import { getPublicSiteSettings } from '@/lib/site-settings'
 import { createClient } from '@/lib/supabase/server'
 import type { Member, MemberContactHistory, MembershipInterest } from '@/types'
+import AdminEmptyState from '@/components/admin/AdminEmptyState'
+import AdminPanel from '@/components/admin/AdminPanel'
+import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
 import MembershipAdminTabs from './MembershipAdminTabs'
 import MembershipInterestCard from './MembershipInterestCard'
 
@@ -29,37 +32,10 @@ const FILTERS = [
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl bg-white py-20 text-center shadow-md">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50">
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="text-primary-400"
-          aria-hidden="true"
-        >
-          <path
-            d="M6 20V8L12 4L18 8V20"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M9 20V13H15V20"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-      <h3 className="mb-1 text-base font-semibold text-neutral-700">
-        Nenhum cadastro encontrado
-      </h3>
-      <p className="max-w-xs text-sm text-neutral-500">
-        Ajuste a busca ou aguarde novos envios pelo formulário público.
-      </p>
-    </div>
+    <AdminEmptyState
+      title="Nenhum cadastro encontrado"
+      description="Ajuste a busca ou aguarde novos envios pelo formulário público para retomar a triagem."
+    />
   )
 }
 
@@ -151,39 +127,30 @@ export default async function SociosAdminPage({ searchParams }: PageProps) {
   const totalConvertidos = allInterests.filter((interest) => interest.member).length
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
-            Gerenciar sócios
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Triagem de interessados, conversão e acompanhamento do módulo.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-3 text-xs font-semibold text-neutral-500">
-            <span>
-              {totalNaoLidos} não lidos
-            </span>
-            <span aria-hidden="true">•</span>
-            <span>
-              {totalConvertidos} convertidos
-            </span>
+    <div className="admin-page">
+      <AdminSectionHeading
+        eyebrow="Relacionamento"
+        title="Gerenciar sócios"
+        description="Faça a triagem dos interessados, registre contatos e transforme cadastros quentes em acompanhamento ativo com mais clareza."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <span className="admin-chip">{totalNaoLidos} não lidos</span>
+            <span className="admin-chip">{totalConvertidos} convertidos</span>
+            <Link
+              href="/admin/membros"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)]"
+            >
+              Ver sócios ativos
+            </Link>
           </div>
-        </div>
-
-        <Link
-          href="/admin/membros"
-          className="inline-flex items-center justify-center rounded-xl bg-primary-300 px-4 py-2 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2"
-        >
-          Ver sócios ativos
-        </Link>
-      </div>
+        }
+      />
 
       <MembershipAdminTabs active="Triagem" />
 
-      <div className="mb-5 rounded-2xl border border-neutral-100 bg-white/80 p-3 shadow-sm">
+      <div className="admin-toolbar mb-5">
         <form
-          className="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_auto]"
+          className="grid w-full gap-2 sm:grid-cols-[minmax(220px,1fr)_auto]"
           action="/admin/socios"
         >
           <div>
@@ -196,19 +163,19 @@ export default async function SociosAdminPage({ searchParams }: PageProps) {
               type="search"
               defaultValue={search}
               placeholder="Buscar por nome"
-              className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
+              className="admin-input"
             />
           </div>
           <input type="hidden" name="status" value={status} />
           <button
             type="submit"
-            className="rounded-lg bg-neutral-800 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-neutral-700 focus:outline-2 focus:outline-neutral-300 focus:outline-offset-2"
+            className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-[var(--color-primary)] focus:outline-offset-2"
           >
             Buscar
           </button>
         </form>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           {FILTERS.map((filter) => {
             const params = new URLSearchParams()
             if (search) params.set('busca', search)
@@ -222,10 +189,10 @@ export default async function SociosAdminPage({ searchParams }: PageProps) {
               <Link
                 key={filter.value}
                 href={href}
-                className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                   active
-                    ? 'bg-primary-300 text-primary-900'
-                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                    ? 'border-[rgba(244,184,96,0.22)] bg-[rgba(244,184,96,0.14)] text-[var(--color-primary)]'
+                    : 'border-white/10 bg-white/5 text-[var(--color-text-muted)] hover:bg-white/10 hover:text-[var(--color-text-main)]'
                 }`}
               >
                 {filter.label}

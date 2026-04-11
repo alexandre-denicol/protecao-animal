@@ -9,6 +9,8 @@ import {
 } from '@/lib/membership'
 import { createClient } from '@/lib/supabase/server'
 import type { Member, MemberPayment } from '@/types'
+import AdminPanel from '@/components/admin/AdminPanel'
+import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
 import MembershipAdminTabs from '../MembershipAdminTabs'
 import PaymentRegisterForm from './PaymentRegisterForm'
 
@@ -29,11 +31,11 @@ const RECENT_PAYMENTS_LIMIT = 6
 
 function EmptyHistoryState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-neutral-50 px-6 py-12 text-center">
-      <p className="text-sm font-semibold text-neutral-700">
+    <div className="admin-panel-muted flex flex-col items-center justify-center border-dashed px-6 py-12 text-center">
+      <p className="text-sm font-semibold text-[var(--color-text-main)]">
         Nenhum pagamento registrado ainda.
       </p>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-[var(--color-text-muted)]">
         Os registros mais recentes vão aparecer aqui.
       </p>
     </div>
@@ -77,31 +79,34 @@ export default async function PagamentosSociosPage() {
   const recentPayments = payments.slice(0, RECENT_PAYMENTS_LIMIT)
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
-          Gerenciar sócios
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Registro e histórico financeiro dos sócios.
-        </p>
-      </div>
+    <div className="admin-page">
+      <AdminSectionHeading
+        eyebrow="Financeiro"
+        title="Gerenciar sócios"
+        description="Lance pagamentos com rapidez e acompanhe o histórico recente com leitura mais clara de valores, competência e data efetiva."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <span className="admin-chip">{members.length} membros</span>
+            <span className="admin-chip">{payments.length} registros financeiros</span>
+          </div>
+        }
+      />
 
       <MembershipAdminTabs active="Pagamentos" />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.2fr)]">
         <PaymentRegisterForm members={members} />
 
-        <section className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm">
-          <div className="flex flex-col gap-1 border-b border-neutral-100 pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <AdminPanel>
+          <div className="flex flex-col gap-1 border-b border-white/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-lg font-bold text-neutral-800">Histórico recente</h2>
-              <p className="mt-1 text-sm text-neutral-500">
+              <h2 className="text-lg font-semibold tracking-[-0.03em] text-[var(--color-text-main)]">Histórico recente</h2>
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">
                 Visualize rapidamente os últimos pagamentos lançados.
               </p>
             </div>
             {payments.length > RECENT_PAYMENTS_LIMIT && (
-              <p className="text-xs font-semibold text-neutral-400">
+              <p className="text-xs font-semibold text-[var(--color-text-muted)]">
                 Mostrando os últimos {RECENT_PAYMENTS_LIMIT}
               </p>
             )}
@@ -114,34 +119,34 @@ export default async function PagamentosSociosPage() {
               recentPayments.map((payment) => (
                 <article
                   key={payment.id}
-                  className="rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-4"
+                  className="admin-panel-muted px-4 py-4"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="text-base font-bold text-neutral-800">
+                      <p className="text-base font-semibold text-[var(--color-text-main)]">
                         {payment.member?.nome ?? 'Sócio não encontrado'}
                       </p>
-                      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
+                      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-[var(--color-text-muted)]">
                         <span>
-                          <span className="font-semibold text-neutral-700">Método:</span>{' '}
+                          <span className="font-semibold text-[var(--color-text-main)]">Método:</span>{' '}
                           {formatPaymentMethod(payment.metodo)}
                         </span>
                         <span>
-                          <span className="font-semibold text-neutral-700">Competência:</span>{' '}
+                          <span className="font-semibold text-[var(--color-text-main)]">Competência:</span>{' '}
                           {formatCompetenciaMes(payment.competencia_mes)}
                         </span>
                         <span>
-                          <span className="font-semibold text-neutral-700">Pago em:</span>{' '}
+                          <span className="font-semibold text-[var(--color-text-main)]">Pago em:</span>{' '}
                           {formatDateBR(payment.pago_em)}
                         </span>
                       </div>
                       {payment.observacoes && (
-                        <p className="mt-3 text-sm leading-relaxed text-neutral-500">
+                        <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)]">
                           {payment.observacoes}
                         </p>
                       )}
                     </div>
-                    <p className="shrink-0 text-lg font-bold text-neutral-800">
+                    <p className="shrink-0 text-lg font-semibold text-[var(--color-text-main)]">
                       {formatCurrencyBR(payment.valor)}
                     </p>
                   </div>
@@ -149,7 +154,7 @@ export default async function PagamentosSociosPage() {
               ))
             )}
           </div>
-        </section>
+        </AdminPanel>
       </div>
     </div>
   )

@@ -44,10 +44,10 @@ export default function AnimalStatusSelect({ id, status }: Props) {
         aria-label="Alterar status do animal"
         className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-wait disabled:opacity-60 ${
           status === 'disponivel'
-            ? 'border-green-200 bg-green-50 text-green-700'
+            ? 'border-[rgba(113,211,205,0.24)] bg-[rgba(31,111,107,0.16)] text-[#8de0d9]'
             : status === 'em_processo'
-              ? 'border-amber-200 bg-amber-50 text-amber-700'
-              : 'border-neutral-200 bg-neutral-100 text-neutral-500'
+              ? 'border-[rgba(244,184,96,0.24)] bg-[rgba(244,184,96,0.14)] text-[var(--color-primary)]'
+              : 'border-white/10 bg-white/5 text-[var(--color-text-muted)]'
         }`}
       >
         {OPCOES.map((o) => (
@@ -56,7 +56,7 @@ export default function AnimalStatusSelect({ id, status }: Props) {
           </option>
         ))}
       </select>
-      {erro && <p className="text-xs text-salmon-600">{erro}</p>}
+      {erro && <p className="text-xs text-[#fca5a5]">{erro}</p>}
     </div>
   )
 }

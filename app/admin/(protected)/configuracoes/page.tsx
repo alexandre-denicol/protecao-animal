@@ -6,25 +6,27 @@ import {
   getPublicSiteSettings,
   type PublicSiteSettings,
 } from '@/lib/site-settings'
+import AdminPanel from '@/components/admin/AdminPanel'
+import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
 import { salvarConfiguracoesAction } from './actions'
 
 export const metadata: Metadata = { title: 'Configurações — Amiga Miau Admin' }
 
 function labelClass() {
-  return 'block text-sm font-semibold text-neutral-700 mb-1'
+  return 'admin-label mb-1'
 }
 
 function inputClass() {
-  return 'w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100'
+  return 'admin-input'
 }
 
 function helpTextClass() {
-  return 'mt-1 text-xs leading-relaxed text-neutral-400'
+  return 'admin-help'
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="mb-4 border-b border-neutral-100 pb-2 text-sm font-bold uppercase tracking-wider text-neutral-400">
+    <h3 className="mb-4 border-b border-white/10 pb-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
       {children}
     </h3>
   )
@@ -44,29 +46,28 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
   const settings: PublicSiteSettings = await getPublicSiteSettings()
 
   return (
-    <div className="mx-auto max-w-2xl">
-      {/* Cabeçalho */}
-      <div className="mb-8">
-        <nav aria-label="Navegação" className="mb-3 flex items-center gap-2 text-sm text-neutral-500">
+    <div className="admin-page mx-auto max-w-4xl">
+      <div className="space-y-3">
+        <nav aria-label="Navegação" className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
           <Link href="/admin" className="hover:text-neutral-700">
             Dashboard
           </Link>
           <span aria-hidden="true">/</span>
-          <span className="text-neutral-800">Configurações</span>
+          <span className="text-[var(--color-text-main)]">Configurações</span>
         </nav>
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
-          Configurações do site
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Edite os textos, contatos e informações exibidos nas páginas públicas.
-        </p>
       </div>
+
+      <AdminSectionHeading
+        eyebrow="Configuração"
+        title="Configurações do site"
+        description="Edite os textos, números, contatos e áreas institucionais exibidos nas páginas públicas sem perder a coerência visual do projeto."
+      />
 
       {/* Feedback */}
       {salvo === '1' && (
         <div
           role="status"
-          className="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700"
+          className="mb-6 rounded-xl border border-[rgba(113,211,205,0.24)] bg-[rgba(31,111,107,0.16)] px-4 py-3 text-sm font-medium text-[#8de0d9]"
         >
           Configurações salvas com sucesso!
         </div>
@@ -74,7 +75,7 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
       {erro && (
         <div
           role="alert"
-          className="mb-6 rounded-xl border border-salmon-200 bg-salmon-50 px-4 py-3 text-sm font-medium text-salmon-700"
+          className="mb-6 rounded-xl border border-[rgba(252,165,165,0.22)] bg-[rgba(248,113,113,0.12)] px-4 py-3 text-sm font-medium text-[#fca5a5]"
         >
           {erro === 'acesso_negado'
             ? 'Acesso negado.'
@@ -84,7 +85,7 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
 
       <form action={salvarConfiguracoesAction} className="space-y-8">
         {/* Seção Hero */}
-        <div className="rounded-2xl bg-white p-6 shadow-md">
+        <AdminPanel>
           <SectionTitle>Página inicial — Hero</SectionTitle>
           <div className="space-y-5">
             <div>
@@ -153,10 +154,10 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
               </p>
             </div>
           </div>
-        </div>
+        </AdminPanel>
 
         {/* Contadores */}
-        <div className="rounded-2xl bg-white p-6 shadow-md">
+        <AdminPanel>
           <SectionTitle>Contadores</SectionTitle>
           <div className="grid gap-5 sm:grid-cols-3">
             <div>
@@ -202,10 +203,10 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
               />
             </div>
           </div>
-        </div>
+        </AdminPanel>
 
         {/* Doação e redes */}
-        <div className="rounded-2xl bg-white p-6 shadow-md">
+        <AdminPanel>
           <SectionTitle>Doação e redes sociais</SectionTitle>
           <div className="space-y-5">
             <div>
@@ -268,10 +269,10 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
               </p>
             </div>
           </div>
-        </div>
+        </AdminPanel>
 
         {/* Sócios */}
-        <div className="rounded-2xl bg-white p-6 shadow-md">
+        <AdminPanel>
           <SectionTitle>Área de sócios</SectionTitle>
           <div className="space-y-5">
             <div>
@@ -371,13 +372,13 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
               </p>
             </div>
           </div>
-        </div>
+        </AdminPanel>
 
         {/* Ações */}
         <div className="flex justify-end">
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary-300 px-6 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-semibold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-[var(--color-primary)] focus:outline-offset-2"
           >
             Salvar configurações
           </button>

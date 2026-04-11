@@ -7,8 +7,8 @@ import {
 } from '@/lib/whatsapp'
 
 function inputClass(hasError?: boolean) {
-  return `w-full border-0 bg-transparent px-3 py-2.5 text-sm text-neutral-800 focus:outline-none focus:ring-0 ${
-    hasError ? 'bg-salmon-50' : 'bg-white'
+  return `w-full border-0 bg-transparent px-3 py-3 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-0 ${
+    hasError ? 'bg-[rgba(127,29,29,0.18)]' : 'bg-transparent'
   }`
 }
 
@@ -40,58 +40,58 @@ export default function PhoneNumberField({
     'Número com DDD'
 
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-semibold text-neutral-700">
+    <div className="space-y-2">
+      <label htmlFor={id} className="block text-sm font-semibold text-[var(--color-text-main)]">
         {label}
         {required && <span className="text-salmon-500"> *</span>}
       </label>
 
       <div
-        className={`mt-1 overflow-hidden rounded-xl border focus-within:ring-2 focus-within:ring-primary-100 ${
-          error ? 'border-salmon-400 bg-salmon-50' : 'border-neutral-200 bg-white'
+        className={`overflow-hidden rounded-[var(--radius-button)] border bg-[rgba(255,255,255,0.03)] transition focus-within:ring-2 focus-within:ring-[rgba(244,184,96,0.14)] ${
+          error ? 'border-salmon-400 bg-[rgba(127,29,29,0.18)]' : 'border-white/10'
         }`}
       >
         <div className="flex flex-col sm:flex-row">
-        <select
-          name={countryName}
-          value={country}
-          onChange={(event) => {
-            const nextCountry = event.target.value as PhoneCountry
-            onCountryChange(nextCountry)
-            onValueChange(formatPhoneInput(value, nextCountry))
-          }}
-          className={`min-w-0 border-b border-neutral-200 bg-transparent px-3 py-2.5 text-sm text-neutral-800 focus:outline-none focus:ring-0 sm:w-44 sm:border-b-0 sm:border-r ${
-            error ? 'bg-salmon-50' : 'bg-transparent'
-          }`}
-        >
-          {PHONE_COUNTRIES.map((option) => (
-            <option key={option.code} value={option.code}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          <select
+            name={countryName}
+            value={country}
+            onChange={(event) => {
+              const nextCountry = event.target.value as PhoneCountry
+              onCountryChange(nextCountry)
+              onValueChange(formatPhoneInput(value, nextCountry))
+            }}
+            className={`min-w-0 border-b border-white/10 bg-transparent px-3 py-3 text-sm text-[var(--color-text-main)] focus:outline-none focus:ring-0 sm:w-44 sm:border-b-0 sm:border-r ${
+              error ? 'bg-[rgba(127,29,29,0.18)]' : 'bg-transparent'
+            }`}
+          >
+            {PHONE_COUNTRIES.map((option) => (
+              <option key={option.code} value={option.code}>
+                {option.label}
+              </option>
+            ))}
+          </select>
 
-        <input
-          id={id}
-          name={name}
-          type="tel"
-          inputMode="tel"
-          required={required}
-          value={value}
-          onChange={(event) =>
-            onValueChange(formatPhoneInput(event.target.value, country))
-          }
-          placeholder={placeholder}
-          className={inputClass(Boolean(error))}
-          autoComplete="tel-national"
-        />
+          <input
+            id={id}
+            name={name}
+            type="tel"
+            inputMode="tel"
+            required={required}
+            value={value}
+            onChange={(event) =>
+              onValueChange(formatPhoneInput(event.target.value, country))
+            }
+            placeholder={placeholder}
+            className={inputClass(Boolean(error))}
+            autoComplete="tel-national"
+          />
         </div>
       </div>
 
       {error ? (
-        <p className="mt-1 text-xs text-salmon-600">{error}</p>
+        <p className="text-xs leading-5 text-salmon-600">{error}</p>
       ) : (
-        <p className="mt-1 text-xs text-neutral-400">
+        <p className="text-xs leading-5 text-[var(--color-text-muted)]">
           Informe o número com DDD.
         </p>
       )}

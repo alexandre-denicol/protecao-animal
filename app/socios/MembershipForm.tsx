@@ -24,12 +24,14 @@ type MembershipField =
 
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null
-  return <p className="mt-1 text-xs text-salmon-600">{msg}</p>
+  return <p className="mt-2 text-xs leading-5 text-salmon-600">{msg}</p>
 }
 
 function inputClass(hasError?: boolean) {
-  return `w-full rounded-xl border px-3 py-2.5 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 ${
-    hasError ? 'border-salmon-400 bg-salmon-50' : 'border-neutral-200 bg-white'
+  return `w-full rounded-[var(--radius-button)] border px-4 py-3 text-sm text-[var(--color-text-main)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] ${
+    hasError
+      ? 'border-salmon-400 bg-[rgba(127,29,29,0.18)]'
+      : 'border-white/10 bg-[rgba(255,255,255,0.03)]'
   }`
 }
 
@@ -110,12 +112,12 @@ export default function MembershipForm() {
       ref={formRef}
       onSubmit={handleSubmit}
       noValidate
-      className="rounded-2xl bg-white p-6 shadow-md sm:p-8"
+      className="rounded-[var(--radius-card)] border border-white/10 bg-[rgba(17,24,39,0.82)] p-5 shadow-[var(--shadow-soft)] backdrop-blur sm:p-8"
     >
       {state.error && (
         <div
           role="alert"
-          className="mb-5 rounded-xl border border-salmon-200 bg-salmon-50 px-4 py-3 text-sm text-salmon-700"
+          className="mb-5 rounded-[var(--radius-button)] border border-salmon-400/40 bg-[rgba(127,29,29,0.22)] px-4 py-3 text-sm text-[#fecaca]"
         >
           {state.error}
         </div>
@@ -124,15 +126,15 @@ export default function MembershipForm() {
       {state.success && state.message && (
         <div
           role="status"
-          className="mb-5 rounded-xl border border-primary-200 bg-primary-50 px-4 py-3 text-sm font-semibold text-primary-800"
+          className="mb-5 rounded-[var(--radius-button)] border border-[rgba(31,111,107,0.35)] bg-[rgba(31,111,107,0.18)] px-4 py-3 text-sm font-semibold text-[#a7f3d0]"
         >
           {state.message}
         </div>
       )}
 
-      <div className="grid gap-5">
+      <div className="grid gap-4 sm:gap-5">
         <div>
-          <label htmlFor="nome" className="block text-sm font-semibold text-neutral-700">
+          <label htmlFor="nome" className="block text-sm font-semibold text-[var(--color-text-main)]">
             Nome <span className="text-salmon-500">*</span>
           </label>
           <input
@@ -148,7 +150,7 @@ export default function MembershipForm() {
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-neutral-700">
+          <label htmlFor="email" className="block text-sm font-semibold text-[var(--color-text-main)]">
             Email <span className="text-salmon-500">*</span>
           </label>
           <input
@@ -164,7 +166,7 @@ export default function MembershipForm() {
         </div>
 
         <div>
-          <label htmlFor="endereco" className="block text-sm font-semibold text-neutral-700">
+          <label htmlFor="endereco" className="block text-sm font-semibold text-[var(--color-text-main)]">
             Endereço <span className="text-salmon-500">*</span>
           </label>
           <input
@@ -182,7 +184,7 @@ export default function MembershipForm() {
 
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            <label htmlFor="cidade" className="block text-sm font-semibold text-neutral-700">
+            <label htmlFor="cidade" className="block text-sm font-semibold text-[var(--color-text-main)]">
               Cidade <span className="text-salmon-500">*</span>
             </label>
             <input
@@ -198,7 +200,7 @@ export default function MembershipForm() {
           </div>
 
           <div>
-            <label htmlFor="estado" className="block text-sm font-semibold text-neutral-700">
+            <label htmlFor="estado" className="block text-sm font-semibold text-[var(--color-text-main)]">
               Estado <span className="text-salmon-500">*</span>
             </label>
             <select
@@ -220,7 +222,7 @@ export default function MembershipForm() {
 
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            <label htmlFor="cpf" className="block text-sm font-semibold text-neutral-700">
+            <label htmlFor="cpf" className="block text-sm font-semibold text-[var(--color-text-main)]">
               CPF <span className="text-salmon-500">*</span>
             </label>
             <input
@@ -254,7 +256,7 @@ export default function MembershipForm() {
         </div>
 
         <div>
-          <label htmlFor="mensagem" className="block text-sm font-semibold text-neutral-700">
+          <label htmlFor="mensagem" className="block text-sm font-semibold text-[var(--color-text-main)]">
             Mensagem adicional
           </label>
           <textarea
@@ -271,7 +273,7 @@ export default function MembershipForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary-300 px-6 py-3 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50"
+        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-[var(--color-primary)] px-6 py-3 text-sm font-bold text-neutral-950 transition duration-200 hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-[var(--color-primary)] focus:outline-offset-2 focus:outline-offset-[var(--color-surface-1)] disabled:opacity-50"
       >
         {isPending && (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

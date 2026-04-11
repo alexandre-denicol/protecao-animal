@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/auth/roles'
 import type { Animal, AnimalPhoto, AnimalEspecie, AnimalStatus } from '@/types'
+import AdminEmptyState from '@/components/admin/AdminEmptyState'
+import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
+import AdminStatusBadge from '@/components/admin/StatusBadge'
 import AnimalStatusSelect from '@/components/admin/AnimalStatusSelect'
 import DeleteAnimalButton from '@/components/admin/DeleteAnimalButton'
 
@@ -23,77 +26,39 @@ interface PageProps {
 // ─── Helpers visuais ──────────────────────────────────────────────────────────
 
 function EspecieBadge({ especie }: { especie: AnimalEspecie }) {
-  const cfg =
-    especie === 'gato'
-      ? { label: 'Gato', className: 'bg-primary-100 text-primary-700' }
-      : { label: 'Cão', className: 'bg-amber-100 text-amber-700' }
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${cfg.className}`}
-    >
-      {cfg.label}
-    </span>
-  )
+  return <AdminStatusBadge tone={especie === 'gato' ? 'primary' : 'warning'}>{especie === 'gato' ? 'Gato' : 'Cão'}</AdminStatusBadge>
 }
 
 function StatusBadge({ status }: { status: AnimalStatus }) {
-  const cfg: Record<AnimalStatus, { label: string; className: string }> = {
-    disponivel: { label: 'Disponível', className: 'bg-green-100 text-green-700' },
-    em_processo: { label: 'Em processo', className: 'bg-amber-100 text-amber-700' },
-    adotado: { label: 'Adotado', className: 'bg-neutral-100 text-neutral-500' },
+  const cfg: Record<AnimalStatus, { label: string; tone: 'success' | 'warning' | 'neutral' }> = {
+    disponivel: { label: 'Disponível', tone: 'success' },
+    em_processo: { label: 'Em processo', tone: 'warning' },
+    adotado: { label: 'Adotado', tone: 'neutral' },
   }
-  const { label, className } = cfg[status]
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${className}`}>
-      {label}
-    </span>
-  )
+  const { label, tone } = cfg[status]
+  return <AdminStatusBadge tone={tone}>{label}</AdminStatusBadge>
 }
 
 function EmptyState({ podeAdcionar }: { podeAdcionar: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50">
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="text-primary-400"
-          aria-hidden="true"
-        >
-          <path
-            d="M10 3C10 3 5 6 5 11C5 13.8 7.2 16 10 16C12.8 16 15 13.8 15 11C15 8.2 13.2 5.8 12 4.5"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M16 16L20 20"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-          <circle cx="10" cy="11" r="2" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      </div>
-      <h3 className="mb-1 text-base font-semibold text-neutral-700">
-        Nenhum animal encontrado
-      </h3>
-      <p className="mb-5 max-w-xs text-sm text-neutral-500">
-        {podeAdcionar
+    <AdminEmptyState
+      title="Nenhum animal encontrado"
+      description={
+        podeAdcionar
           ? 'Comece cadastrando o primeiro animal para adoção.'
-          : 'Nenhum animal corresponde aos filtros aplicados.'}
-      </p>
-      {podeAdcionar && (
-        <Link
-          href="/admin/animais/novo"
-          className="inline-flex items-center gap-2 rounded-xl bg-primary-300 px-5 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2"
-        >
-          Cadastrar primeiro animal
-        </Link>
-      )}
-    </div>
+          : 'Nenhum animal corresponde aos filtros aplicados.'
+      }
+      action={
+        podeAdcionar ? (
+          <Link
+            href="/admin/animais/novo"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)]"
+          >
+            Cadastrar primeiro animal
+          </Link>
+        ) : undefined
+      }
+    />
   )
 }
 
@@ -132,7 +97,7 @@ function Filtros({
           name="busca"
           defaultValue={busca}
           placeholder="Buscar por nome…"
-          className="w-full rounded-xl border border-neutral-200 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
+          className="admin-input py-2.5 pl-9 pr-4"
         />
       </div>
 
@@ -140,7 +105,7 @@ function Filtros({
       <select
         name="especie"
         defaultValue={especie}
-        className="rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
+        className="admin-select"
       >
         <option value="">Todas as espécies</option>
         <option value="gato">Gato</option>
@@ -151,7 +116,7 @@ function Filtros({
       <select
         name="status"
         defaultValue={status}
-        className="rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
+        className="admin-select"
       >
         <option value="">Todos os status</option>
         <option value="disponivel">Disponível</option>
@@ -161,7 +126,7 @@ function Filtros({
 
       <button
         type="submit"
-        className="rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 focus:outline-2 focus:outline-primary-300"
+        className="admin-button-muted"
       >
         Filtrar
       </button>
@@ -169,7 +134,7 @@ function Filtros({
       {(busca || especie || status) && (
         <Link
           href="/admin/animais"
-          className="text-sm text-neutral-400 underline-offset-2 hover:text-neutral-600 hover:underline"
+          className="text-sm text-[var(--color-text-muted)] underline-offset-2 hover:text-[var(--color-text-main)] hover:underline"
         >
           Limpar
         </Link>
@@ -193,10 +158,10 @@ function AnimalCard({
     <article
       data-testid="admin-animal-row"
       data-animal-id={animal.id}
-      className="flex flex-col gap-4 overflow-hidden rounded-2xl bg-white shadow-md transition-shadow hover:shadow-lg sm:flex-row sm:items-center"
+      className="admin-panel flex flex-col gap-4 overflow-hidden transition-shadow hover:border-[rgba(244,184,96,0.2)] sm:flex-row sm:items-center"
     >
       {/* Foto */}
-      <div className="relative h-40 w-full shrink-0 overflow-hidden bg-neutral-100 sm:h-28 sm:w-28">
+      <div className="relative h-40 w-full shrink-0 overflow-hidden bg-[rgba(255,255,255,0.04)] sm:h-28 sm:w-28">
         {capa ? (
           <Image
             src={capa.url}
@@ -212,7 +177,7 @@ function AnimalCard({
               height="28"
               viewBox="0 0 24 24"
               fill="none"
-              className="text-neutral-300"
+              className="text-[var(--color-text-muted)]"
               aria-hidden="true"
             >
               <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.5" />
@@ -229,21 +194,19 @@ function AnimalCard({
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/admin/animais/${animal.id}/editar`}
-              className="font-semibold text-neutral-800 hover:text-primary-600"
+              className="font-semibold text-[var(--color-text-main)] hover:text-[var(--color-primary)]"
             >
               {animal.nome}
             </Link>
             <EspecieBadge especie={animal.especie} />
             {animal.destaque && (
-              <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
-                ★ Destaque
-              </span>
+                <AdminStatusBadge tone="warning">Destaque</AdminStatusBadge>
             )}
           </div>
           {animal.raca && (
-            <span className="text-xs text-neutral-500">{animal.raca}</span>
+            <span className="text-xs text-[var(--color-text-muted)]">{animal.raca}</span>
           )}
-          <span className="text-xs text-neutral-400">
+          <span className="text-xs text-[var(--color-text-muted)]">
             {animal.sexo === 'macho' ? 'Macho' : 'Fêmea'}
             {animal.idade_anos !== null &&
               ` · ${animal.idade_anos} ano${animal.idade_anos !== 1 ? 's' : ''}${
@@ -264,7 +227,7 @@ function AnimalCard({
             <>
               <Link
                 href={`/admin/animais/${animal.id}/editar`}
-                className="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+                className="admin-button-muted px-3 py-1.5 text-xs"
               >
                 Editar
               </Link>
@@ -322,32 +285,29 @@ export default async function AnimaisPage({ searchParams }: PageProps) {
   const temFiltro = Boolean(busca || especie || status)
 
   return (
-    <div data-testid="admin-animals-page">
-      {/* Cabeçalho */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-800">Animais</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            {animais.length} {animais.length === 1 ? 'animal' : 'animais'}
-            {profile.role === 'editor' && ' cadastrados por você'}
-          </p>
-        </div>
-        {podeAdcionar && (
-          <Link
-            href="/admin/animais/novo"
-            data-testid="admin-new-animal-link"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary-300 px-4 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-            Novo animal
-          </Link>
-        )}
-      </div>
+    <div className="admin-page" data-testid="admin-animals-page">
+      <AdminSectionHeading
+        eyebrow="Adoção"
+        title="Animais"
+        description={`${animais.length} ${animais.length === 1 ? 'animal' : 'animais'}${profile.role === 'editor' ? ' cadastrados por você' : ''}. Mantenha status, destaque e edição sempre à mão.`}
+        actions={
+          podeAdcionar ? (
+            <Link
+              href="/admin/animais/novo"
+              data-testid="admin-new-animal-link"
+              className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-[var(--color-primary)] focus:outline-offset-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              Novo animal
+            </Link>
+          ) : undefined
+        }
+      />
 
       {/* Filtros */}
-      <div className="mb-6 rounded-2xl bg-white p-4 shadow-md">
+      <div className="admin-toolbar mb-6">
         <Filtros busca={busca} especie={especie} status={status} />
       </div>
 

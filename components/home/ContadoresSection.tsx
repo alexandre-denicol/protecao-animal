@@ -32,23 +32,19 @@ function ItemContador({ dados, iniciar }: { dados: DadosContador; iniciar: boole
   }, [iniciar, dados.valor])
 
   return (
-    <div className="flex flex-1 flex-col items-center px-6 py-10 text-center">
-      {/* Ícone */}
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 text-primary-500">
+    <div className="flex flex-1 flex-col items-start rounded-[var(--radius-card)] border border-white/8 bg-[rgba(17,24,39,0.72)] px-5 py-6 text-left shadow-[var(--shadow-soft)] sm:px-6 sm:py-8">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-[rgba(244,184,96,0.18)] bg-[rgba(244,184,96,0.12)] text-[var(--color-primary)] sm:mb-5 sm:h-14 sm:w-14">
         {dados.icone}
       </div>
 
-      {/* Número animado */}
-      <p className="text-5xl font-extrabold tabular-nums text-neutral-800 lg:text-6xl">
+      <p className="text-4xl font-extrabold tabular-nums text-[var(--color-text-main)] sm:text-5xl lg:text-6xl">
         {atual.toLocaleString('pt-BR')}
-        <span className="text-primary-400">{dados.sufixo}</span>
+        <span className="text-[var(--color-primary)]">{dados.sufixo}</span>
       </p>
 
-      {/* Label */}
-      <p className="mt-2 text-base font-semibold text-neutral-700">{dados.label}</p>
+      <p className="mt-3 text-base font-semibold text-[var(--color-text-main)]">{dados.label}</p>
 
-      {/* Descrição */}
-      <p className="mt-1 max-w-[180px] text-sm leading-relaxed text-neutral-400">{dados.descricao}</p>
+      <p className="mt-2 max-w-[240px] text-sm leading-6 text-[var(--color-text-muted)] sm:leading-7">{dados.descricao}</p>
     </div>
   )
 }
@@ -123,9 +119,9 @@ export default function ContadoresSection({ resgatados, adotados, emEspera }: Co
   }, [])
 
   return (
-    <section ref={refSecao} className="bg-white py-4">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col divide-y divide-neutral-100 sm:flex-row sm:divide-x sm:divide-y-0">
+    <section ref={refSecao} className="bg-[var(--color-bg)] py-6 sm:py-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-4 lg:grid-cols-3 lg:gap-5">
           {contadores.map((item) => (
             <ItemContador key={item.label} dados={item} iniciar={iniciar} />
           ))}

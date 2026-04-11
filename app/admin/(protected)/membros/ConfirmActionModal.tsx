@@ -37,18 +37,18 @@ export default function ConfirmActionModal({
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
       <div
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={isLoading ? undefined : onCancel}
         aria-hidden="true"
       />
 
-      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 id="confirm-action-title" className="text-xl font-bold text-neutral-800">
+      <div className="admin-panel relative z-10 w-full max-w-md p-6">
+        <h2 id="confirm-action-title" className="text-xl font-semibold tracking-[-0.04em] text-[var(--color-text-main)]">
           {title}
         </h2>
         <p
           id="confirm-action-description"
-          className="mt-3 text-sm leading-relaxed text-neutral-500"
+          className="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)]"
         >
           {description}
         </p>
@@ -58,7 +58,7 @@ export default function ConfirmActionModal({
             type="button"
             disabled={isLoading}
             onClick={onCancel}
-            className="inline-flex items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-bold text-neutral-600 transition-colors hover:bg-neutral-50 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:cursor-wait disabled:opacity-60"
+            className="admin-button-muted"
           >
             Voltar
           </button>
@@ -76,4 +76,3 @@ export default function ConfirmActionModal({
     </div>
   )
 }
-

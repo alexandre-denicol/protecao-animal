@@ -15,12 +15,14 @@ interface Props {
 
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null
-  return <p className="mt-1 text-xs text-salmon-600">{msg}</p>
+  return <p className="mt-2 text-xs leading-5 text-salmon-600">{msg}</p>
 }
 
 function inputClass(hasError?: boolean) {
-  return `w-full rounded-xl border px-3 py-2.5 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 ${
-    hasError ? 'border-salmon-400 bg-salmon-50' : 'border-neutral-200 bg-white'
+  return `w-full rounded-[var(--radius-button)] border px-4 py-3 text-sm text-[var(--color-text-main)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] ${
+    hasError
+      ? 'border-salmon-400 bg-[rgba(127,29,29,0.18)]'
+      : 'border-white/10 bg-[rgba(255,255,255,0.03)]'
   }`
 }
 
@@ -73,7 +75,7 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
             setIsOpen(true)
             setState({})
           }}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-primary-300 px-6 py-3 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2"
+          className="inline-flex w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--color-primary)] px-6 py-3.5 text-sm font-bold text-neutral-950 transition duration-200 hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-[var(--color-primary)] focus:outline-offset-2 focus:outline-offset-[var(--color-surface-1)]"
         >
           Quero adotar
         </button>
@@ -85,15 +87,15 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
           onSubmit={handleSubmit}
           noValidate
           data-testid="adoption-interest-form"
-          className="rounded-xl border border-neutral-100 bg-neutral-50 p-4"
+          className="rounded-[var(--radius-card)] border border-white/10 bg-[rgba(17,24,39,0.82)] p-4 shadow-[var(--shadow-soft)] sm:p-5"
         >
           <input type="hidden" name="animal_id" value={animalId} />
 
-          <div className="mb-4">
-            <h2 className="text-lg font-bold text-neutral-800">
+          <div className="mb-5">
+            <h2 className="text-lg font-bold text-[var(--color-text-main)]">
               Quero adotar {animalNome}
             </h2>
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
               Conte um pouco sobre você para a nossa equipe continuar a conversa.
             </p>
           </div>
@@ -101,7 +103,7 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
           {state.error && (
             <div
               role="alert"
-              className="mb-4 rounded-xl border border-salmon-200 bg-salmon-50 px-4 py-3 text-sm text-salmon-700"
+              className="mb-4 rounded-[var(--radius-button)] border border-salmon-400/40 bg-[rgba(127,29,29,0.22)] px-4 py-3 text-sm text-[#fecaca]"
             >
               {state.error}
             </div>
@@ -110,15 +112,15 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
           {state.success && state.message && (
             <div
               role="status"
-              className="mb-4 rounded-xl border border-primary-200 bg-primary-50 px-4 py-3 text-sm font-semibold text-primary-800"
+              className="mb-4 rounded-[var(--radius-button)] border border-[rgba(31,111,107,0.35)] bg-[rgba(31,111,107,0.18)] px-4 py-3 text-sm font-semibold text-[#a7f3d0]"
             >
               {state.message}
             </div>
           )}
 
-          <div className="grid gap-4">
+          <div className="grid gap-4 sm:gap-5">
             <div>
-              <label htmlFor="nome" className="block text-sm font-semibold text-neutral-700">
+              <label htmlFor="nome" className="block text-sm font-semibold text-[var(--color-text-main)]">
                 Nome <span className="text-salmon-500">*</span>
               </label>
               <input
@@ -132,7 +134,7 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-neutral-700">
+              <label htmlFor="email" className="block text-sm font-semibold text-[var(--color-text-main)]">
                 Email <span className="text-salmon-500">*</span>
               </label>
               <input
@@ -158,7 +160,7 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
             />
 
             <div>
-              <label htmlFor="mensagem" className="block text-sm font-semibold text-neutral-700">
+              <label htmlFor="mensagem" className="block text-sm font-semibold text-[var(--color-text-main)]">
                 Mensagem
               </label>
               <textarea
@@ -172,14 +174,14 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={() => {
                 setIsOpen(false)
                 setState({})
               }}
-              className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+              className="inline-flex items-center justify-center rounded-[var(--radius-button)] border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-[var(--color-text-main)] transition duration-200 hover:border-[rgba(244,184,96,0.25)] hover:text-[var(--color-primary)]"
             >
               Cancelar
             </button>
@@ -187,7 +189,7 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
               type="submit"
               disabled={isPending}
               data-testid="adoption-submit"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-300 px-6 py-2.5 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-button)] bg-[var(--color-primary)] px-6 py-2.5 text-sm font-bold text-neutral-950 transition duration-200 hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-[var(--color-primary)] focus:outline-offset-2 focus:outline-offset-[var(--color-surface-1)] disabled:opacity-50"
             >
               {isPending && (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import { getUserProfile } from '@/lib/auth/roles'
 import { getPublicSiteSettings, type SettingKey } from '@/lib/site-settings'
 import { createClient } from '@/lib/supabase/server'
+import AdminPanel from '@/components/admin/AdminPanel'
+import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
 import MembershipAdminTabs from '../MembershipAdminTabs'
 
 export const metadata: Metadata = { title: 'Comunicação — Amiga Miau Admin' }
@@ -110,7 +112,7 @@ async function salvarComunicacaoSociosAction(formData: FormData): Promise<void> 
 }
 
 function fieldClass() {
-  return 'w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100'
+  return 'admin-input'
 }
 
 export default async function ComunicacaoSociosPage({ searchParams }: PageProps) {
@@ -122,26 +124,23 @@ export default async function ComunicacaoSociosPage({ searchParams }: PageProps)
   const settings = await getPublicSiteSettings()
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
-          Gerenciar sócios
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Configure os modelos de WhatsApp, email, nome do remetente e reply-to.
-        </p>
-      </div>
+    <div className="admin-page">
+      <AdminSectionHeading
+        eyebrow="Comunicação"
+        title="Gerenciar sócios"
+        description="Centralize aqui os modelos de WhatsApp e email usados pela equipe, com campos mais claros para assunto, corpo, remetente lógico e reply-to."
+      />
 
       <MembershipAdminTabs active="Comunicação" />
 
       {salvo === '1' && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">
+        <div className="mb-4 rounded-lg border border-[rgba(113,211,205,0.24)] bg-[rgba(31,111,107,0.16)] px-4 py-3 text-sm font-semibold text-[#8de0d9]">
           Modelos salvos com sucesso.
         </div>
       )}
 
       {erro && (
-        <div className="mb-4 rounded-lg border border-salmon-200 bg-salmon-50 px-4 py-3 text-sm font-semibold text-salmon-700">
+        <div className="mb-4 rounded-lg border border-[rgba(252,165,165,0.22)] bg-[rgba(248,113,113,0.12)] px-4 py-3 text-sm font-semibold text-[#fca5a5]">
           {erro === 'acesso'
             ? 'Apenas administradores podem alterar os modelos.'
             : 'Não foi possível salvar os modelos.'}
@@ -150,31 +149,31 @@ export default async function ComunicacaoSociosPage({ searchParams }: PageProps)
 
       <form
         action={salvarComunicacaoSociosAction}
-        className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm"
+        className="admin-panel p-5"
       >
-        <div className="mb-5 rounded-xl bg-neutral-50 p-4 text-sm text-neutral-600">
+        <div className="admin-panel-muted mb-5 p-4 text-sm text-[var(--color-text-main)]">
           Placeholders aceitos: <strong>{'{nome}'}</strong>,{' '}
           <strong>{'{valor}'}</strong>, <strong>{'{vencimento}'}</strong> e{' '}
           <strong>{'{animal}'}</strong>.
         </div>
 
-        <div className="grid gap-5">
+        <div className="grid gap-4 lg:grid-cols-2">
           {COMMUNICATION_FIELDS.map((field) => (
-            <div key={field.key}>
+            <div key={field.key} className="admin-panel-muted space-y-2 p-4">
               <label
                 htmlFor={field.key}
-                className="mb-1 block text-sm font-bold text-neutral-700"
+                className="admin-label mb-0"
               >
                 {field.label}
               </label>
-              <p className="mb-2 text-xs text-neutral-400">{field.description}</p>
+              <p className="text-xs text-[var(--color-text-muted)]">{field.description}</p>
               {field.rows ? (
                 <textarea
                   id={field.key}
                   name={field.key}
                   rows={field.rows}
                   defaultValue={settings[field.key]}
-                  className={`${fieldClass()} resize-none`}
+                  className="admin-textarea resize-none"
                 />
               ) : (
                 <input
@@ -191,7 +190,7 @@ export default async function ComunicacaoSociosPage({ searchParams }: PageProps)
 
         <button
           type="submit"
-          className="mt-6 rounded-lg bg-neutral-800 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-neutral-700 focus:outline-2 focus:outline-neutral-300 focus:outline-offset-2"
+          className="mt-6 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-[var(--color-primary)] focus:outline-offset-2"
         >
           Salvar modelos
         </button>

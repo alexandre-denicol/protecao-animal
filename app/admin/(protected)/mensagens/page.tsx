@@ -4,6 +4,9 @@ import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/auth/roles'
 import { isValidEmailAddress } from '@/lib/membership'
 import type { ContactMessage } from '@/types'
+import AdminEmptyState from '@/components/admin/AdminEmptyState'
+import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
+import AdminStatusBadge from '@/components/admin/StatusBadge'
 import MarkMessageAsReadButton from './MarkMessageAsReadButton'
 import SendContactReplyEmailButton from './SendContactReplyEmailButton'
 
@@ -20,55 +23,15 @@ function formatDate(iso: string): string {
 }
 
 function StatusBadge({ lida }: { lida: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-        lida
-          ? 'bg-neutral-100 text-neutral-500'
-          : 'bg-amber-100 text-amber-700'
-      }`}
-    >
-      {lida ? 'Lida' : 'Não lida'}
-    </span>
-  )
+  return <AdminStatusBadge tone={lida ? 'neutral' : 'warning'}>{lida ? 'Lida' : 'Não lida'}</AdminStatusBadge>
 }
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl bg-white py-20 text-center shadow-md">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50">
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="text-primary-400"
-          aria-hidden="true"
-        >
-          <rect
-            x="3"
-            y="5"
-            width="18"
-            height="14"
-            rx="2"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M3 8L12 13.5L21 8"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
-      <h3 className="mb-1 text-base font-semibold text-neutral-700">
-        Nenhuma mensagem ainda
-      </h3>
-      <p className="max-w-xs text-sm text-neutral-500">
-        As mensagens enviadas pelo formulário de contato aparecerão aqui.
-      </p>
-    </div>
+    <AdminEmptyState
+      title="Nenhuma mensagem ainda"
+      description="As mensagens enviadas pelo formulário de contato aparecerão aqui, prontas para resposta e acompanhamento."
+    />
   )
 }
 
@@ -92,23 +55,15 @@ export default async function MensagensPage() {
   const totalNaoLidas = mensagens.filter((mensagem) => !mensagem.lida).length
 
   return (
-    <div data-testid="admin-messages-page">
-      <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
-            Mensagens de contato
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Acompanhe as mensagens enviadas pelo site.
-          </p>
-          {totalNaoLidas > 0 && (
-            <p className="mt-1 text-sm text-amber-600">
-              {totalNaoLidas}{' '}
-              {totalNaoLidas === 1 ? 'mensagem não lida' : 'mensagens não lidas'}
-            </p>
-          )}
-        </div>
-      </div>
+    <div className="admin-page" data-testid="admin-messages-page">
+      <AdminSectionHeading
+        eyebrow="Contato"
+        title="Mensagens de contato"
+        description="Acompanhe as mensagens enviadas pelo site com leitura mais rápida de remetente, assunto e próxima ação."
+        actions={
+          totalNaoLidas > 0 ? <span className="admin-chip">{totalNaoLidas} não lidas</span> : undefined
+        }
+      />
 
       {mensagens.length === 0 ? (
         <EmptyState />
@@ -121,22 +76,22 @@ export default async function MensagensPage() {
               <article
                 key={mensagem.id}
                 data-testid="admin-message-row"
-                className={`rounded-2xl border bg-white p-5 shadow-sm ${
-                  mensagem.lida ? 'border-neutral-100' : 'border-amber-200 bg-amber-50/40'
+                className={`admin-panel p-5 ${
+                  mensagem.lida ? 'border-neutral-100' : 'border-amber-200 bg-[linear-gradient(180deg,rgba(244,184,96,0.08),rgba(17,24,39,0.96))]'
                 }`}
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-lg font-bold text-neutral-800">{mensagem.nome}</h2>
+                      <h2 className="text-lg font-semibold tracking-[-0.03em] text-[var(--color-text-main)]">{mensagem.nome}</h2>
                       <StatusBadge lida={mensagem.lida} />
                     </div>
 
-                    <p className="mt-1 text-sm font-medium text-primary-700">
+                    <p className="mt-1 text-sm font-medium text-[var(--color-primary)]">
                       {mensagem.assunto}
                     </p>
 
-                    <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
+                    <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm text-[var(--color-text-muted)]">
                       <span>{mensagem.email}</span>
                       <span aria-hidden="true">•</span>
                       <time dateTime={mensagem.created_at}>
@@ -144,11 +99,11 @@ export default async function MensagensPage() {
                       </time>
                     </div>
 
-                    <div className="mt-3 rounded-xl bg-neutral-50 px-3 py-3">
-                      <p className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+                    <div className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                         Mensagem
                       </p>
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-600">
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[var(--color-text-main)]">
                         {mensagem.mensagem}
                       </p>
                     </div>
@@ -163,7 +118,7 @@ export default async function MensagensPage() {
                     {!mensagem.lida ? (
                       <MarkMessageAsReadButton id={mensagem.id} />
                     ) : (
-                      <span className="inline-flex items-center rounded-lg bg-neutral-100 px-3 py-2 text-xs font-semibold text-neutral-400">
+                      <span className="inline-flex items-center rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[var(--color-text-muted)]">
                         Já lida
                       </span>
                     )}

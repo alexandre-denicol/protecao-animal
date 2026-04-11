@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { getPublicSiteSettings } from '@/lib/site-settings'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import { ExternalLink } from './ExternalLink'
+import BrandLogo from './BrandLogo'
 
 const linksNavegacao = [
   { href: '/', label: 'Home' },
@@ -101,37 +101,30 @@ export default async function Footer() {
   const pixChave = settings.pix_chave.trim()
 
   return (
-    <footer className="bg-neutral-800">
-      {/* Corpo principal */}
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+    <footer className="border-t border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.96),rgba(13,17,23,1))]">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-
-          {/* Identidade — col larga */}
           <div className="sm:col-span-2 lg:col-span-2">
             <Link
               href="/"
-              className="mb-5 inline-flex items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-primary-300"
-              aria-label="Associação Amiga Miau — Página inicial"
+              className="mb-6 inline-flex rounded-2xl focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
+              aria-label="Associação Amiga MiAu — Página inicial"
             >
-              <div className="relative h-10 w-10 flex-shrink-0">
-                <Image src="/logo.svg" alt="Logo Amiga Miau" fill className="object-contain" />
-              </div>
-              <span className="text-lg font-bold text-white">Amiga Miau</span>
+              <BrandLogo className="items-center" imageClassName="shadow-[0_18px_40px_rgba(0,0,0,0.5)]" />
             </Link>
 
-            <p className="max-w-xs text-sm leading-relaxed text-white/50">
+            <p className="max-w-md text-sm leading-7 text-[var(--color-text-muted)]">
               {footerText}
             </p>
 
-            {/* Redes sociais */}
             {redes.length > 0 && (
-              <div className="mt-6 flex items-center gap-2">
+              <div className="mt-7 flex items-center gap-2">
                 {redes.map((rede) => (
                   <ExternalLink
                     key={rede.href}
                     href={rede.href}
                     aria-label={rede.label}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300"
+                    className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-button)] border border-white/10 bg-white/5 text-[var(--color-text-muted)] transition duration-200 hover:border-[rgba(244,184,96,0.3)] hover:bg-[rgba(244,184,96,0.08)] hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
                   >
                     {rede.icone}
                   </ExternalLink>
@@ -142,7 +135,7 @@ export default async function Footer() {
 
           {/* Links de navegação */}
           <div>
-            <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-white/30">
+            <h3 className="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-text-muted)]/70">
               Navegação
             </h3>
             <ul className="flex flex-col gap-3">
@@ -150,7 +143,7 @@ export default async function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300"
+                    className="text-sm text-[var(--color-text-muted)] transition duration-200 hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
                   >
                     {link.label}
                   </Link>
@@ -160,22 +153,22 @@ export default async function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-white/30">
+            <h3 className="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-text-muted)]/70">
               Apoio
             </h3>
             {pixChave ? (
               <>
-                <p className="mb-2 text-xs text-white/40">Chave PIX</p>
-                <p className="break-all font-mono text-sm font-semibold text-primary-300">
+                <p className="mb-2 text-xs text-[var(--color-text-muted)]/70">Chave PIX</p>
+                <p className="break-all rounded-[var(--radius-button)] border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm font-semibold text-[var(--color-primary)]">
                   {pixChave}
                 </p>
               </>
             ) : (
-              <p className="text-sm leading-relaxed text-white/40">
+              <p className="text-sm leading-relaxed text-[var(--color-text-muted)]/80">
                 As informações de doação serão atualizadas em breve.
               </p>
             )}
-            <p className="mt-3 text-xs leading-relaxed text-white/30">
+            <p className="mt-3 text-xs leading-relaxed text-[var(--color-text-muted)]/70">
               100% destinado ao cuidado dos animais resgatados.
             </p>
             <ul className="mt-5 flex flex-col gap-2">
@@ -183,7 +176,7 @@ export default async function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-xs font-semibold text-white/40 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300"
+                    className="text-xs font-semibold text-[var(--color-text-muted)] transition duration-200 hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
                   >
                     {link.label}
                   </Link>
@@ -194,10 +187,9 @@ export default async function Footer() {
         </div>
       </div>
 
-      {/* Barra inferior */}
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-white/30 sm:flex-row sm:px-6 lg:px-8">
-          <p>© {anoAtual} Associação Amiga Miau</p>
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-[var(--color-text-muted)]/75 sm:flex-row sm:px-6 lg:px-8">
+          <p>© {anoAtual} Associação Amiga MiAu</p>
           <p>Cuidado, adoção responsável e comunidade.</p>
         </div>
       </div>

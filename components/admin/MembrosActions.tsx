@@ -46,7 +46,7 @@ export function InviteForm({ onClose }: { onClose: () => void }) {
       {state.error && (
         <div
           role="alert"
-          className="rounded-xl border border-salmon-200 bg-salmon-50 px-4 py-3 text-sm text-salmon-700"
+          className="rounded-xl border border-[rgba(252,165,165,0.22)] bg-[rgba(248,113,113,0.12)] px-4 py-3 text-sm text-[#fca5a5]"
         >
           {state.error}
         </div>
@@ -55,7 +55,7 @@ export function InviteForm({ onClose }: { onClose: () => void }) {
       {state.success && (
         <div
           role="status"
-          className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+          className="rounded-xl border border-[rgba(113,211,205,0.24)] bg-[rgba(31,111,107,0.16)] px-4 py-3 text-sm text-[#8de0d9]"
         >
           {state.success}
         </div>
@@ -63,7 +63,7 @@ export function InviteForm({ onClose }: { onClose: () => void }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="invite-nome" className="text-sm font-semibold text-neutral-700">
+          <label htmlFor="invite-nome" className="admin-label mb-1">
             Nome <span className="text-salmon-500">*</span>
           </label>
           <input
@@ -72,19 +72,19 @@ export function InviteForm({ onClose }: { onClose: () => void }) {
             type="text"
             required
             placeholder="Nome completo"
-            className={`rounded-xl border px-3 py-2.5 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 ${
+            className={`admin-input ${
               state.fieldErrors?.nome
-                ? 'border-salmon-400 bg-salmon-50'
-                : 'border-neutral-200 bg-white'
+                ? 'border-salmon-400 bg-[rgba(248,113,113,0.12)]'
+                : ''
             }`}
           />
           {state.fieldErrors?.nome && (
-            <p className="text-xs text-salmon-600">{state.fieldErrors.nome}</p>
+            <p className="text-xs text-[#fca5a5]">{state.fieldErrors.nome}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="invite-email" className="text-sm font-semibold text-neutral-700">
+          <label htmlFor="invite-email" className="admin-label mb-1">
             E-mail <span className="text-salmon-500">*</span>
           </label>
           <input
@@ -93,30 +93,30 @@ export function InviteForm({ onClose }: { onClose: () => void }) {
             type="email"
             required
             placeholder="nome@email.com"
-            className={`rounded-xl border px-3 py-2.5 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 ${
+            className={`admin-input ${
               state.fieldErrors?.email
-                ? 'border-salmon-400 bg-salmon-50'
-                : 'border-neutral-200 bg-white'
+                ? 'border-salmon-400 bg-[rgba(248,113,113,0.12)]'
+                : ''
             }`}
           />
           {state.fieldErrors?.email && (
-            <p className="text-xs text-salmon-600">{state.fieldErrors.email}</p>
+            <p className="text-xs text-[#fca5a5]">{state.fieldErrors.email}</p>
           )}
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="invite-role" className="text-sm font-semibold text-neutral-700">
+        <label htmlFor="invite-role" className="admin-label mb-1">
           Perfil de acesso <span className="text-salmon-500">*</span>
         </label>
         <select
           id="invite-role"
           name="role"
           required
-          className={`rounded-xl border px-3 py-2.5 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 ${
+          className={`admin-select ${
             state.fieldErrors?.role
-              ? 'border-salmon-400 bg-salmon-50'
-              : 'border-neutral-200 bg-white'
+              ? 'border-salmon-400 bg-[rgba(248,113,113,0.12)]'
+              : ''
           }`}
         >
           <option value="">Selecione…</option>
@@ -125,7 +125,7 @@ export function InviteForm({ onClose }: { onClose: () => void }) {
           <option value="admin">Admin — acesso completo</option>
         </select>
         {state.fieldErrors?.role && (
-          <p className="text-xs text-salmon-600">{state.fieldErrors.role}</p>
+          <p className="text-xs text-[#fca5a5]">{state.fieldErrors.role}</p>
         )}
       </div>
 
@@ -133,14 +133,14 @@ export function InviteForm({ onClose }: { onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          className="rounded-xl border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+          className="admin-button-muted"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary-300 px-4 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-400 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
         >
           {isPending && (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -187,13 +187,13 @@ export function RoleSelector({
         onChange={handleChange}
         disabled={isPending || isSelf}
         aria-label={`Perfil de ${membro.nome}`}
-        className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-700 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
+        className="admin-select min-h-0 rounded-lg px-2.5 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
       >
         <option value="viewer">Visualizador</option>
         <option value="editor">Editor</option>
         <option value="admin">Admin</option>
       </select>
-      {error && <p className="text-xs text-salmon-600">{error}</p>}
+      {error && <p className="text-xs text-[#fca5a5]">{error}</p>}
     </div>
   )
 }
@@ -242,13 +242,13 @@ export function RevokeButton({
         onClick={handleToggle}
         className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 focus:outline-2 focus:outline-offset-2 ${
           membro.ativo
-            ? 'border-salmon-200 text-salmon-600 hover:bg-salmon-50 focus:outline-salmon-300'
-            : 'border-green-200 text-green-600 hover:bg-green-50 focus:outline-green-300'
+            ? 'border-[rgba(252,165,165,0.22)] text-[#fca5a5] hover:bg-[rgba(248,113,113,0.12)] focus:outline-[#fca5a5]'
+            : 'border-[rgba(113,211,205,0.24)] text-[#8de0d9] hover:bg-[rgba(31,111,107,0.16)] focus:outline-[#8de0d9]'
         }`}
       >
         {isPending ? 'Aguarde…' : membro.ativo ? 'Revogar' : 'Reativar'}
       </button>
-      {error && <p className="text-xs text-salmon-600">{error}</p>}
+      {error && <p className="text-xs text-[#fca5a5]">{error}</p>}
     </div>
   )
 }
@@ -262,7 +262,7 @@ export function InviteToggle() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-xl bg-primary-300 px-4 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2"
+        className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-primary-300 focus:outline-offset-2"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -279,14 +279,14 @@ export function InviteToggle() {
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
 
           {/* Modal */}
-          <div className="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl sm:p-8">
-            <h2 className="mb-6 text-xl font-bold text-neutral-800">
+          <div className="admin-panel relative z-10 w-full max-w-lg p-6 sm:p-8">
+            <h2 className="mb-6 text-xl font-semibold tracking-[-0.03em] text-[var(--color-text-main)]">
               Convidar novo membro
             </h2>
             <InviteForm onClose={() => setOpen(false)} />

@@ -14,6 +14,7 @@ import {
   maskCpf,
 } from '@/lib/membership'
 import type { Member, MemberContactHistory, MembershipInterest } from '@/types'
+import StatusBadge from '@/components/admin/StatusBadge'
 import {
   convertMembershipInterest,
   markMembershipAsRead,
@@ -59,8 +60,8 @@ function Toast({ toast }: { toast: ToastState }) {
       role={toast.type === 'error' ? 'alert' : 'status'}
       className={`rounded-lg border px-3 py-2 text-sm font-semibold ${
         toast.type === 'success'
-          ? 'border-green-200 bg-green-50 text-green-700'
-          : 'border-salmon-200 bg-salmon-50 text-salmon-700'
+          ? 'border-[rgba(113,211,205,0.24)] bg-[rgba(31,111,107,0.16)] text-[#8de0d9]'
+          : 'border-[rgba(252,165,165,0.22)] bg-[rgba(248,113,113,0.12)] text-[#fca5a5]'
       }`}
     >
       {toast.message}
@@ -70,25 +71,15 @@ function Toast({ toast }: { toast: ToastState }) {
 
 function ReadBadge({ lida }: { lida: boolean }) {
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-        lida ? 'bg-neutral-100 text-neutral-500' : 'bg-amber-100 text-amber-700'
-      }`}
-    >
-      {lida ? 'Lido' : 'Não lido'}
-    </span>
+    <StatusBadge tone={lida ? 'neutral' : 'warning'}>{lida ? 'Lido' : 'Não lido'}</StatusBadge>
   )
 }
 
 function ConvertedBadge({ converted }: { converted: boolean }) {
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-        converted ? 'bg-primary-100 text-primary-700' : 'bg-neutral-100 text-neutral-600'
-      }`}
-    >
+    <StatusBadge tone={converted ? 'primary' : 'neutral'}>
       {converted ? 'Convertido' : 'Em abordagem'}
-    </span>
+    </StatusBadge>
   )
 }
 
@@ -104,17 +95,17 @@ function ContactHistorySummary({
   }
 
   return (
-    <div className="mt-4 rounded-xl bg-neutral-50 p-3">
-      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-neutral-400">
+    <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-3">
+      <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
         Últimos contatos
       </p>
       <div className="grid gap-2">
         {recentContacts.map((contact) => (
           <div
             key={contact.id}
-            className="flex flex-col gap-0.5 text-xs text-neutral-500 sm:flex-row sm:items-center sm:gap-2"
+            className="flex flex-col gap-0.5 text-xs text-[var(--color-text-muted)] sm:flex-row sm:items-center sm:gap-2"
           >
-            <span className="font-bold text-neutral-700">
+            <span className="font-bold text-[var(--color-text-main)]">
               {contactChannelLabel(contact.canal)}
             </span>
             <span className="hidden sm:inline" aria-hidden="true">•</span>
@@ -251,25 +242,25 @@ export default function MembershipInterestCard({
 
   return (
     <article
-      className={`rounded-2xl border bg-white p-5 shadow-sm transition-colors ${
+      className={`admin-panel p-5 transition-colors ${
         interest.lida
           ? converted
             ? 'border-primary-100'
             : 'border-neutral-100'
-          : 'border-amber-200 bg-amber-50/40'
+          : 'border-amber-200 bg-[linear-gradient(180deg,rgba(244,184,96,0.08),rgba(17,24,39,0.96))]'
       }`}
     >
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className="text-xl font-extrabold tracking-tight text-neutral-800 sm:text-2xl">
+          <h2 className="text-xl font-semibold tracking-[-0.04em] text-[var(--color-text-main)] sm:text-2xl">
             {interest.nome}
           </h2>
-          <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-sm text-neutral-500">
+          <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-sm text-[var(--color-text-muted)]">
             <span>{interest.cidade}/{interest.estado}</span>
             <span aria-hidden="true">•</span>
             <span>{formatPhoneBR(interest.whatsapp)}</span>
             <span aria-hidden="true">•</span>
-            <span>{interest.email}</span>
+            <span>{interest.email || 'Sem email'}</span>
             <span aria-hidden="true">•</span>
             <span className="font-mono text-xs">CPF: {maskCpf(interest.cpf)}</span>
             <span aria-hidden="true">•</span>
@@ -292,19 +283,19 @@ export default function MembershipInterestCard({
       )}
 
       <div className="mt-5">
-        <p className="whitespace-pre-wrap text-base leading-relaxed text-neutral-800">
+        <p className="whitespace-pre-wrap text-base leading-relaxed text-[var(--color-text-main)]">
           {interest.mensagem || 'Sem mensagem adicional.'}
         </p>
-        <p className="mt-3 text-sm leading-relaxed text-neutral-500">
-          <span className="font-semibold text-neutral-600">Endereço:</span>{' '}
+        <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)]">
+          <span className="font-semibold text-[var(--color-text-main)]">Endereço:</span>{' '}
           {interest.endereco}
         </p>
       </div>
 
       <ContactHistorySummary contacts={contacts} />
 
-      <footer className="mt-5 flex flex-col gap-2 border-t border-neutral-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs text-neutral-400">
+      <footer className="mt-5 flex flex-col gap-2 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-xs text-[var(--color-text-muted)]">
           {converted
             ? 'Cadastro concluído'
             : interest.lida
@@ -318,7 +309,7 @@ export default function MembershipInterestCard({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200 focus:outline-2 focus:outline-green-300 focus:outline-offset-2"
+              className="admin-button-secondary"
             >
               Abrir WhatsApp
             </a>
@@ -330,7 +321,7 @@ export default function MembershipInterestCard({
               isLoading={pendingAction === 'whatsapp-log'}
               loadingText="Registrando..."
               onClick={handleRegisterWhatsAppContact}
-              className="bg-white text-green-700 ring-1 ring-inset ring-green-200 hover:bg-green-50"
+              className="border border-[rgba(113,211,205,0.24)] bg-[rgba(31,111,107,0.16)] text-[#8de0d9] hover:bg-[rgba(31,111,107,0.22)]"
             >
               Registrar WhatsApp
             </ActionButton>
@@ -343,8 +334,8 @@ export default function MembershipInterestCard({
             onClick={handleSendEmail}
             className={
               hasEmail
-                ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                : 'bg-neutral-100 text-neutral-400'
+                ? 'border border-white/10 bg-white/5 text-[var(--color-text-main)] hover:bg-white/10'
+                : 'border border-white/10 bg-white/5 text-[var(--color-text-muted)]'
             }
           >
             {hasEmail ? 'Email inicial' : 'Email não disponível'}
@@ -353,7 +344,7 @@ export default function MembershipInterestCard({
           {converted ? (
             <Link
               href="/admin/membros"
-              className="inline-flex items-center justify-center rounded-lg bg-neutral-800 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-neutral-700 focus:outline-2 focus:outline-neutral-300 focus:outline-offset-2"
+              className="admin-button-muted"
             >
               Ver sócio ativo
             </Link>
@@ -363,7 +354,7 @@ export default function MembershipInterestCard({
               isLoading={pendingAction === 'convert'}
               loadingText="Salvando..."
               onClick={handleConvert}
-              className="bg-primary-300 text-primary-900 hover:bg-primary-400"
+              className="bg-[var(--color-primary)] text-[#1f1406] hover:bg-[var(--color-primary-hover)]"
             >
               Converter em sócio
             </ActionButton>
@@ -375,7 +366,7 @@ export default function MembershipInterestCard({
               isLoading={pendingAction === 'mark-read'}
               loadingText="Atualizando..."
               onClick={handleMarkAsRead}
-              className="bg-white text-neutral-600 ring-1 ring-inset ring-neutral-200 hover:bg-neutral-50"
+              className="border border-white/10 bg-white/5 text-[var(--color-text-main)] hover:bg-white/10"
             >
               Marcar como lido
             </ActionButton>

@@ -24,7 +24,7 @@ export default async function HomePage() {
   const emEspera = parseCounter(settings.animais_em_espera)
 
   return (
-    <>
+    <main className="bg-[var(--color-bg)]">
       <HeroSection
         titulo={settings.hero_titulo}
         subtitulo={settings.hero_subtitulo}
@@ -46,6 +46,6 @@ export default async function HomePage() {
         facebookUrl={settings.facebook_url}
         whatsappNumero={settings.whatsapp_numero}
       />
-    </>
+    </main>
   )
 }

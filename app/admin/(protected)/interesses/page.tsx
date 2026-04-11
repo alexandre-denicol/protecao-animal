@@ -5,6 +5,9 @@ import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/auth/roles'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import type { AdoptionInterest } from '@/types'
+import AdminEmptyState from '@/components/admin/AdminEmptyState'
+import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
+import AdminStatusBadge from '@/components/admin/StatusBadge'
 import MarkInterestAsReadButton from './MarkInterestAsReadButton'
 import SendInterestReplyEmailButton from './SendInterestReplyEmailButton'
 
@@ -25,17 +28,7 @@ function formatDate(iso: string): string {
 }
 
 function StatusBadge({ lida }: { lida: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-        lida
-          ? 'bg-neutral-100 text-neutral-500'
-          : 'bg-amber-100 text-amber-700'
-      }`}
-    >
-      {lida ? 'Lida' : 'Não lida'}
-    </span>
-  )
+  return <AdminStatusBadge tone={lida ? 'neutral' : 'warning'}>{lida ? 'Lida' : 'Não lida'}</AdminStatusBadge>
 }
 
 function animalNome(interesse: InteresseComAnimal): string {
@@ -57,55 +50,28 @@ function buildInterestWhatsAppUrl(interesse: InteresseComAnimal): string | null 
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl bg-white py-20 text-center shadow-md">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50">
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="text-primary-400"
-          aria-hidden="true"
-        >
-          <path
-            d="M12 21C12 21 3.5 15.5 3.5 9.5C3.5 6.46 5.96 4 9 4C10.54 4 11.93 4.65 12.93 5.68"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M12 21C12 21 20.5 15.5 20.5 9.5C20.5 6.46 18.04 4 15 4C13.46 4 12.07 4.65 11.07 5.68"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
-      <h3 className="mb-1 text-base font-semibold text-neutral-700">
-        Nenhum interesse registrado ainda
-      </h3>
-      <p className="max-w-xs text-sm text-neutral-500">
-        Quando alguém demonstrar interesse em adotar um animal, aparecerá aqui.
-      </p>
-    </div>
+    <AdminEmptyState
+      title="Nenhum interesse registrado ainda"
+      description="Quando alguém demonstrar interesse em adotar um animal, esse contato vai aparecer aqui pronto para triagem."
+    />
   )
 }
 
 function InterestMessage({ message }: { message: string | null }) {
   if (!message) {
     return (
-      <p className="mt-3 text-sm text-neutral-400">
+      <p className="mt-3 text-sm text-[var(--color-text-muted)]">
         Sem mensagem adicional.
       </p>
     )
   }
 
   return (
-    <div className="mt-3 rounded-xl bg-neutral-50 px-3 py-3">
-      <p className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+    <div className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
         Mensagem
       </p>
-      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-600">
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[var(--color-text-main)]">
         {message}
       </p>
     </div>
@@ -134,15 +100,12 @@ export default async function InteressesPage() {
 
     if (ids.length === 0) {
       return (
-        <div>
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
-              Interesses em adoção
-            </h1>
-            <p className="mt-1 text-sm text-neutral-500">
-              Apenas interesses nos animais que você cadastrou.
-            </p>
-          </div>
+        <div className="admin-page">
+          <AdminSectionHeading
+            eyebrow="Adoção"
+            title="Interesses em adoção"
+            description="Apenas interesses nos animais que você cadastrou."
+          />
           <EmptyState />
         </div>
       )
@@ -160,25 +123,21 @@ export default async function InteressesPage() {
   const canMarkAsRead = profile.role === 'admin' || profile.role === 'viewer'
 
   return (
-    <div data-testid="admin-interests-page">
-      <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
-            Interesses em adoção
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            {profile.role === 'editor'
-              ? 'Apenas interesses nos animais que você cadastrou.'
-              : 'Acompanhe os pedidos enviados pelo site.'}
-          </p>
-          {totalNaoLidos > 0 && (
-            <p className="mt-1 text-sm text-amber-600">
-              {totalNaoLidos}{' '}
-              {totalNaoLidos === 1 ? 'interesse não lido' : 'interesses não lidos'}
-            </p>
-          )}
-        </div>
-      </div>
+    <div className="admin-page" data-testid="admin-interests-page">
+      <AdminSectionHeading
+        eyebrow="Adoção"
+        title="Interesses em adoção"
+        description={
+          profile.role === 'editor'
+            ? 'Apenas interesses nos animais que você cadastrou.'
+            : 'Acompanhe os pedidos enviados pelo site e priorize quem precisa de retorno.'
+        }
+        actions={
+          totalNaoLidos > 0 ? (
+            <span className="admin-chip">{totalNaoLidos} não lidos</span>
+          ) : undefined
+        }
+      />
 
       {interesses.length === 0 ? (
         <EmptyState />
@@ -192,26 +151,26 @@ export default async function InteressesPage() {
               <article
                 key={interesse.id}
                 data-testid="admin-interest-row"
-                className={`rounded-2xl border bg-white p-5 shadow-sm ${
+                className={`admin-panel p-5 ${
                   interesse.lida
                     ? 'border-neutral-100'
-                    : 'border-amber-200 bg-amber-50/40'
+                    : 'border-amber-200 bg-[linear-gradient(180deg,rgba(244,184,96,0.08),rgba(17,24,39,0.96))]'
                 }`}
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-lg font-bold text-neutral-800">
+                      <h2 className="text-lg font-semibold tracking-[-0.03em] text-[var(--color-text-main)]">
                         {interesse.nome}
                       </h2>
                       <StatusBadge lida={interesse.lida} />
                     </div>
 
-                    <p className="mt-1 text-sm font-medium text-primary-700">
+                    <p className="mt-1 text-sm font-medium text-[var(--color-primary)]">
                       Interesse em {animalNome(interesse)}
                     </p>
 
-                    <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
+                    <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm text-[var(--color-text-muted)]">
                       <span>{interesse.email}</span>
                       <span aria-hidden="true">•</span>
                       <span>
@@ -232,7 +191,7 @@ export default async function InteressesPage() {
                         href={whatsappUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200 focus:outline-2 focus:outline-green-300 focus:outline-offset-2"
+                        className="admin-button-secondary"
                       >
                         WhatsApp
                       </a>
@@ -246,7 +205,7 @@ export default async function InteressesPage() {
                     {!interesse.lida && canMarkAsRead ? (
                       <MarkInterestAsReadButton id={interesse.id} />
                     ) : (
-                      <span className="inline-flex items-center rounded-lg bg-neutral-100 px-3 py-2 text-xs font-semibold text-neutral-400">
+                      <span className="inline-flex items-center rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[var(--color-text-muted)]">
                         Já lida
                       </span>
                     )}

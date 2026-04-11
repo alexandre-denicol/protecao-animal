@@ -54,8 +54,8 @@ function Toast({ toast }: { toast: ToastState }) {
       role={toast.type === 'error' ? 'alert' : 'status'}
       className={`mx-4 mt-3 rounded-xl border px-4 py-3 text-sm font-semibold ${
         toast.type === 'success'
-          ? 'border-green-200 bg-green-50 text-green-700'
-          : 'border-salmon-200 bg-salmon-50 text-salmon-700'
+          ? 'border-[rgba(113,211,205,0.24)] bg-[rgba(31,111,107,0.16)] text-[#8de0d9]'
+          : 'border-[rgba(252,165,165,0.22)] bg-[rgba(248,113,113,0.12)] text-[#fca5a5]'
       }`}
     >
       {toast.message}

@@ -82,11 +82,11 @@ function InfoItem({
   value: string
 }) {
   return (
-    <div className="rounded-xl bg-neutral-50 px-4 py-3">
-      <dt className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+    <div className="rounded-[var(--radius-card)] border border-white/8 bg-white/5 px-4 py-4">
+      <dt className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
         {label}
       </dt>
-      <dd className="mt-1 text-sm font-semibold text-neutral-800">{value}</dd>
+      <dd className="mt-2 text-sm font-semibold text-[var(--color-text-main)]">{value}</dd>
     </div>
   )
 }
@@ -111,40 +111,62 @@ export default async function AnimalDetalhePage({ params }: PageProps) {
   return (
     <main
       data-testid="animal-detail-page"
-      className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8"
+      className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8"
     >
       <Link
         href="/animais"
-        className="mb-6 inline-flex text-sm font-semibold text-primary-700 hover:text-primary-800"
+        className="mb-6 inline-flex rounded-[var(--radius-button)] border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-[var(--color-text-main)] transition duration-200 hover:border-[rgba(244,184,96,0.24)] hover:text-[var(--color-primary)]"
       >
         Voltar para animais
       </Link>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)] lg:gap-8">
         <section>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-neutral-100 shadow-md">
+          <div className="relative aspect-[4/4.7] overflow-hidden rounded-[24px] border border-white/10 bg-[var(--color-surface-2)] shadow-[var(--shadow-soft)] sm:aspect-[4/4.4] sm:rounded-[28px]">
             {mainPhoto ? (
-              <Image
-                src={mainPhoto.url}
-                alt={`Foto de ${animal.nome}`}
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 58vw"
-              />
+              <>
+                <Image
+                  src={mainPhoto.url}
+                  alt={`Foto de ${animal.nome}`}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 58vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,17,23,0.96)] via-[rgba(13,17,23,0.12)] to-transparent" />
+              </>
             ) : (
-              <div className="flex h-full items-center justify-center text-sm font-semibold text-neutral-400">
+              <div className="flex h-full items-center justify-center text-sm font-semibold text-[var(--color-text-muted)]">
                 Sem foto
               </div>
             )}
+
+            <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-[rgba(244,184,96,0.22)] bg-[rgba(244,184,96,0.12)] px-3 py-1 text-xs font-semibold text-[var(--color-primary)]">
+                  {statusLabel(animal.status)}
+                </span>
+                <span className="rounded-full border border-white/10 bg-[rgba(13,17,23,0.62)] px-3 py-1 text-xs font-semibold text-white/82">
+                  {especieLabel(animal.especie)}
+                </span>
+              </div>
+
+              <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+                <span data-testid="animal-detail-name">{animal.nome}</span>
+              </h1>
+              <p className="mt-2 text-base text-white/72">
+                {animal.raca ? `${animal.raca} • ` : ''}
+                {idadeLabel(animal.idade_anos, animal.idade_meses)}
+              </p>
+            </div>
           </div>
 
           {galleryPhotos.length > 0 && (
-            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+            <div className="mt-4 grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-3">
               {galleryPhotos.map((photo, index) => (
                 <div
                   key={photo.id}
-                  className="relative aspect-square overflow-hidden rounded-xl bg-neutral-100"
+                  className="relative aspect-square overflow-hidden rounded-[18px] border border-white/10 bg-[var(--color-surface-2)]"
                 >
                   <Image
                     src={photo.url}
@@ -159,21 +181,15 @@ export default async function AnimalDetalhePage({ params }: PageProps) {
           )}
         </section>
 
-        <section className="rounded-xl bg-white p-6 shadow-md">
-          <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-neutral-800">
-                <span data-testid="animal-detail-name">{animal.nome}</span>
-              </h1>
-              <p className="mt-2 text-neutral-500">
-                {especieLabel(animal.especie)}
-                {animal.raca ? ` • ${animal.raca}` : ''}
-              </p>
-            </div>
-
-            <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-bold text-primary-700">
-              {statusLabel(animal.status)}
-            </span>
+        <section className="rounded-[24px] border border-white/10 bg-[rgba(17,24,39,0.84)] p-5 shadow-[var(--shadow-soft)] sm:rounded-[28px] sm:p-6">
+          <div className="mb-6 rounded-[var(--radius-card)] border border-[rgba(244,184,96,0.18)] bg-[rgba(244,184,96,0.12)] p-4 sm:p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-primary)]">
+              Encontro responsável
+            </p>
+            <p className="mt-3 text-sm leading-7 text-white/78">
+              Se este animal combina com a sua rotina, preencha o interesse e fale com
+              a equipe. O processo acontece com calma, escuta e acompanhamento.
+            </p>
           </div>
 
           <dl className="grid gap-3 sm:grid-cols-2">
@@ -190,19 +206,19 @@ export default async function AnimalDetalhePage({ params }: PageProps) {
 
           {animal.temperamento && (
             <div className="mt-6">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-400">
+              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                 Temperamento
               </h2>
-              <p className="mt-2 text-neutral-700">{animal.temperamento}</p>
+              <p className="mt-3 text-[var(--color-text-muted)] leading-7">{animal.temperamento}</p>
             </div>
           )}
 
           {animal.descricao && (
             <div className="mt-6">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-400">
+              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                 Sobre
               </h2>
-              <p className="mt-2 whitespace-pre-line text-neutral-700">
+              <p className="mt-3 whitespace-pre-line text-[var(--color-text-muted)] leading-7">
                 {animal.descricao}
               </p>
             </div>
@@ -210,10 +226,10 @@ export default async function AnimalDetalhePage({ params }: PageProps) {
 
           {animal.obs_saude && (
             <div className="mt-6">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-400">
+              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                 Saúde
               </h2>
-              <p className="mt-2 text-neutral-700">{animal.obs_saude}</p>
+              <p className="mt-3 text-[var(--color-text-muted)] leading-7">{animal.obs_saude}</p>
             </div>
           )}
 
@@ -230,7 +246,7 @@ export default async function AnimalDetalhePage({ params }: PageProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   data-testid="animal-whatsapp-link"
-                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] border border-[rgba(31,111,107,0.45)] bg-[rgba(31,111,107,0.18)] px-6 py-3 text-sm font-bold text-[#a7f3d0] transition duration-200 hover:bg-[rgba(31,111,107,0.26)] focus:outline-none focus:ring-2 focus:ring-[rgba(31,111,107,0.3)]"
                 >
                   <svg
                     aria-hidden="true"

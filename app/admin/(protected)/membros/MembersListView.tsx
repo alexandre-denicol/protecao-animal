@@ -49,8 +49,8 @@ export default function MembersListView({
 
   return (
     <div className="grid gap-4">
-      <section className="rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm">
-        <div className="grid gap-3 lg:grid-cols-[minmax(260px,1fr)_auto_auto] lg:items-center">
+      <section className="admin-toolbar">
+        <div className="grid gap-3 xl:grid-cols-[minmax(260px,1fr)_auto_auto] xl:items-center">
           <div>
             <label htmlFor="member-search" className="sr-only">
               Buscar membro por nome
@@ -61,7 +61,7 @@ export default function MembersListView({
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Buscar por nome"
-              className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
+              className="admin-input"
             />
           </div>
 
@@ -74,10 +74,10 @@ export default function MembersListView({
                   key={option.value}
                   type="button"
                   onClick={() => setFilter(option.value)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     active
-                      ? 'bg-primary-300 text-primary-900'
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                      ? 'border-[rgba(244,184,96,0.22)] bg-[rgba(244,184,96,0.14)] text-[var(--color-primary)]'
+                      : 'border-white/10 bg-white/5 text-[var(--color-text-muted)] hover:bg-white/10 hover:text-[var(--color-text-main)]'
                   }`}
                 >
                   {option.label}
@@ -87,17 +87,17 @@ export default function MembersListView({
           </div>
 
           <div className="flex flex-wrap gap-2 text-xs font-semibold">
-            <span className="rounded-full bg-green-100 px-3 py-1 text-green-700">
+            <span className="rounded-full border border-[rgba(113,211,205,0.24)] bg-[rgba(31,111,107,0.16)] px-3 py-1 text-[#8de0d9]">
               {activeCount} ativos
             </span>
-            <span className="rounded-full bg-salmon-100 px-3 py-1 text-salmon-700">
+            <span className="rounded-full border border-[rgba(252,165,165,0.22)] bg-[rgba(248,113,113,0.12)] px-3 py-1 text-[#fca5a5]">
               {overdueCount} inadimplentes
             </span>
           </div>
         </div>
       </section>
 
-      <div className="grid gap-3">
+      <div className="grid gap-2.5 lg:gap-3">
         {filteredMembers.map((member) => (
           <MemberCard
             key={member.id}
@@ -111,11 +111,11 @@ export default function MembersListView({
       </div>
 
       {filteredMembers.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-6 py-12 text-center">
-          <p className="text-sm font-semibold text-neutral-600">
+        <div className="admin-panel border-dashed px-6 py-12 text-center">
+          <p className="text-sm font-semibold text-[var(--color-text-main)]">
             Nenhum sócio encontrado com esse filtro.
           </p>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
             Ajuste a busca ou selecione outro status.
           </p>
         </div>

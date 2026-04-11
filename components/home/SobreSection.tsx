@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import SectionHeading from '@/components/public/SectionHeading'
 
 const valores = [
   { label: 'Resgate responsável', descricao: 'Cada acolhimento respeita o tempo e as necessidades do animal.' },
@@ -16,30 +17,20 @@ export default function SobreSection({ missao }: SobreSectionProps) {
     'A missão da associação será publicada em breve. Enquanto isso, conheça os animais disponíveis e acompanhe nosso trabalho pelos canais oficiais.'
 
   return (
-    <section className="bg-white py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <section className="bg-[var(--color-bg)] py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)] lg:gap-16">
           <div>
-            <div className="mb-6 flex items-start gap-4">
-              <div className="mt-1 h-12 w-1 flex-shrink-0 rounded-full bg-primary-300" />
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary-500">
-                  Nossa missão
-                </p>
-                <h2 className="mt-2 text-4xl font-extrabold leading-tight tracking-tight text-neutral-800">
-                  Cuidado real para cada história
-                </h2>
-              </div>
-            </div>
-
-            <p className="max-w-prose text-base leading-relaxed text-neutral-600">
-              {missaoTexto}
-            </p>
+            <SectionHeading
+              eyebrow="Nossa missão"
+              title="Cuidado real, rotina digna e encontros transformadores"
+              description={missaoTexto}
+            />
 
             <div className="mt-10">
               <Link
                 href="/sobre"
-                className="inline-flex items-center gap-2 text-sm font-bold text-primary-500 transition-colors hover:text-primary-600 focus-visible:outline-2 focus-visible:outline-primary-300"
+                className="inline-flex items-center gap-2 rounded-[var(--radius-button)] border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-[var(--color-text-main)] transition duration-200 hover:border-[rgba(244,184,96,0.25)] hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
               >
                 Conheça nossa equipe completa
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -49,15 +40,18 @@ export default function SobreSection({ missao }: SobreSectionProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-neutral-50 p-6 shadow-md">
-            <h3 className="text-lg font-bold text-neutral-800">
+          <div className="rounded-[var(--radius-card)] border border-white/10 bg-[rgba(17,24,39,0.72)] p-6 shadow-[var(--shadow-soft)]">
+            <h3 className="text-lg font-bold text-[var(--color-text-main)]">
               Como a Amiga Miau cuida
             </h3>
             <div className="mt-5 grid gap-4">
-              {valores.map((item) => (
-                <div key={item.label} className="rounded-xl bg-white p-4 shadow-sm">
-                  <p className="font-semibold text-neutral-800">{item.label}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-neutral-500">
+              {valores.map((item, index) => (
+                <div key={item.label} className="rounded-[var(--radius-card)] border border-white/8 bg-white/5 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
+                    0{index + 1}
+                  </p>
+                  <p className="mt-3 font-semibold text-[var(--color-text-main)]">{item.label}</p>
+                  <p className="mt-2 text-sm leading-7 text-[var(--color-text-muted)]">
                     {item.descricao}
                   </p>
                 </div>

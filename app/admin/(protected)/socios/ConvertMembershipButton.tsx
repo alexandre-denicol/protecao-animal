@@ -30,7 +30,7 @@ export default function ConvertMembershipButton({ id }: { id: string }) {
         type="button"
         disabled={isPending}
         onClick={handleClick}
-        className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary-300 px-3 py-1.5 text-xs font-bold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50"
+        className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-bold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50"
       >
         {isPending && (
           <span
@@ -41,7 +41,7 @@ export default function ConvertMembershipButton({ id }: { id: string }) {
         Converter em sócio
       </button>
       {error && (
-        <p className="max-w-44 text-xs text-salmon-600" role="alert">
+        <p className="max-w-44 text-xs text-[#fca5a5]" role="alert">
           {error}
         </p>
       )}

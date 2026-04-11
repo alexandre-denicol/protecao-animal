@@ -103,11 +103,11 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm"
+      className="admin-panel p-5"
     >
       <div className="mb-4">
-        <h2 className="text-lg font-bold text-neutral-800">Registrar pagamento</h2>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h2 className="text-lg font-semibold tracking-[-0.03em] text-[var(--color-text-main)]">Registrar pagamento</h2>
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           Cada pagamento fica no histórico do sócio.
         </p>
       </div>
@@ -117,8 +117,8 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
           role={toast.type === 'error' ? 'alert' : 'status'}
           className={`mb-4 rounded-lg border px-3 py-2 text-sm font-semibold ${
             toast.type === 'success'
-              ? 'border-green-200 bg-green-50 text-green-700'
-              : 'border-salmon-200 bg-salmon-50 text-salmon-700'
+              ? 'border-[rgba(113,211,205,0.24)] bg-[rgba(31,111,107,0.16)] text-[#8de0d9]'
+              : 'border-[rgba(252,165,165,0.22)] bg-[rgba(248,113,113,0.12)] text-[#fca5a5]'
           }`}
         >
           {toast.message}
@@ -127,7 +127,7 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
 
       <div className="grid gap-3 md:grid-cols-2">
         <div>
-          <label htmlFor="member_id" className="mb-1 block text-sm font-semibold text-neutral-700">
+          <label htmlFor="member_id" className="admin-label">
             Sócio
           </label>
           <select
@@ -135,7 +135,7 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
             name="member_id"
             required
             disabled={isPending}
-            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:opacity-60"
+            className="admin-select disabled:opacity-60"
           >
             <option value="">Selecione</option>
             {members.map((member) => (
@@ -147,7 +147,7 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
         </div>
 
         <div>
-          <label htmlFor="valor" className="mb-1 block text-sm font-semibold text-neutral-700">
+          <label htmlFor="valor" className="admin-label">
             Valor
           </label>
           <input
@@ -158,12 +158,12 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
             required
             disabled={isPending}
             placeholder="Ex: 20,00"
-            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:opacity-60"
+            className="admin-input disabled:opacity-60"
           />
         </div>
 
         <div>
-          <label htmlFor="metodo" className="mb-1 block text-sm font-semibold text-neutral-700">
+          <label htmlFor="metodo" className="admin-label">
             Método
           </label>
           <input
@@ -173,12 +173,12 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
             required
             disabled={isPending}
             defaultValue="PIX"
-            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:opacity-60"
+            className="admin-input disabled:opacity-60"
           />
         </div>
 
         <div>
-          <label htmlFor="pago_em" className="mb-1 block text-sm font-semibold text-neutral-700">
+          <label htmlFor="pago_em" className="admin-label">
             Pago em
           </label>
           <input
@@ -190,12 +190,12 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
             value={paidAt}
             onChange={(event) => setPaidAt(event.target.value)}
             placeholder="DD/MM/AAAA"
-            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:opacity-60"
+            className="admin-input disabled:opacity-60"
           />
         </div>
 
         <div>
-          <label htmlFor="competencia_mes" className="mb-1 block text-sm font-semibold text-neutral-700">
+          <label htmlFor="competencia_mes" className="admin-label">
             Competência
           </label>
           <input
@@ -205,12 +205,12 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
             required
             disabled={isPending}
             defaultValue={currentCompetenceMonth()}
-            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:opacity-60"
+            className="admin-input disabled:opacity-60"
           />
         </div>
 
         <div>
-          <label htmlFor="observacoes" className="mb-1 block text-sm font-semibold text-neutral-700">
+          <label htmlFor="observacoes" className="admin-label">
             Observações
           </label>
           <input
@@ -219,18 +219,23 @@ export default function PaymentRegisterForm({ members }: { members: Member[] }) 
             type="text"
             disabled={isPending}
             placeholder="Opcional"
-            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:opacity-60"
+            className="admin-input disabled:opacity-60"
           />
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="mt-4 inline-flex items-center justify-center rounded-lg bg-neutral-800 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-neutral-700 focus:outline-2 focus:outline-neutral-300 focus:outline-offset-2 disabled:cursor-wait disabled:opacity-60"
-      >
-        {isPending ? 'Salvando...' : 'Registrar pagamento'}
-      </button>
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs leading-5 text-[var(--color-text-muted)]">
+          O formulário mantém sócio, método e competência após salvar para acelerar lançamentos em sequência.
+        </p>
+        <button
+          type="submit"
+          disabled={isPending}
+          className="inline-flex items-center justify-center rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-[#1f1406] transition-colors hover:bg-[var(--color-primary-hover)] focus:outline-2 focus:outline-[var(--color-primary)] focus:outline-offset-2 disabled:cursor-wait disabled:opacity-60"
+        >
+          {isPending ? 'Salvando...' : 'Registrar pagamento'}
+        </button>
+      </div>
     </form>
   )
 }

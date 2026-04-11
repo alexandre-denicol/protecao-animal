@@ -25,8 +25,8 @@ export default function ToggleLidaButton({ lida, action }: Props) {
       onClick={handleClick}
       className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50 ${
         lida
-          ? 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-          : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+          ? 'border border-white/10 bg-white/5 text-[var(--color-text-muted)] hover:bg-white/10'
+          : 'border border-[rgba(244,184,96,0.24)] bg-[rgba(244,184,96,0.14)] text-[var(--color-primary)] hover:bg-[rgba(244,184,96,0.22)]'
       }`}
     >
       {isPending ? (
