@@ -1,6 +1,6 @@
 'use server'
 
-import { sendContactMessageEmail } from '@/lib/email'
+import { maskEmailForLogs, sendContactMessageEmail } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 
 type ContactMessageField = 'nome' | 'email' | 'assunto' | 'mensagem'
@@ -64,10 +64,10 @@ export async function createContactMessageAction(
   }
 
   try {
-    console.error('[CONTACT MESSAGE EMAIL] action chamada')
-    console.error('[CONTACT MESSAGE EMAIL] destinatario: equipe')
-    console.error('[CONTACT MESSAGE EMAIL] assunto:', `Nova mensagem - ${assunto}`)
-    console.error('[CONTACT MESSAGE EMAIL] resend configurado:', Boolean(process.env.RESEND_API_KEY))
+    console.error('[CONTACT MESSAGE EMAIL] action chamada', {
+      resendConfigurado: Boolean(process.env.RESEND_API_KEY),
+      origem: maskEmailForLogs(email),
+    })
 
     await sendContactMessageEmail({
       nome,
@@ -76,10 +76,7 @@ export async function createContactMessageAction(
       mensagem,
     })
 
-    console.error('[CONTACT MESSAGE EMAIL SUCCESS]', {
-      origem: email,
-      assunto: `Nova mensagem - ${assunto}`,
-    })
+    console.error('[CONTACT MESSAGE EMAIL SUCCESS]', { origem: maskEmailForLogs(email) })
   } catch (e) {
     console.error('[CONTACT MESSAGE EMAIL ERROR]', e)
   }

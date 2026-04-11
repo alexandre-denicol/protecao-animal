@@ -1,6 +1,6 @@
 'use server'
 
-import { sendAdoptionInterestEmail } from '@/lib/email'
+import { maskEmailForLogs, sendAdoptionInterestEmail } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import {
   type PhoneCountry,
@@ -97,10 +97,11 @@ export async function createAdoptionInterestAction(
   }
 
   try {
-    console.error('[ADOPTION INTEREST EMAIL] action chamada', { animalId })
-    console.error('[ADOPTION INTEREST EMAIL] destinatario: equipe')
-    console.error('[ADOPTION INTEREST EMAIL] assunto:', `Novo interesse em adoção - ${(animal as { nome: string }).nome}`)
-    console.error('[ADOPTION INTEREST EMAIL] resend configurado:', Boolean(process.env.RESEND_API_KEY))
+    console.error('[ADOPTION INTEREST EMAIL] action chamada', {
+      animalId,
+      resendConfigurado: Boolean(process.env.RESEND_API_KEY),
+      origem: maskEmailForLogs(email),
+    })
 
     await sendAdoptionInterestEmail({
       animalNome: (animal as { nome: string }).nome,
@@ -112,8 +113,7 @@ export async function createAdoptionInterestAction(
 
     console.error('[ADOPTION INTEREST EMAIL SUCCESS]', {
       animalId,
-      origem: email,
-      assunto: `Novo interesse em adoção - ${(animal as { nome: string }).nome}`,
+      origem: maskEmailForLogs(email),
     })
   } catch (e) {
     console.error('[ADOPTION INTEREST EMAIL ERROR]', e)

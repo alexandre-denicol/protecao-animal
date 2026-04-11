@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/roles'
-import { sendDirectEmail } from '@/lib/email'
+import { maskEmailForLogs, sendDirectEmail } from '@/lib/email'
 import { isValidEmailAddress } from '@/lib/membership'
 import { getPublicSiteSettings } from '@/lib/site-settings'
 import { createClient } from '@/lib/supabase/server'
@@ -67,7 +67,7 @@ export async function sendAdoptionInterestReplyEmail(
   if (!isValidEmailAddress(interest.email)) {
     console.error('[INTEREST REPLY EMAIL] email inválido', {
       id,
-      destinatario: interest.email,
+      destinatario: maskEmailForLogs(interest.email),
     })
     return { error: 'Este interesse não possui um email válido.' }
   }
@@ -87,9 +87,11 @@ export async function sendAdoptionInterestReplyEmail(
   ].join('\n')
 
   try {
-    console.error('[INTEREST REPLY EMAIL] destinatario:', interest.email.trim())
-    console.error('[INTEREST REPLY EMAIL] assunto:', subject)
-    console.error('[INTEREST REPLY EMAIL] resend configurado:', Boolean(process.env.RESEND_API_KEY))
+    console.error('[INTEREST REPLY EMAIL] envio iniciado', {
+      id,
+      destinatario: maskEmailForLogs(interest.email),
+      resendConfigurado: Boolean(process.env.RESEND_API_KEY),
+    })
 
     const result = await sendDirectEmail({
       to: interest.email.trim(),
@@ -101,8 +103,7 @@ export async function sendAdoptionInterestReplyEmail(
 
     console.error('[INTEREST REPLY EMAIL SUCCESS]', {
       id,
-      destinatario: result.to,
-      assunto: result.subject,
+      destinatario: maskEmailForLogs(result.to),
       providerId: result.providerId ?? null,
     })
   } catch (sendError) {

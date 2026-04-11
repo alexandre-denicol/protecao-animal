@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { getUserProfile, requireRole } from '@/lib/auth/roles'
+import { maskEmailForLogs } from '@/lib/email'
 import {
   fillMembershipTemplate,
   formatCurrencyBR,
@@ -385,7 +386,7 @@ async function sendMemberEmailAction(
     console.error('[MEMBER EMAIL] email inválido', {
       id,
       tipo: type,
-      destinatario: member.email,
+      destinatario: maskEmailForLogs(member.email),
     })
     return { error: 'Este sócio não possui um email válido.' }
   }
@@ -414,10 +415,13 @@ async function sendMemberEmailAction(
         ? 'socios_email_boas_vindas'
         : 'socios_email_cobranca'
 
-    console.error('[MEMBER EMAIL] destinatario:', member.email.trim())
-    console.error('[MEMBER EMAIL] assunto template:', subjectTemplate)
-    console.error('[MEMBER EMAIL] template usado:', templateName)
-    console.error('[MEMBER EMAIL] resend configurado:', Boolean(process.env.RESEND_API_KEY))
+    console.error('[MEMBER EMAIL] envio iniciado', {
+      id,
+      tipo: type,
+      destinatario: maskEmailForLogs(member.email),
+      template: templateName,
+      resendConfigurado: Boolean(process.env.RESEND_API_KEY),
+    })
 
     emailResult = await sendMembershipEmail({
       to: member.email.trim(),
@@ -431,8 +435,7 @@ async function sendMemberEmailAction(
     console.error('[MEMBER EMAIL SUCCESS]', {
       id,
       tipo: type,
-      destinatario: emailResult.to,
-      assunto: emailResult.subject,
+      destinatario: maskEmailForLogs(emailResult.to),
       providerId: emailResult.providerId ?? null,
     })
   } catch (error) {

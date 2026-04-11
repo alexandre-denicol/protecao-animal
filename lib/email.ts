@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { resend } from '@/lib/resend'
+import { getResendClient } from '@/lib/resend'
 
 // NOTIFICATION_EMAIL deve conter emails separados por vírgula
 // Ex: a@a.com,b@b.com
@@ -9,10 +9,13 @@ import { resend } from '@/lib/resend'
 
 const FALLBACK_FROM = 'Amiga Miau <onboarding@resend.dev>'
 
-const notificationEmails =
-  process.env.NOTIFICATION_EMAIL?.split(',')
-    .map((email) => email.trim())
-    .filter(Boolean) ?? []
+function getNotificationEmails(): string[] {
+  return (
+    process.env.NOTIFICATION_EMAIL?.split(',')
+      .map((email) => email.trim())
+      .filter(Boolean) ?? []
+  )
+}
 
 interface AdoptionInterestEmailData {
   animalNome: string
@@ -88,6 +91,18 @@ function isValidEmail(value: string | null | undefined): value is string {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
 }
 
+export function maskEmailForLogs(value: string | null | undefined): string {
+  if (!isValidEmail(value)) {
+    return 'email-invalido'
+  }
+
+  const [localPart, domain] = value.trim().split('@')
+  const visibleChars = localPart.slice(0, Math.min(2, localPart.length))
+  const hiddenChars = '*'.repeat(Math.max(localPart.length - visibleChars.length, 1))
+
+  return `${visibleChars}${hiddenChars}@${domain}`
+}
+
 function sanitizeSenderName(value: string | null | undefined): string {
   const trimmed = value?.trim()
 
@@ -156,6 +171,8 @@ function renderEmailHtmlFromText(message: string): string {
 async function sendConfiguredEmail(
   data: DirectEmailSendData
 ): Promise<MembershipEmailSendResult> {
+  const resend = getResendClient()
+
   if (!isValidEmail(data.to)) {
     throw new Error('INVALID_EMAIL')
   }
@@ -277,6 +294,9 @@ async function sendNotificationEmail(args: {
   subject: string
   html: string
 }): Promise<void> {
+  const resend = getResendClient()
+  const notificationEmails = getNotificationEmails()
+
   if (notificationEmails.length === 0) {
     console.warn('NOTIFICATION_EMAIL não configurado')
     return

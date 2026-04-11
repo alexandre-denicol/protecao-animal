@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/roles'
+import { maskEmailForLogs } from '@/lib/email'
 import {
   fillMembershipTemplate,
   isValidEmailAddress,
@@ -141,7 +142,7 @@ export async function sendMembershipTriageEmail(
   if (!isValidEmailAddress(membershipInterest.email)) {
     console.error('[EMAIL TRIAGEM] email inválido', {
       id,
-      destinatario: membershipInterest.email,
+      destinatario: maskEmailForLogs(membershipInterest.email),
     })
     return { error: 'Este cadastro não possui um email válido.' }
   }
@@ -153,10 +154,12 @@ export async function sendMembershipTriageEmail(
     const { sendMembershipEmail } = await import('@/lib/email')
     const templateName = 'socios_email_triagem'
 
-    console.error('[EMAIL TRIAGEM] destinatario:', membershipInterest.email.trim())
-    console.error('[EMAIL TRIAGEM] assunto template:', settings.socios_email_triagem_assunto)
-    console.error('[EMAIL TRIAGEM] template usado:', templateName)
-    console.error('[EMAIL TRIAGEM] resend configurado:', Boolean(process.env.RESEND_API_KEY))
+    console.error('[EMAIL TRIAGEM] envio iniciado', {
+      id,
+      destinatario: maskEmailForLogs(membershipInterest.email),
+      template: templateName,
+      resendConfigurado: Boolean(process.env.RESEND_API_KEY),
+    })
 
     emailResult = await sendMembershipEmail({
       to: membershipInterest.email.trim(),
@@ -171,8 +174,7 @@ export async function sendMembershipTriageEmail(
 
     console.error('[EMAIL TRIAGEM SUCCESS]', {
       id,
-      destinatario: emailResult.to,
-      assunto: emailResult.subject,
+      destinatario: maskEmailForLogs(emailResult.to),
       providerId: emailResult.providerId ?? null,
     })
   } catch (error) {

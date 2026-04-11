@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/roles'
-import { sendDirectEmail } from '@/lib/email'
+import { maskEmailForLogs, sendDirectEmail } from '@/lib/email'
 import { isValidEmailAddress } from '@/lib/membership'
 import { getPublicSiteSettings } from '@/lib/site-settings'
 import { createClient } from '@/lib/supabase/server'
@@ -67,7 +67,7 @@ export async function sendContactReplyEmail(
   if (!isValidEmailAddress(messageData.email)) {
     console.error('[CONTACT REPLY EMAIL] email inválido', {
       id,
-      destinatario: messageData.email,
+      destinatario: maskEmailForLogs(messageData.email),
     })
     return { error: 'Esta mensagem não possui um email válido.' }
   }
@@ -83,9 +83,11 @@ export async function sendContactReplyEmail(
   ].join('\n')
 
   try {
-    console.error('[CONTACT REPLY EMAIL] destinatario:', messageData.email.trim())
-    console.error('[CONTACT REPLY EMAIL] assunto:', subject)
-    console.error('[CONTACT REPLY EMAIL] resend configurado:', Boolean(process.env.RESEND_API_KEY))
+    console.error('[CONTACT REPLY EMAIL] envio iniciado', {
+      id,
+      destinatario: maskEmailForLogs(messageData.email),
+      resendConfigurado: Boolean(process.env.RESEND_API_KEY),
+    })
 
     const result = await sendDirectEmail({
       to: messageData.email.trim(),
@@ -97,8 +99,7 @@ export async function sendContactReplyEmail(
 
     console.error('[CONTACT REPLY EMAIL SUCCESS]', {
       id,
-      destinatario: result.to,
-      assunto: result.subject,
+      destinatario: maskEmailForLogs(result.to),
       providerId: result.providerId ?? null,
     })
   } catch (sendError) {

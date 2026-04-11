@@ -1,6 +1,6 @@
 'use server'
 
-import { sendMembershipInterestEmail } from '@/lib/email'
+import { maskEmailForLogs, sendMembershipInterestEmail } from '@/lib/email'
 import { isBrazilianState, onlyDigits } from '@/lib/membership'
 import { createClient } from '@/lib/supabase/server'
 import {
@@ -119,10 +119,10 @@ export async function createMembershipInterestAction(
   }
 
   try {
-    console.error('[MEMBERSHIP INTEREST EMAIL] action chamada')
-    console.error('[MEMBERSHIP INTEREST EMAIL] destinatario: equipe')
-    console.error('[MEMBERSHIP INTEREST EMAIL] assunto:', `Novo cadastro de sócio - ${nome}`)
-    console.error('[MEMBERSHIP INTEREST EMAIL] resend configurado:', Boolean(process.env.RESEND_API_KEY))
+    console.error('[MEMBERSHIP INTEREST EMAIL] action chamada', {
+      resendConfigurado: Boolean(process.env.RESEND_API_KEY),
+      origem: maskEmailForLogs(email),
+    })
 
     await sendMembershipInterestEmail({
       nome,
@@ -135,8 +135,7 @@ export async function createMembershipInterestAction(
     })
 
     console.error('[MEMBERSHIP INTEREST EMAIL SUCCESS]', {
-      assunto: `Novo cadastro de sócio - ${nome}`,
-      origem: email,
+      origem: maskEmailForLogs(email),
     })
   } catch (error) {
     console.error('[MEMBERSHIP INTEREST EMAIL ERROR]', error)

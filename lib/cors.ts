@@ -1,7 +1,7 @@
 const allowedOrigins = [
-  process.env.NEXT_PUBLIC_SITE_URL!,
+  process.env.NEXT_PUBLIC_SITE_URL?.trim(),
   'http://localhost:3000',
-]
+].filter((origin): origin is string => Boolean(origin))
 
 export function setCorsHeaders(response: Response, origin: string): Response {
   if (allowedOrigins.includes(origin)) {
