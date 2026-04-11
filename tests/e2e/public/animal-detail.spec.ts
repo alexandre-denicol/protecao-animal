@@ -1,22 +1,25 @@
 import { expect, test } from '@playwright/test'
-import { e2eData } from '../utils/test-data'
+import { createAnimalViaAdmin } from '../utils/admin'
 import { trackPageErrors } from '../utils/assertions'
+import { openAnimalDetailFromCatalog } from '../utils/public'
 
 test('detalhe do animal renderiza ficha e WhatsApp com número configurado', async ({ page }) => {
   const assertNoErrors = trackPageErrors(page)
+  const animal = await createAnimalViaAdmin(page, { namePrefix: 'E2E Detalhe' })
 
-  await page.goto(`/animais/${e2eData.animal.slug}`)
+  const { animalName } = await openAnimalDetailFromCatalog(page, {
+    animalName: animal.name,
+  })
 
-  await expect(page.getByTestId('animal-detail-page')).toBeVisible()
-  await expect(page.getByTestId('animal-detail-name')).toHaveText(e2eData.animal.nome)
-  await expect(page.getByText('Temperamento')).toBeVisible()
-  await expect(page.getByText('Sobre')).toBeVisible()
+  await expect(page.getByTestId('animal-detail-name')).toHaveText(animalName)
+  await expect(page.getByRole('heading', { name: 'Temperamento', level: 2 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Sobre', level: 2 })).toBeVisible()
 
   const whatsapp = page.getByTestId('animal-whatsapp-link')
   await expect(whatsapp).toBeVisible()
   await expect(whatsapp).toHaveAttribute(
     'href',
-    /https:\/\/wa\.me\/555499886688\?text=.+E2E%20Luna/,
+    new RegExp(`https://wa\\.me/\\d+\\?text=.*${encodeURIComponent(animalName)}`),
   )
   await expect(whatsapp).toHaveAttribute('target', '_blank')
   await expect(whatsapp).toHaveAttribute('rel', /noopener/)

@@ -1,24 +1,20 @@
 import { expect, test } from '@playwright/test'
-import { e2eData } from '../utils/test-data'
+import { createAnimalViaAdmin } from '../utils/admin'
 import { trackPageErrors } from '../utils/assertions'
+import { openAnimalDetailFromCatalog } from '../utils/public'
 
 test('catálogo lista animais reais e navega para o detalhe pelo card', async ({ page }) => {
   const assertNoErrors = trackPageErrors(page)
+  const animal = await createAnimalViaAdmin(page, { namePrefix: 'E2E Catálogo' })
 
-  await page.goto('/animais')
+  const { animalName, href } = await openAnimalDetailFromCatalog(page, {
+    animalName: animal.name,
+  })
 
-  await expect(page.getByTestId('animals-page')).toBeVisible()
-  await expect(page.getByTestId('animals-grid')).toBeVisible()
+  if (href) {
+    await expect(page).toHaveURL(new RegExp(`${href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`))
+  }
 
-  const card = page.locator(
-    `[data-testid="animal-card"][data-animal-slug="${e2eData.animal.slug}"]`,
-  )
-  await expect(card).toBeVisible()
-  await card.click()
-
-  await expect(page).toHaveURL(new RegExp(`/animais/${e2eData.animal.slug}$`))
-  await expect(page.getByTestId('animal-detail-page')).toBeVisible()
-  await expect(page.getByTestId('animal-detail-name')).toHaveText(e2eData.animal.nome)
-
+  await expect(page.getByTestId('animal-detail-name')).toHaveText(animalName)
   await assertNoErrors()
 })

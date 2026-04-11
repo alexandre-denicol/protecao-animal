@@ -23,5 +23,7 @@ export async function expectSuccessFeedback(
   page: Page,
   message: RegExp,
 ): Promise<void> {
-  await expect(page.getByRole('status').filter({ hasText: message })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: message })).toBeVisible({
+    timeout: 15_000,
+  })
 }

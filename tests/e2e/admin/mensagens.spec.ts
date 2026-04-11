@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { loginAsAdmin } from '../utils/admin'
+import { expectSuccessFeedback } from '../utils/assertions'
 import { uniqueEmail, uniqueSuffix } from '../utils/test-data'
 
 test('mensagens lista registros e permite marcar como lida', async ({ page }) => {
@@ -15,7 +16,7 @@ test('mensagens lista registros e permite marcar como lida', async ({ page }) =>
     .getByLabel(/Mensagem/)
     .fill('Mensagem criada para testar a área administrativa.')
   await page.getByTestId('contact-submit').click()
-  await expect(page.getByRole('status')).toContainText(/Mensagem enviada com sucesso/)
+  await expectSuccessFeedback(page, /Mensagem enviada com sucesso/)
 
   await loginAsAdmin(page)
   await page.goto('/admin/mensagens')

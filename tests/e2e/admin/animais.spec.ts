@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { loginAsAdmin } from '../utils/admin'
 import { trackPageErrors } from '../utils/assertions'
-import { uniqueSuffix } from '../utils/test-data'
+import { uniqueName } from '../utils/test-data'
 
 const pngBuffer = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',
@@ -9,7 +9,7 @@ const pngBuffer = Buffer.from(
 )
 
 test.describe.serial('gestão admin de animais', () => {
-  const animalNome = `E2E Criado ${uniqueSuffix()}`
+  const animalNome = uniqueName('E2E Criado')
   const animalNomeEditado = `${animalNome} Editado`
 
   test('listagem de animais carrega', async ({ page }) => {
@@ -19,7 +19,14 @@ test.describe.serial('gestão admin de animais', () => {
     await page.goto('/admin/animais')
 
     await expect(page.getByTestId('admin-animals-page')).toBeVisible()
-    await expect(page.getByTestId('admin-animal-row').first()).toBeVisible()
+
+    const rows = page.getByTestId('admin-animal-row')
+    if ((await rows.count()) > 0) {
+      await expect(rows.first()).toBeVisible()
+    } else {
+      await expect(page.getByText(/Nenhum animal encontrado/i)).toBeVisible()
+    }
+
     await assertNoErrors()
   })
 
@@ -27,7 +34,8 @@ test.describe.serial('gestão admin de animais', () => {
     const assertNoErrors = trackPageErrors(page)
 
     await loginAsAdmin(page)
-    await page.goto('/admin/animais/novo')
+    await page.goto('/admin/animais')
+    await page.getByTestId('admin-new-animal-link').click()
 
     await page.getByLabel(/Nome/).fill(animalNome)
     await page.getByLabel(/Espécie/).selectOption('gato')

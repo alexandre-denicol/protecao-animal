@@ -10,8 +10,8 @@ Defina as variáveis do ambiente de desenvolvimento ou teste. Não use produçã
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SECRET_KEY=
-E2E_ADMIN_EMAIL=e2e-admin@amigamiau.test
-E2E_ADMIN_PASSWORD=E2eAdmin12345!
+E2E_ADMIN_EMAIL=
+E2E_ADMIN_PASSWORD=
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` também é aceito no lugar de `SUPABASE_SECRET_KEY`.
@@ -22,9 +22,10 @@ O banco precisa ter o schema aplicado e os buckets de storage criados conforme `
 
 ```bash
 npx playwright install chromium
-npm run seed:e2e
 npm run test:e2e
 ```
+
+Os testes não dependem de seed, slugs fixos ou dados controlados no banco. Quando um fluxo precisa de animal, a própria suíte cria esse registro pela UI administrativa com credenciais reais configuradas no ambiente.
 
 Por padrão, o Playwright sobe `npm run dev` em `http://127.0.0.1:3000`.
 Para usar um servidor já aberto:
@@ -35,7 +36,6 @@ PLAYWRIGHT_SKIP_WEB_SERVER=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run t
 
 ## Scripts
 
-- `npm run seed:e2e`: cria usuário admin, configurações e dados controlados `e2e-*`.
 - `npm run test:e2e`: executa headless.
 - `npm run test:e2e:headed`: executa com navegador visível.
 - `npm run test:e2e:ui`: abre a UI do Playwright.
