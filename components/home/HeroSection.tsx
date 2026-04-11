@@ -1,5 +1,5 @@
+import Image from 'next/image'
 import Link from 'next/link'
-import type { CSSProperties } from 'react'
 import BrandLogo from '@/components/BrandLogo'
 
 interface HeroSectionProps {
@@ -35,26 +35,33 @@ export default function HeroSection({
   emEspera,
 }: HeroSectionProps) {
   const backgroundUrl = safeImageUrl(imagemUrl)
-  const backgroundStyle: CSSProperties = backgroundUrl
-    ? { backgroundImage: `url("${backgroundUrl}")` }
-    : {}
+  const heroImageSrc = backgroundUrl || '/home-hero.webp'
 
   return (
     <section className="relative -mt-20 overflow-hidden bg-[var(--color-bg)] pt-20">
-      {backgroundUrl ? (
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={backgroundStyle}
-          aria-hidden="true"
+      <div className="absolute inset-0" aria-hidden="true">
+        <Image
+          src={heroImageSrc}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[60%_center] sm:object-center"
         />
-      ) : (
-        <div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(200,168,232,0.38),transparent_32%),linear-gradient(135deg,#201E1A,#58544C)]"
-          aria-hidden="true"
-        />
-      )}
+      </div>
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(244,184,96,0.2),transparent_24%),linear-gradient(125deg,rgba(13,17,23,0.92),rgba(13,17,23,0.68),rgba(13,17,23,0.84))]" />
+      <div
+        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.35)_0%,rgba(0,0,0,0.55)_100%)]"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1)_0%,rgba(0,0,0,0.5)_100%)]"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(244,184,96,0.18),transparent_24%),linear-gradient(125deg,rgba(13,17,23,0.76),rgba(13,17,23,0.46),rgba(13,17,23,0.74))]"
+        aria-hidden="true"
+      />
 
       <div className="relative z-10 px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:px-8">
         <div className="mx-auto grid min-h-[calc(100vh-5.5rem)] max-w-7xl items-center gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(340px,0.7fr)] lg:gap-10">
