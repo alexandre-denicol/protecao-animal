@@ -1,28 +1,63 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import type { CSSProperties } from 'react'
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  titulo: string
+  subtitulo: string
+  imagemUrl: string
+  resgatados: number
+  adotados: number
+  emEspera: number
+}
+
+function safeImageUrl(url: string): string {
+  const trimmed = url.trim()
+
+  if (!trimmed) return ''
+
+  try {
+    const parsed = new URL(trimmed)
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+      ? parsed.toString()
+      : ''
+  } catch {
+    return trimmed.startsWith('/') ? trimmed : ''
+  }
+}
+
+export default function HeroSection({
+  titulo,
+  subtitulo,
+  imagemUrl,
+  resgatados,
+  adotados,
+  emEspera,
+}: HeroSectionProps) {
+  const backgroundUrl = safeImageUrl(imagemUrl)
+  const backgroundStyle: CSSProperties = backgroundUrl
+    ? { backgroundImage: `url("${backgroundUrl}")` }
+    : {}
+
   return (
-    <section className="relative -mt-16 min-h-screen overflow-hidden">
-      {/* Imagem de fundo */}
-      <Image
-        src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1920&q=80"
-        alt="Dois cachorros felizes correndo juntos"
-        fill
-        className="object-cover object-center"
-        priority
-        sizes="100vw"
-      />
+    <section className="relative -mt-16 min-h-screen overflow-hidden bg-neutral-800">
+      {backgroundUrl ? (
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={backgroundStyle}
+          aria-hidden="true"
+        />
+      ) : (
+        <div
+          className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(200,168,232,0.38),transparent_32%),linear-gradient(135deg,#201E1A,#58544C)]"
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Overlay gradiente da esquerda para direita */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/15" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
 
-      {/* Conteúdo */}
       <div className="relative z-10 flex min-h-screen flex-col justify-center px-4 pb-24 pt-28 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-6xl">
           <div className="max-w-2xl">
-
-            {/* Eyebrow */}
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary-300/40 bg-primary-300/20 px-4 py-1.5 backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-primary-300" />
               <span className="text-xs font-semibold uppercase tracking-widest text-primary-200">
@@ -30,21 +65,14 @@ export default function HeroSection() {
               </span>
             </div>
 
-            {/* Título principal */}
             <h1 className="mb-6 text-5xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-6xl lg:text-7xl">
-              Todo animal
-              <br />
-              merece um lar{' '}
-              <span className="text-primary-300">cheio de amor</span>
+              {titulo}
             </h1>
 
-            {/* Subtítulo */}
             <p className="mb-10 max-w-lg text-xl leading-relaxed text-white/80">
-              Resgatamos, cuidamos e encontramos famílias perfeitas para cada animal.
-              Venha conhecer quem está esperando por você.
+              {subtitulo}
             </p>
 
-            {/* Botões CTA */}
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link
                 href="/animais"
@@ -63,12 +91,11 @@ export default function HeroSection() {
               </Link>
             </div>
 
-            {/* Mini stats */}
             <div className="mt-12 flex flex-wrap gap-6">
               {[
-                { numero: '847+', label: 'Animais resgatados' },
-                { numero: '623+', label: 'Adotados com amor' },
-                { numero: '24', label: 'Aguardando um lar' },
+                { numero: `${resgatados}+`, label: 'Animais resgatados' },
+                { numero: `${adotados}+`, label: 'Adotados com amor' },
+                { numero: String(emEspera), label: 'Aguardando um lar' },
               ].map((stat) => (
                 <div key={stat.label} className="flex items-center gap-2.5">
                   <div className="h-8 w-0.5 rounded-full bg-primary-300/60" />
@@ -83,7 +110,6 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Onda de transição para a seção de baixo */}
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <svg
           viewBox="0 0 1440 80"

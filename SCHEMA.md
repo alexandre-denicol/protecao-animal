@@ -8,13 +8,89 @@ Este arquivo serve como documentação e referência.
 ---
 
 ## 0. Extensões
+
 ```sql
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 ```
 
 ---
 
-## 1. Tabela: animals
+## 1. Tabela: profiles (RBAC)
+
+Extensão da tabela `auth.users` com dados de perfil e controle de acesso.
+Criada automaticamente via trigger ao inserir em `auth.users`.
+
+```sql
+CREATE TABLE profiles (
+  id            UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  nome          TEXT NOT NULL CHECK (char_length(nome) BETWEEN 2 AND 100),
+  email         TEXT NOT NULL,
+  role          TEXT NOT NULL DEFAULT 'viewer'
+                CHECK (role IN ('admin', 'editor', 'viewer')),
+  ativo         BOOLEAN NOT NULL DEFAULT TRUE,
+  convidado_por UUID REFERENCES profiles(id),
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_profiles_role ON profiles(role);
+CREATE INDEX idx_profiles_ativo ON profiles(ativo);
+
+CREATE TRIGGER profiles_updated_at
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "profiles_trigger_insert" ON profiles
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "profiles_self_read" ON profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "profiles_admin_read" ON profiles
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE POLICY "profiles_admin_write" ON profiles
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- Trigger: cria perfil automaticamente ao criar usuário no Auth
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, nome, email, role)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'nome', 'Novo membro'),
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'role', 'viewer')
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+   SET search_path = public;
+
+ALTER FUNCTION handle_new_user() OWNER TO postgres;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+```
+
+---
+
+## 2. Tabela: animals
+
 ```sql
 CREATE TABLE animals (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -54,11 +130,50 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER animals_updated_at
   BEFORE UPDATE ON animals
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+ALTER TABLE animals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "animals_public_read" ON animals
+  FOR SELECT USING (true);
+
+CREATE POLICY "animals_auth_insert" ON animals
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND role IN ('admin', 'editor')
+    )
+  );
+
+CREATE POLICY "animals_auth_update" ON animals
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND (
+        role = 'admin'
+        OR (role = 'editor' AND animals.created_by = auth.uid())
+      )
+    )
+  );
+
+CREATE POLICY "animals_auth_delete" ON animals
+  FOR DELETE USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND (
+        role = 'admin'
+        OR (role = 'editor' AND animals.created_by = auth.uid())
+      )
+    )
+  );
 ```
 
 ---
 
-## 2. Tabela: animal_photos
+## 3. Tabela: animal_photos
+
 ```sql
 CREATE TABLE animal_photos (
   id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -72,11 +187,26 @@ CREATE TABLE animal_photos (
 
 CREATE INDEX idx_animal_photos_animal_id ON animal_photos(animal_id);
 CREATE INDEX idx_animal_photos_cover ON animal_photos(animal_id, is_cover);
+
+ALTER TABLE animal_photos ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "photos_public_read" ON animal_photos
+  FOR SELECT USING (true);
+
+CREATE POLICY "photos_auth_write" ON animal_photos
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND role IN ('admin', 'editor')
+    )
+  );
 ```
 
 ---
 
-## 3. Tabela: adoption_interests
+## 4. Tabela: adoption_interests
+
 ```sql
 CREATE TABLE adoption_interests (
   id        UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -91,11 +221,45 @@ CREATE TABLE adoption_interests (
 
 CREATE INDEX idx_adoption_interests_animal_id ON adoption_interests(animal_id);
 CREATE INDEX idx_adoption_interests_lida ON adoption_interests(lida);
+
+ALTER TABLE adoption_interests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "interests_public_insert" ON adoption_interests
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "interests_auth_read" ON adoption_interests
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.ativo = TRUE
+      AND (
+        p.role IN ('admin', 'viewer')
+        OR (
+          p.role = 'editor'
+          AND EXISTS (
+            SELECT 1 FROM animals a
+            WHERE a.id = adoption_interests.animal_id
+            AND a.created_by = auth.uid()
+          )
+        )
+      )
+    )
+  );
+
+CREATE POLICY "interests_auth_update" ON adoption_interests
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND role IN ('admin', 'viewer')
+    )
+  );
 ```
 
 ---
 
-## 4. Tabela: contact_messages
+## 5. Tabela: contact_messages
+
 ```sql
 CREATE TABLE contact_messages (
   id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -108,11 +272,35 @@ CREATE TABLE contact_messages (
 );
 
 CREATE INDEX idx_contact_messages_lida ON contact_messages(lida);
+
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "contact_public_insert" ON contact_messages
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "contact_auth_read" ON contact_messages
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND role IN ('admin', 'viewer')
+    )
+  );
+
+CREATE POLICY "contact_auth_update" ON contact_messages
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND role IN ('admin', 'viewer')
+    )
+  );
 ```
 
 ---
 
-## 5. Tabela: adoptions (portfólio)
+## 6. Tabela: adoptions (portfólio)
+
 ```sql
 CREATE TABLE adoptions (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -127,6 +315,20 @@ CREATE TABLE adoptions (
 );
 
 CREATE INDEX idx_adoptions_data ON adoptions(data_adocao DESC);
+
+ALTER TABLE adoptions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "adoptions_public_read" ON adoptions
+  FOR SELECT USING (true);
+
+CREATE POLICY "adoptions_auth_write" ON adoptions
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND ativo = TRUE
+      AND role IN ('admin', 'editor')
+    )
+  );
 ```
 
 ---

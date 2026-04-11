@@ -27,7 +27,11 @@ yarn-error.log*
 
 # Testes
 /coverage
+/playwright-report/
+/test-results/
 
 # dwyt
 .claude/
 .mcp.json
+.codex/
+AGENTS.md
