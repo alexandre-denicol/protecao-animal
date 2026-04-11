@@ -1,65 +1,36 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import SectionHeading from '@/components/public/SectionHeading'
 
 const valores = [
-  { icone: '🐾', texto: 'Resgate com responsabilidade' },
-  { icone: '💉', texto: 'Cuidado veterinário completo' },
-  { icone: '❤️', texto: 'Adoção acompanhada e segura' },
+  { label: 'Resgate responsável', descricao: 'Cada acolhimento respeita o tempo e as necessidades do animal.' },
+  { label: 'Cuidado contínuo', descricao: 'Saúde, segurança e bem-estar vêm antes de qualquer adoção.' },
+  { label: 'Adoção acompanhada', descricao: 'A nova família recebe orientação para uma adaptação tranquila.' },
 ]
 
-export default function SobreSection() {
+interface SobreSectionProps {
+  missao?: string
+}
+
+export default function SobreSection({ missao }: SobreSectionProps) {
+  const missaoTexto =
+    missao?.trim() ||
+    'A missão da associação será publicada em breve. Enquanto isso, conheça os animais disponíveis e acompanhe nosso trabalho pelos canais oficiais.'
+
   return (
-    <section className="bg-white py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-
-          {/* Coluna de texto — esquerda */}
+    <section className="bg-[var(--color-bg)] py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)] lg:gap-16">
           <div>
-            {/* Accent bar + eyebrow */}
-            <div className="mb-6 flex items-start gap-4">
-              <div className="mt-1 h-12 w-1 flex-shrink-0 rounded-full bg-primary-300" />
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary-500">
-                  Nossa missão
-                </p>
-                <h2 className="mt-2 text-4xl font-extrabold leading-tight tracking-tight text-neutral-800">
-                  Cada animal tem uma{' '}
-                  <span className="text-primary-500">história</span> que
-                  merece ser contada
-                </h2>
-              </div>
-            </div>
+            <SectionHeading
+              eyebrow="Nossa missão"
+              title="Cuidado real, rotina digna e encontros transformadores"
+              description={missaoTexto}
+            />
 
-            <p className="text-base leading-relaxed text-neutral-600">
-              Desde 2018, a Associação Amiga Miau resgata animais em situação de
-              vulnerabilidade nas ruas e os prepara para um novo lar. Cada animal
-              recebe tratamento veterinário, carinho e toda a atenção que merece
-              antes de ser adotado.
-            </p>
-
-            <p className="mt-4 text-base leading-relaxed text-neutral-600">
-              Acreditamos que adoção responsável é um compromisso de vida. Por isso,
-              acompanhamos cada processo com cuidado, garantindo que tanto o adotante
-              quanto o animal estejam prontos para essa nova fase.
-            </p>
-
-            {/* Lista de valores */}
-            <ul className="mt-8 flex flex-col gap-3">
-              {valores.map((item) => (
-                <li key={item.texto} className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary-50 text-base">
-                    {item.icone}
-                  </span>
-                  <span className="text-sm font-medium text-neutral-700">{item.texto}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* CTA */}
             <div className="mt-10">
               <Link
                 href="/sobre"
-                className="inline-flex items-center gap-2 text-sm font-bold text-primary-500 transition-colors hover:text-primary-600 focus-visible:outline-2 focus-visible:outline-primary-300"
+                className="inline-flex items-center gap-2 rounded-[var(--radius-button)] border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-[var(--color-text-main)] transition duration-200 hover:border-[rgba(244,184,96,0.25)] hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
               >
                 Conheça nossa equipe completa
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -69,28 +40,22 @@ export default function SobreSection() {
             </div>
           </div>
 
-          {/* Coluna de imagem — direita */}
-          <div className="relative">
-            {/* Elemento decorativo de fundo */}
-            <div className="absolute -right-4 -top-4 h-full w-full rounded-3xl bg-primary-100" />
-
-            {/* Imagem principal */}
-            <div className="relative overflow-hidden rounded-3xl shadow-2xl">
-              <div className="aspect-[4/3]">
-                <Image
-                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=800&q=80"
-                  alt="Dois cachorros felizes correndo lado a lado"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              </div>
-            </div>
-
-            {/* Card flutuante com estatística */}
-            <div className="absolute -bottom-5 -left-5 rounded-2xl bg-white p-4 shadow-xl">
-              <p className="text-3xl font-extrabold text-primary-500">+6 anos</p>
-              <p className="text-xs font-medium text-neutral-500">cuidando com amor</p>
+          <div className="rounded-[var(--radius-card)] border border-white/10 bg-[rgba(17,24,39,0.72)] p-6 shadow-[var(--shadow-soft)]">
+            <h3 className="text-lg font-bold text-[var(--color-text-main)]">
+              Como a Amiga Miau cuida
+            </h3>
+            <div className="mt-5 grid gap-4">
+              {valores.map((item, index) => (
+                <div key={item.label} className="rounded-[var(--radius-card)] border border-white/8 bg-white/5 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
+                    0{index + 1}
+                  </p>
+                  <p className="mt-3 font-semibold text-[var(--color-text-main)]">{item.label}</p>
+                  <p className="mt-2 text-sm leading-7 text-[var(--color-text-muted)]">
+                    {item.descricao}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

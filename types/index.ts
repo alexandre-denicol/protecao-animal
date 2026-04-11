@@ -6,6 +6,7 @@ export interface Animal {
   id: string
   slug: string
   nome: string
+  created_by: string | null
   especie: AnimalEspecie
   raca: string | null
   idade_anos: number | null
@@ -57,6 +58,81 @@ export interface ContactMessage {
   created_at: string
 }
 
+export interface MembershipInterest {
+  id: string
+  nome: string
+  email: string
+  endereco: string
+  cidade: string
+  estado: string
+  cpf: string
+  whatsapp: string
+  mensagem: string | null
+  lida: boolean
+  created_at: string
+  members?: Pick<Member, 'id' | 'status'>[]
+}
+
+export type MemberStatus =
+  | 'pendente'
+  | 'contatado'
+  | 'ativo'
+  | 'inadimplente'
+  | 'cancelado'
+
+export interface Member {
+  id: string
+  interest_id: string | null
+  nome: string
+  email: string | null
+  endereco: string
+  cidade: string
+  estado: string
+  cpf: string
+  whatsapp: string
+  observacoes: string | null
+  status: MemberStatus
+  valor_mensal: number | null
+  data_inicio: string
+  ultimo_pagamento_em: string | null
+  proximo_vencimento_em: string | null
+  created_at: string
+  updated_at: string
+  payments?: MemberPayment[]
+}
+
+export interface MemberPayment {
+  id: string
+  member_id: string
+  valor: number
+  metodo: string
+  pago_em: string
+  competencia_mes: string
+  observacoes: string | null
+  created_at: string
+  member?: Pick<Member, 'id' | 'nome' | 'whatsapp' | 'status'>
+}
+
+export type MemberContactChannel = 'email' | 'whatsapp'
+export type MemberContactType =
+  | 'triagem'
+  | 'boas_vindas'
+  | 'cobranca'
+  | 'manual'
+
+export interface MemberContactHistory {
+  id: string
+  membership_interest_id: string | null
+  member_id: string | null
+  canal: MemberContactChannel
+  tipo: MemberContactType
+  destinatario: string
+  assunto: string | null
+  mensagem: string
+  enviado_por: string | null
+  created_at: string
+}
+
 export interface Adoption {
   id: string
   animal_id: string | null
@@ -67,4 +143,14 @@ export interface Adoption {
   adotante_nome: string | null
   data_adocao: string
   created_at: string
+}
+
+export type UserRole = 'admin' | 'editor' | 'viewer'
+
+export interface Profile {
+  id: string
+  nome: string
+  email: string
+  role: UserRole
+  ativo: boolean
 }
