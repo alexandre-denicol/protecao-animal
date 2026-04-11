@@ -2,8 +2,10 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/auth/roles'
+import { isValidEmailAddress } from '@/lib/membership'
 import type { ContactMessage } from '@/types'
 import MarkMessageAsReadButton from './MarkMessageAsReadButton'
+import SendContactReplyEmailButton from './SendContactReplyEmailButton'
 
 export const metadata: Metadata = { title: 'Mensagens — Amiga Miau Admin' }
 
@@ -29,11 +31,6 @@ function StatusBadge({ lida }: { lida: boolean }) {
       {lida ? 'Lida' : 'Não lida'}
     </span>
   )
-}
-
-function mensagemResumo(mensagem: string): string {
-  if (mensagem.length <= 120) return mensagem
-  return `${mensagem.slice(0, 117)}...`
 }
 
 function EmptyState() {
@@ -95,7 +92,7 @@ export default async function MensagensPage() {
   const totalNaoLidas = mensagens.filter((mensagem) => !mensagem.lida).length
 
   return (
-    <div>
+    <div data-testid="admin-messages-page">
       <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
@@ -116,60 +113,65 @@ export default async function MensagensPage() {
       {mensagens.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-md">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-neutral-100 text-sm">
-              <thead className="bg-neutral-50 text-left text-xs font-bold uppercase tracking-wider text-neutral-400">
-                <tr>
-                  <th scope="col" className="px-5 py-3">Nome</th>
-                  <th scope="col" className="px-5 py-3">Email</th>
-                  <th scope="col" className="px-5 py-3">Assunto</th>
-                  <th scope="col" className="px-5 py-3">Mensagem</th>
-                  <th scope="col" className="px-5 py-3">Data</th>
-                  <th scope="col" className="px-5 py-3">Status</th>
-                  <th scope="col" className="px-5 py-3">Ação</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100">
-                {mensagens.map((mensagem) => (
-                  <tr
-                    key={mensagem.id}
-                    className={mensagem.lida ? 'bg-white' : 'bg-amber-50/60'}
-                  >
-                    <td className="px-5 py-4 align-top">
-                      <div className="font-semibold text-neutral-800">{mensagem.nome}</div>
-                    </td>
-                    <td className="px-5 py-4 align-top text-neutral-600">
-                      {mensagem.email}
-                    </td>
-                    <td className="px-5 py-4 align-top font-medium text-neutral-800">
+        <div className="grid gap-4">
+          {mensagens.map((mensagem) => {
+            const hasEmail = isValidEmailAddress(mensagem.email)
+
+            return (
+              <article
+                key={mensagem.id}
+                data-testid="admin-message-row"
+                className={`rounded-2xl border bg-white p-5 shadow-sm ${
+                  mensagem.lida ? 'border-neutral-100' : 'border-amber-200 bg-amber-50/40'
+                }`}
+              >
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-lg font-bold text-neutral-800">{mensagem.nome}</h2>
+                      <StatusBadge lida={mensagem.lida} />
+                    </div>
+
+                    <p className="mt-1 text-sm font-medium text-primary-700">
                       {mensagem.assunto}
-                    </td>
-                    <td className="px-5 py-4 align-top">
-                      <p className="max-w-xs whitespace-pre-wrap text-xs leading-relaxed text-neutral-500">
-                        {mensagemResumo(mensagem.mensagem)}
-                      </p>
-                    </td>
-                    <td className="px-5 py-4 align-top text-neutral-500">
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
+                      <span>{mensagem.email}</span>
+                      <span aria-hidden="true">•</span>
                       <time dateTime={mensagem.created_at}>
                         {formatDate(mensagem.created_at)}
                       </time>
-                    </td>
-                    <td className="px-5 py-4 align-top">
-                      <StatusBadge lida={mensagem.lida} />
-                    </td>
-                    <td className="px-5 py-4 align-top">
-                      {!mensagem.lida ? (
-                        <MarkMessageAsReadButton id={mensagem.id} />
-                      ) : (
-                        <span className="text-xs text-neutral-400">-</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+
+                    <div className="mt-3 rounded-xl bg-neutral-50 px-3 py-3">
+                      <p className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+                        Mensagem
+                      </p>
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-600">
+                        {mensagem.mensagem}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 flex-wrap gap-2 lg:max-w-xs lg:justify-end">
+                    <SendContactReplyEmailButton
+                      id={mensagem.id}
+                      disabled={!hasEmail}
+                    />
+
+                    {!mensagem.lida ? (
+                      <MarkMessageAsReadButton id={mensagem.id} />
+                    ) : (
+                      <span className="inline-flex items-center rounded-lg bg-neutral-100 px-3 py-2 text-xs font-semibold text-neutral-400">
+                        Já lida
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </article>
+            )
+          })}
         </div>
       )}
     </div>

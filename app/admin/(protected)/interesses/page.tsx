@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { formatPhoneBR, isValidEmailAddress } from '@/lib/membership'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/auth/roles'
+import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import type { AdoptionInterest } from '@/types'
 import MarkInterestAsReadButton from './MarkInterestAsReadButton'
+import SendInterestReplyEmailButton from './SendInterestReplyEmailButton'
 
 export const metadata: Metadata = { title: 'Interesses em adoção — Amiga Miau Admin' }
 
@@ -43,6 +46,15 @@ function animalNome(interesse: InteresseComAnimal): string {
   return interesse.animals?.nome ?? 'Animal removido'
 }
 
+function buildInterestWhatsAppUrl(interesse: InteresseComAnimal): string | null {
+  if (!interesse.telefone) return null
+
+  return buildWhatsAppUrl(
+    interesse.telefone,
+    `Olá, ${interesse.nome}! Recebemos seu interesse em adotar ${animalNome(interesse)}. Vamos conversar?`
+  )
+}
+
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl bg-white py-20 text-center shadow-md">
@@ -74,6 +86,27 @@ function EmptyState() {
       </h3>
       <p className="max-w-xs text-sm text-neutral-500">
         Quando alguém demonstrar interesse em adotar um animal, aparecerá aqui.
+      </p>
+    </div>
+  )
+}
+
+function InterestMessage({ message }: { message: string | null }) {
+  if (!message) {
+    return (
+      <p className="mt-3 text-sm text-neutral-400">
+        Sem mensagem adicional.
+      </p>
+    )
+  }
+
+  return (
+    <div className="mt-3 rounded-xl bg-neutral-50 px-3 py-3">
+      <p className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+        Mensagem
+      </p>
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-neutral-600">
+        {message}
       </p>
     </div>
   )
@@ -127,7 +160,7 @@ export default async function InteressesPage() {
   const canMarkAsRead = profile.role === 'admin' || profile.role === 'viewer'
 
   return (
-    <div>
+    <div data-testid="admin-interests-page">
       <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
@@ -150,61 +183,78 @@ export default async function InteressesPage() {
       {interesses.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-md">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-neutral-100 text-sm">
-              <thead className="bg-neutral-50 text-left text-xs font-bold uppercase tracking-wider text-neutral-400">
-                <tr>
-                  <th scope="col" className="px-5 py-3">Nome</th>
-                  <th scope="col" className="px-5 py-3">Email</th>
-                  <th scope="col" className="px-5 py-3">Telefone</th>
-                  <th scope="col" className="px-5 py-3">Animal</th>
-                  <th scope="col" className="px-5 py-3">Data</th>
-                  <th scope="col" className="px-5 py-3">Status</th>
-                  <th scope="col" className="px-5 py-3">Ação</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100">
-                {interesses.map((interesse) => (
-                  <tr
-                    key={interesse.id}
-                    className={interesse.lida ? 'bg-white' : 'bg-amber-50/60'}
-                  >
-                    <td className="px-5 py-4 align-top">
-                      <div className="font-semibold text-neutral-800">{interesse.nome}</div>
-                      {interesse.mensagem && (
-                        <p className="mt-1 max-w-xs whitespace-pre-wrap text-xs leading-relaxed text-neutral-500">
-                          {interesse.mensagem}
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-5 py-4 align-top text-neutral-600">{interesse.email}</td>
-                    <td className="px-5 py-4 align-top text-neutral-600">
-                      {interesse.telefone || 'Não informado'}
-                    </td>
-                    <td className="px-5 py-4 align-top font-medium text-primary-700">
-                      {animalNome(interesse)}
-                    </td>
-                    <td className="px-5 py-4 align-top text-neutral-500">
+        <div className="grid gap-4">
+          {interesses.map((interesse) => {
+            const whatsappUrl = buildInterestWhatsAppUrl(interesse)
+            const hasEmail = isValidEmailAddress(interesse.email)
+
+            return (
+              <article
+                key={interesse.id}
+                data-testid="admin-interest-row"
+                className={`rounded-2xl border bg-white p-5 shadow-sm ${
+                  interesse.lida
+                    ? 'border-neutral-100'
+                    : 'border-amber-200 bg-amber-50/40'
+                }`}
+              >
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-lg font-bold text-neutral-800">
+                        {interesse.nome}
+                      </h2>
+                      <StatusBadge lida={interesse.lida} />
+                    </div>
+
+                    <p className="mt-1 text-sm font-medium text-primary-700">
+                      Interesse em {animalNome(interesse)}
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
+                      <span>{interesse.email}</span>
+                      <span aria-hidden="true">•</span>
+                      <span>
+                        {interesse.telefone ? formatPhoneBR(interesse.telefone) : 'Telefone não informado'}
+                      </span>
+                      <span aria-hidden="true">•</span>
                       <time dateTime={interesse.created_at}>
                         {formatDate(interesse.created_at)}
                       </time>
-                    </td>
-                    <td className="px-5 py-4 align-top">
-                      <StatusBadge lida={interesse.lida} />
-                    </td>
-                    <td className="px-5 py-4 align-top">
-                      {!interesse.lida && canMarkAsRead ? (
-                        <MarkInterestAsReadButton id={interesse.id} />
-                      ) : (
-                        <span className="text-xs text-neutral-400">-</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+
+                    <InterestMessage message={interesse.mensagem} />
+                  </div>
+
+                  <div className="flex shrink-0 flex-wrap gap-2 lg:max-w-xs lg:justify-end">
+                    {whatsappUrl && (
+                      <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200 focus:outline-2 focus:outline-green-300 focus:outline-offset-2"
+                      >
+                        WhatsApp
+                      </a>
+                    )}
+
+                    <SendInterestReplyEmailButton
+                      id={interesse.id}
+                      disabled={!hasEmail}
+                    />
+
+                    {!interesse.lida && canMarkAsRead ? (
+                      <MarkInterestAsReadButton id={interesse.id} />
+                    ) : (
+                      <span className="inline-flex items-center rounded-lg bg-neutral-100 px-3 py-2 text-xs font-semibold text-neutral-400">
+                        Já lida
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </article>
+            )
+          })}
         </div>
       )}
     </div>

@@ -151,7 +151,7 @@ export default async function AdminDashboardPage() {
   const prefixo = isEditorOnly ? 'Meus' : ''
 
   return (
-    <div>
+    <div data-testid="admin-dashboard-page">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-neutral-900">
           Olá, {profile.nome.split(' ')[0]}!

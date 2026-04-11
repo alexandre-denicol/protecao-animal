@@ -4,14 +4,33 @@ import { getPublicSiteSettings } from '@/lib/site-settings'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import { ExternalLink } from './ExternalLink'
 
-const PIX_CNPJ = '49728609000170'
-
 const linksNavegacao = [
+  { href: '/', label: 'Home' },
   { href: '/animais', label: 'Animais para adoção' },
+  { href: '/socios', label: 'Quero ser sócio' },
   { href: '/adocoes', label: 'Histórias de adoção' },
   { href: '/sobre', label: 'Sobre a Associação' },
   { href: '/contato', label: 'Contato' },
 ]
+
+const linksEquipe = [
+  { href: '/admin/login', label: 'Área da equipe' },
+]
+
+function cleanExternalUrl(url: string): string {
+  const trimmed = url.trim()
+
+  if (!trimmed) return ''
+
+  try {
+    const parsed = new URL(trimmed)
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+      ? parsed.toString()
+      : ''
+  } catch {
+    return ''
+  }
+}
 
 function redesSociais({
   instagramUrl,
@@ -72,10 +91,14 @@ export default async function Footer() {
     'Olá! Gostaria de falar com a Amiga Miau.',
   )
   const redes = redesSociais({
-    instagramUrl: settings.instagram_url,
-    facebookUrl: settings.facebook_url,
+    instagramUrl: cleanExternalUrl(settings.instagram_url),
+    facebookUrl: cleanExternalUrl(settings.facebook_url),
     whatsappUrl,
   })
+  const footerText =
+    settings.missao.trim() ||
+    'Associação sem fins lucrativos dedicada a proteger animais e encontrar lares responsáveis.'
+  const pixChave = settings.pix_chave.trim()
 
   return (
     <footer className="bg-neutral-800">
@@ -97,8 +120,7 @@ export default async function Footer() {
             </Link>
 
             <p className="max-w-xs text-sm leading-relaxed text-white/50">
-              Associação sem fins lucrativos dedicada a resgatar, cuidar e
-              encontrar lares amorosos para animais de rua desde 2018.
+              {footerText}
             </p>
 
             {/* Redes sociais */}
@@ -137,18 +159,37 @@ export default async function Footer() {
             </ul>
           </div>
 
-          {/* PIX resumido */}
           <div>
             <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-white/30">
-              Doação PIX
+              Apoio
             </h3>
-            <p className="mb-2 text-xs text-white/40">Chave PIX — CNPJ</p>
-            <p className="break-all font-mono text-sm font-semibold text-primary-300">
-              {PIX_CNPJ}
-            </p>
+            {pixChave ? (
+              <>
+                <p className="mb-2 text-xs text-white/40">Chave PIX</p>
+                <p className="break-all font-mono text-sm font-semibold text-primary-300">
+                  {pixChave}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm leading-relaxed text-white/40">
+                As informações de doação serão atualizadas em breve.
+              </p>
+            )}
             <p className="mt-3 text-xs leading-relaxed text-white/30">
               100% destinado ao cuidado dos animais resgatados.
             </p>
+            <ul className="mt-5 flex flex-col gap-2">
+              {linksEquipe.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-xs font-semibold text-white/40 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
@@ -156,8 +197,8 @@ export default async function Footer() {
       {/* Barra inferior */}
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-white/30 sm:flex-row sm:px-6 lg:px-8">
-          <p>© {anoAtual} Associação Amiga Miau · CNPJ 49.728.609/0001-70</p>
-          <p>Feito com ❤️ por quem ama os animais</p>
+          <p>© {anoAtual} Associação Amiga Miau</p>
+          <p>Cuidado, adoção responsável e comunidade.</p>
         </div>
       </div>
     </footer>

@@ -1,10 +1,13 @@
-import { Resend } from 'resend'
+import 'server-only'
+
+import { resend } from '@/lib/resend'
 
 // NOTIFICATION_EMAIL deve conter emails separados por vírgula
 // Ex: a@a.com,b@b.com
-// TODO: substituir onboarding@resend.dev por domínio próprio (ex: contato@amigamiau.com)
+// RESEND_VERIFIED_FROM pode definir um remetente verificado do domínio próprio
+// TODO: substituir onboarding@resend.dev por domínio próprio quando disponível
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const FALLBACK_FROM = 'Amiga Miau <onboarding@resend.dev>'
 
 const notificationEmails =
   process.env.NOTIFICATION_EMAIL?.split(',')
@@ -26,6 +29,49 @@ interface ContactMessageEmailData {
   mensagem: string
 }
 
+interface MembershipInterestEmailData {
+  nome: string
+  endereco: string
+  cidade: string
+  estado: string
+  cpf: string
+  whatsapp: string
+  mensagem: string | null
+}
+
+interface MembershipTemplateData {
+  nome: string
+  valor?: string
+  vencimento?: string
+  animal?: string
+}
+
+interface MembershipEmailSendData {
+  to: string
+  subjectTemplate: string
+  bodyTemplate: string
+  templateData: MembershipTemplateData
+  senderName?: string | null
+  replyTo?: string | null
+}
+
+interface MembershipEmailSendResult {
+  subject: string
+  message: string
+  from: string
+  to: string
+  replyTo?: string
+  providerId?: string
+}
+
+interface DirectEmailSendData {
+  to: string
+  subject: string
+  message: string
+  senderName?: string | null
+  replyTo?: string | null
+}
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -34,6 +80,112 @@ function escapeHtml(value: string): string {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;')
     .replaceAll('\n', '<br/>')
+}
+
+function isValidEmail(value: string | null | undefined): value is string {
+  if (!value) return false
+
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+}
+
+function sanitizeSenderName(value: string | null | undefined): string {
+  const trimmed = value?.trim()
+
+  if (!trimmed) return 'Amiga Miau'
+
+  return trimmed.replace(/[<>]/g, '').slice(0, 80) || 'Amiga Miau'
+}
+
+function resolveEmailFrom(senderName?: string | null): string {
+  const verifiedFrom = process.env.RESEND_VERIFIED_FROM?.trim()
+  const safeSenderName = sanitizeSenderName(senderName)
+
+  if (!verifiedFrom) {
+    return FALLBACK_FROM
+  }
+
+  if (verifiedFrom.includes('<')) {
+    return verifiedFrom
+  }
+
+  return `${safeSenderName} <${verifiedFrom}>`
+}
+
+function resolveReplyTo(replyTo?: string | null): string | undefined {
+  const trimmedReplyTo = typeof replyTo === 'string' ? replyTo.trim() : ''
+
+  if (!isValidEmail(trimmedReplyTo)) {
+    if (trimmedReplyTo) {
+      console.error('[EMAIL REPLY_TO INVALID]', trimmedReplyTo)
+    }
+    return undefined
+  }
+
+  return trimmedReplyTo
+}
+
+function fillEmailTemplate(
+  template: string,
+  data: MembershipTemplateData
+): string {
+  return template
+    .replaceAll('{nome}', data.nome)
+    .replaceAll('{valor}', data.valor ?? '')
+    .replaceAll('{vencimento}', data.vencimento ?? '')
+    .replaceAll('{animal}', data.animal ?? '')
+}
+
+function renderEmailHtmlFromText(message: string): string {
+  const safeMessage = escapeHtml(message)
+
+  return `
+  <div style="font-family: Arial, sans-serif; background:#f9fafb; padding:20px;">
+    <div style="max-width:600px; margin:auto; background:white; border-radius:8px; padding:24px;">
+      <div style="background:#f3f4f6; padding:16px; border-radius:6px; color:#1f2937; line-height:1.6;">
+        ${safeMessage}
+      </div>
+
+      <p style="margin-top:24px; font-size:12px; color:#888;">
+        Sistema Amiga Miau
+      </p>
+    </div>
+  </div>
+  `
+}
+
+async function sendConfiguredEmail(
+  data: DirectEmailSendData
+): Promise<MembershipEmailSendResult> {
+  if (!isValidEmail(data.to)) {
+    throw new Error('INVALID_EMAIL')
+  }
+
+  const subject = data.subject.trim()
+  const message = data.message.trim()
+  const replyTo = resolveReplyTo(data.replyTo)
+  const from = resolveEmailFrom(data.senderName)
+  const to = data.to.trim()
+
+  const result = await resend.emails.send({
+    from,
+    to: [to],
+    subject,
+    html: renderEmailHtmlFromText(message),
+    ...(replyTo ? { replyTo } : {}),
+  })
+
+  if (result.error) {
+    throw result.error
+  }
+
+  return {
+    subject,
+    message,
+    from,
+    to,
+    replyTo,
+    providerId: result.data?.id,
+  }
 }
 
 function adoptionEmailTemplate(data: AdoptionInterestEmailData): string {
@@ -90,17 +242,58 @@ function contactEmailTemplate(data: ContactMessageEmailData): string {
   `
 }
 
-export async function sendAdoptionInterestEmail(
-  data: AdoptionInterestEmailData
-): Promise<void> {
+function membershipEmailTemplate(data: MembershipInterestEmailData): string {
+  const nome = escapeHtml(data.nome)
+  const endereco = escapeHtml(data.endereco)
+  const cidade = escapeHtml(data.cidade)
+  const estado = escapeHtml(data.estado)
+  const cpf = escapeHtml(data.cpf)
+  const whatsapp = escapeHtml(data.whatsapp)
+  const mensagem = data.mensagem ? escapeHtml(data.mensagem) : '-'
+
+  return `
+  <div style="font-family: Arial, sans-serif; background:#f9fafb; padding:20px;">
+    <div style="max-width:600px; margin:auto; background:white; border-radius:8px; padding:24px;">
+      <h2 style="margin:0 0 16px;">Novo cadastro de sócio</h2>
+
+      <div style="background:#f3f4f6; padding:16px; border-radius:6px;">
+        <p><strong>Nome:</strong> ${nome}</p>
+        <p><strong>CPF:</strong> ${cpf}</p>
+        <p><strong>WhatsApp:</strong> ${whatsapp}</p>
+        <p><strong>Endereço:</strong> ${endereco}</p>
+        <p><strong>Cidade/UF:</strong> ${cidade}/${estado}</p>
+        <p><strong>Mensagem:</strong><br/>${mensagem}</p>
+      </div>
+
+      <p style="margin-top:24px; font-size:12px; color:#888;">
+        Sistema Amiga Miau
+      </p>
+    </div>
+  </div>
+  `
+}
+
+async function sendNotificationEmail(args: {
+  subject: string
+  html: string
+}): Promise<void> {
   if (notificationEmails.length === 0) {
     console.warn('NOTIFICATION_EMAIL não configurado')
     return
   }
 
   await resend.emails.send({
-    from: 'Amiga Miau <onboarding@resend.dev>',
+    from: FALLBACK_FROM,
     to: notificationEmails,
+    subject: args.subject,
+    html: args.html,
+  })
+}
+
+export async function sendAdoptionInterestEmail(
+  data: AdoptionInterestEmailData
+): Promise<void> {
+  await sendNotificationEmail({
     subject: `Novo interesse em adoção - ${data.animalNome}`,
     html: adoptionEmailTemplate(data),
   })
@@ -109,15 +302,35 @@ export async function sendAdoptionInterestEmail(
 export async function sendContactMessageEmail(
   data: ContactMessageEmailData
 ): Promise<void> {
-  if (notificationEmails.length === 0) {
-    console.warn('NOTIFICATION_EMAIL não configurado')
-    return
-  }
-
-  await resend.emails.send({
-    from: 'Amiga Miau <onboarding@resend.dev>',
-    to: notificationEmails,
+  await sendNotificationEmail({
     subject: `Nova mensagem - ${data.assunto}`,
     html: contactEmailTemplate(data),
   })
+}
+
+export async function sendMembershipInterestEmail(
+  data: MembershipInterestEmailData
+): Promise<void> {
+  await sendNotificationEmail({
+    subject: `Novo cadastro de sócio - ${data.nome}`,
+    html: membershipEmailTemplate(data),
+  })
+}
+
+export async function sendMembershipEmail(
+  data: MembershipEmailSendData
+): Promise<MembershipEmailSendResult> {
+  return sendConfiguredEmail({
+    to: data.to,
+    subject: fillEmailTemplate(data.subjectTemplate, data.templateData),
+    message: fillEmailTemplate(data.bodyTemplate, data.templateData),
+    senderName: data.senderName,
+    replyTo: data.replyTo,
+  })
+}
+
+export async function sendDirectEmail(
+  data: DirectEmailSendData
+): Promise<MembershipEmailSendResult> {
+  return sendConfiguredEmail(data)
 }

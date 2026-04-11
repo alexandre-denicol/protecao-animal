@@ -109,7 +109,10 @@ export default async function AnimalDetalhePage({ params }: PageProps) {
   )
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <main
+      data-testid="animal-detail-page"
+      className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8"
+    >
       <Link
         href="/animais"
         className="mb-6 inline-flex text-sm font-semibold text-primary-700 hover:text-primary-800"
@@ -160,7 +163,7 @@ export default async function AnimalDetalhePage({ params }: PageProps) {
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight text-neutral-800">
-                {animal.nome}
+                <span data-testid="animal-detail-name">{animal.nome}</span>
               </h1>
               <p className="mt-2 text-neutral-500">
                 {especieLabel(animal.especie)}
@@ -226,6 +229,7 @@ export default async function AnimalDetalhePage({ params }: PageProps) {
                   href={animalWhatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-testid="animal-whatsapp-link"
                   className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
                 >
                   <svg

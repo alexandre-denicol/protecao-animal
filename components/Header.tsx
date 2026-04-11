@@ -6,7 +6,9 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 const navLinks = [
+  { href: '/', label: 'Home' },
   { href: '/animais', label: 'Adotar' },
+  { href: '/socios', label: 'Sócios' },
   { href: '/adocoes', label: 'Histórias' },
   { href: '/sobre', label: 'Sobre nós' },
   { href: '/contato', label: 'Contato' },
@@ -27,8 +29,13 @@ export default function Header() {
     return () => { document.body.style.overflow = '' }
   }, [menuAberto])
 
+  function isActive(href: string) {
+    if (href === '/') return pathname === '/'
+    return pathname.startsWith(href)
+  }
+
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 h-16 bg-neutral-800">
+    <header className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-white/10 bg-neutral-800/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* Logo + Nome — esquerda */}
@@ -61,10 +68,11 @@ export default function Header() {
               key={link.href}
               href={link.href}
               className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-primary-300 ${
-                pathname.startsWith(link.href)
+                isActive(link.href)
                   ? 'bg-white/15 text-white'
                   : 'text-white/70 hover:bg-white/10 hover:text-white'
               }`}
+              aria-current={isActive(link.href) ? 'page' : undefined}
             >
               {link.label}
             </Link>
@@ -78,6 +86,12 @@ export default function Header() {
             className="hidden rounded-xl bg-primary-300 px-5 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-primary-400 focus-visible:outline-2 focus-visible:outline-primary-300 md:block"
           >
             Quero adotar
+          </Link>
+          <Link
+            href="/admin/login"
+            className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-white/65 transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300 lg:block"
+          >
+            Área da equipe
           </Link>
 
           {/* Hamburger — apenas mobile */}
@@ -121,10 +135,11 @@ export default function Header() {
                 <Link
                   href={link.href}
                   className={`block rounded-xl px-4 py-3 text-base font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-primary-300 ${
-                    pathname.startsWith(link.href)
+                    isActive(link.href)
                       ? 'bg-white/15 text-white'
                       : 'text-white/70 hover:bg-white/10 hover:text-white'
                   }`}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   {link.label}
                 </Link>
@@ -136,6 +151,14 @@ export default function Header() {
                 className="block rounded-xl bg-primary-300 px-4 py-3 text-center text-base font-semibold text-white transition-colors duration-150 hover:bg-primary-400 focus-visible:outline-2 focus-visible:outline-primary-300"
               >
                 Quero adotar
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/admin/login"
+                className="block rounded-xl px-4 py-3 text-center text-sm font-semibold text-white/70 transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-primary-300"
+              >
+                Área da equipe
               </Link>
             </li>
           </ul>

@@ -18,6 +18,10 @@ function inputClass() {
   return 'w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-800 focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100'
 }
 
+function helpTextClass() {
+  return 'mt-1 text-xs leading-relaxed text-neutral-400'
+}
+
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <h3 className="mb-4 border-b border-neutral-100 pb-2 text-sm font-bold uppercase tracking-wider text-neutral-400">
@@ -54,7 +58,7 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
           Configurações do site
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Edite os textos e informações exibidos na página inicial.
+          Edite os textos, contatos e informações exibidos nas páginas públicas.
         </p>
       </div>
 
@@ -96,6 +100,9 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
                 placeholder="Ex: Todo animal merece um lar cheio de amor"
                 className={inputClass()}
               />
+              <p className={helpTextClass()}>
+                Aparece em destaque no topo da página inicial.
+              </p>
             </div>
             <div>
               <label htmlFor="hero_subtitulo" className={labelClass()}>
@@ -112,6 +119,23 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
               />
             </div>
             <div>
+              <label htmlFor="hero_imagem_url" className={labelClass()}>
+                URL da imagem de fundo
+              </label>
+              <input
+                id="hero_imagem_url"
+                name="hero_imagem_url"
+                type="url"
+                maxLength={500}
+                defaultValue={settings.hero_imagem_url}
+                placeholder="https://..."
+                className={inputClass()}
+              />
+              <p className={helpTextClass()}>
+                Use uma imagem horizontal, com boa resolução. Se ficar vazio, a Home usa um fundo visual neutro.
+              </p>
+            </div>
+            <div>
               <label htmlFor="missao" className={labelClass()}>
                 Missão da ONG
               </label>
@@ -124,6 +148,9 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
                 placeholder="Ex: Nossa missão é resgatar animais em situação de vulnerabilidade..."
                 className={`${inputClass()} resize-none`}
               />
+              <p className={helpTextClass()}>
+                Texto usado na seção institucional resumida da Home.
+              </p>
             </div>
           </div>
         </div>
@@ -236,6 +263,112 @@ export default async function ConfiguracoesPage({ searchParams }: PageProps) {
                 placeholder="Ex: DDI + DDD + número"
                 className={inputClass()}
               />
+              <p className={helpTextClass()}>
+                Informe apenas números ou use uma formatação simples. O site limpa a formatação antes de montar links.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Sócios */}
+        <div className="rounded-2xl bg-white p-6 shadow-md">
+          <SectionTitle>Área de sócios</SectionTitle>
+          <div className="space-y-5">
+            <div>
+              <label htmlFor="socios_titulo" className={labelClass()}>
+                Título da página de sócios
+              </label>
+              <input
+                id="socios_titulo"
+                name="socios_titulo"
+                type="text"
+                maxLength={120}
+                defaultValue={settings.socios_titulo}
+                placeholder="Ex: Quero ser sócio"
+                className={inputClass()}
+              />
+            </div>
+            <div>
+              <label htmlFor="socios_texto" className={labelClass()}>
+                Texto institucional
+              </label>
+              <textarea
+                id="socios_texto"
+                name="socios_texto"
+                rows={5}
+                maxLength={1200}
+                defaultValue={settings.socios_texto}
+                placeholder="Explique como a contribuição dos sócios ajuda a associação."
+                className={`${inputClass()} resize-none`}
+              />
+              <p className={helpTextClass()}>
+                Aparece na página pública de cadastro de sócios.
+              </p>
+            </div>
+            <div>
+              <label htmlFor="socios_cta_titulo" className={labelClass()}>
+                Título do formulário
+              </label>
+              <input
+                id="socios_cta_titulo"
+                name="socios_cta_titulo"
+                type="text"
+                maxLength={120}
+                defaultValue={settings.socios_cta_titulo}
+                placeholder="Ex: Faça parte dessa corrente de cuidado"
+                className={inputClass()}
+              />
+              <p className={helpTextClass()}>
+                Aparece acima do formulário público de cadastro.
+              </p>
+            </div>
+            <div>
+              <label htmlFor="socios_cta_subtitulo" className={labelClass()}>
+                Texto de apoio do formulário
+              </label>
+              <textarea
+                id="socios_cta_subtitulo"
+                name="socios_cta_subtitulo"
+                rows={3}
+                maxLength={300}
+                defaultValue={settings.socios_cta_subtitulo}
+                placeholder="Oriente brevemente o visitante sobre o próximo contato."
+                className={`${inputClass()} resize-none`}
+              />
+            </div>
+            <div>
+              <label htmlFor="socios_valor_minimo" className={labelClass()}>
+                Valor mínimo mensal
+              </label>
+              <input
+                id="socios_valor_minimo"
+                name="socios_valor_minimo"
+                type="text"
+                maxLength={40}
+                defaultValue={settings.socios_valor_minimo}
+                placeholder="Ex: R$ 20,00"
+                className={inputClass()}
+              />
+              <p className={helpTextClass()}>
+                Mostrado como referência para quem deseja contribuir mensalmente.
+              </p>
+            </div>
+            <div>
+              <label htmlFor="socios_mensagem_admin" className={labelClass()}>
+                Instrução interna de abordagem
+              </label>
+              <textarea
+                id="socios_mensagem_admin"
+                name="socios_mensagem_admin"
+                rows={4}
+                maxLength={800}
+                defaultValue={settings.socios_mensagem_admin}
+                placeholder="Ex: Entrar em contato pelo WhatsApp, explicar valores e combinar vencimento."
+                className={`${inputClass()} resize-none`}
+              />
+              <p className={helpTextClass()}>
+                Aparece apenas no admin para orientar a equipe no acompanhamento dos cadastros.
+              </p>
             </div>
           </div>
         </div>

@@ -64,14 +64,24 @@ export async function createContactMessageAction(
   }
 
   try {
+    console.error('[CONTACT MESSAGE EMAIL] action chamada')
+    console.error('[CONTACT MESSAGE EMAIL] destinatario: equipe')
+    console.error('[CONTACT MESSAGE EMAIL] assunto:', `Nova mensagem - ${assunto}`)
+    console.error('[CONTACT MESSAGE EMAIL] resend configurado:', Boolean(process.env.RESEND_API_KEY))
+
     await sendContactMessageEmail({
       nome,
       email,
       assunto,
       mensagem,
     })
+
+    console.error('[CONTACT MESSAGE EMAIL SUCCESS]', {
+      origem: email,
+      assunto: `Nova mensagem - ${assunto}`,
+    })
   } catch (e) {
-    console.error('Erro ao enviar email de contato', e)
+    console.error('[CONTACT MESSAGE EMAIL ERROR]', e)
   }
 
   return {

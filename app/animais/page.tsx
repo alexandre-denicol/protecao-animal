@@ -36,7 +36,10 @@ export default async function AnimaisPage() {
   const animals = await getPublicAnimals()
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <div
+      data-testid="animals-page"
+      className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8"
+    >
       <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-neutral-800">
         Animais para adoção
       </h1>
@@ -54,11 +57,16 @@ export default async function AnimaisPage() {
           </p>
         </div>
       ) : (
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          data-testid="animals-grid"
+          className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {animals.map((animal) => (
             <Link
               key={animal.id}
               href={`/animais/${animal.slug}`}
+              data-testid="animal-card"
+              data-animal-slug={animal.slug}
               className="group overflow-hidden rounded-xl bg-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="relative aspect-[4/3] bg-neutral-100">

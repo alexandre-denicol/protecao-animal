@@ -30,6 +30,7 @@ export default function MarkInterestAsReadButton({ id }: { id: string }) {
         type="button"
         disabled={isPending}
         onClick={handleClick}
+        data-testid="mark-interest-read"
         className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-200 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50"
       >
         {isPending && (

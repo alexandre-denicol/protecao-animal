@@ -27,6 +27,8 @@ yarn-error.log*
 
 # Testes
 /coverage
+/playwright-report/
+/test-results/
 
 # dwyt
 .claude/

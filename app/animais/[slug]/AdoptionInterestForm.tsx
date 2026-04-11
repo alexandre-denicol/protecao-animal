@@ -1,6 +1,8 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
+import PhoneNumberField from '@/components/forms/PhoneNumberField'
+import { type PhoneCountry, validatePhoneNumber } from '@/lib/whatsapp'
 import {
   createAdoptionInterestAction,
   type AdoptionInterestState,
@@ -26,12 +28,28 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
   const formRef = useRef<HTMLFormElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [state, setState] = useState<AdoptionInterestState>({})
+  const [phoneCountry, setPhoneCountry] = useState<PhoneCountry>('BR')
+  const [phoneValue, setPhoneValue] = useState('')
   const [isPending, startTransition] = useTransition()
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
     const formData = new FormData(e.currentTarget)
+    const phoneError = validatePhoneNumber(phoneValue, phoneCountry, {
+      required: false,
+      label: 'um telefone',
+    })
+
+    if (phoneError) {
+      setState({
+        fieldErrors: {
+          ...state.fieldErrors,
+          telefone: phoneError,
+        },
+      })
+      return
+    }
 
     startTransition(async () => {
       const result = await createAdoptionInterestAction(formData)
@@ -39,6 +57,8 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
 
       if (result.success) {
         formRef.current?.reset()
+        setPhoneCountry('BR')
+        setPhoneValue('')
       }
     })
   }
@@ -48,6 +68,7 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
       {!isOpen && (
         <button
           type="button"
+          data-testid="adoption-open-form"
           onClick={() => {
             setIsOpen(true)
             setState({})
@@ -63,6 +84,7 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
           ref={formRef}
           onSubmit={handleSubmit}
           noValidate
+          data-testid="adoption-interest-form"
           className="rounded-xl border border-neutral-100 bg-neutral-50 p-4"
         >
           <input type="hidden" name="animal_id" value={animalId} />
@@ -123,19 +145,17 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
               <FieldError msg={state.fieldErrors?.email} />
             </div>
 
-            <div>
-              <label htmlFor="telefone" className="block text-sm font-semibold text-neutral-700">
-                Telefone
-              </label>
-              <input
-                id="telefone"
-                name="telefone"
-                type="tel"
-                maxLength={20}
-                className={inputClass(Boolean(state.fieldErrors?.telefone))}
-              />
-              <FieldError msg={state.fieldErrors?.telefone} />
-            </div>
+            <PhoneNumberField
+              id="telefone"
+              label="Telefone"
+              name="telefone"
+              countryName="telefone_country"
+              value={phoneValue}
+              country={phoneCountry}
+              error={state.fieldErrors?.telefone}
+              onValueChange={setPhoneValue}
+              onCountryChange={setPhoneCountry}
+            />
 
             <div>
               <label htmlFor="mensagem" className="block text-sm font-semibold text-neutral-700">
@@ -166,6 +186,7 @@ export default function AdoptionInterestForm({ animalId, animalNome }: Props) {
             <button
               type="submit"
               disabled={isPending}
+              data-testid="adoption-submit"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-300 px-6 py-2.5 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50"
             >
               {isPending && (

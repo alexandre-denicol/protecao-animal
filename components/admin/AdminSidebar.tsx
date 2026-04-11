@@ -64,6 +64,17 @@ const navItems: NavItem[] = [
     ),
   },
   {
+    href: '/admin/socios',
+    label: 'Gerenciar sócios',
+    roles: ['admin', 'viewer'],
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M4 17V7L10 3L16 7V17" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M7.5 17V11.5H12.5V17" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/portfolio',
     label: 'Portfólio',
     roles: ['admin', 'editor'],
@@ -75,19 +86,6 @@ const navItems: NavItem[] = [
         <circle cx="10" cy="6.5" r="1" fill="currentColor" />
         <circle cx="14" cy="6.5" r="1" fill="currentColor" />
         <path d="M6 12L8.5 10L11 13L13 11.5L15 14H5L6 12Z" fill="currentColor" opacity="0.5" />
-      </svg>
-    ),
-  },
-  {
-    href: '/admin/membros',
-    label: 'Membros',
-    roles: ['admin'],
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <circle cx="8" cy="6" r="3" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M2 17C2 14.2386 4.68629 12 8 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="14.5" cy="13.5" r="2.5" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M14.5 16V18M12.5 17H16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     ),
   },
@@ -123,6 +121,9 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
 
   function isActive(href: string) {
     if (href === '/admin') return pathname === '/admin'
+    if (href === '/admin/socios') {
+      return pathname.startsWith('/admin/socios') || pathname.startsWith('/admin/membros')
+    }
     return pathname.startsWith(href)
   }
 
@@ -185,12 +186,16 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
         className="hidden w-60 flex-shrink-0 flex-col border-r border-neutral-200 bg-white px-3 py-6 lg:flex"
         aria-label="Menu lateral"
       >
-        <div className="mb-8 flex items-center gap-3 px-3">
+        <Link
+          href="/"
+          className="mb-8 flex items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-primary-300"
+          aria-label="Associação Amiga Miau — Página inicial"
+        >
           <div className="relative h-8 w-8 flex-shrink-0">
             <Image src="/logo.svg" alt="Logo Amiga Miau" fill className="object-contain" />
           </div>
           <span className="text-sm font-bold text-neutral-800">Amiga Miau</span>
-        </div>
+        </Link>
 
         <div className="flex flex-1 flex-col justify-between">
           {navContent}
@@ -200,12 +205,16 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
 
       {/* Header mobile */}
       <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 lg:hidden">
-        <div className="flex items-center gap-2">
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-lg py-1 pr-2 transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-primary-300"
+          aria-label="Associação Amiga Miau — Página inicial"
+        >
           <div className="relative h-7 w-7">
             <Image src="/logo.svg" alt="Logo Amiga Miau" fill className="object-contain" />
           </div>
           <span className="text-sm font-bold text-neutral-800">Amiga Miau</span>
-        </div>
+        </Link>
 
         <button
           type="button"
@@ -242,12 +251,17 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
             aria-label="Menu de navegação"
             className="fixed inset-y-0 left-0 z-30 flex w-72 flex-col border-r border-neutral-200 bg-white px-3 py-6 lg:hidden"
           >
-            <div className="mb-8 flex items-center gap-3 px-3">
+            <Link
+              href="/"
+              onClick={() => setMobileOpen(false)}
+              className="mb-8 flex items-center gap-3 rounded-lg px-3 py-1 transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-primary-300"
+              aria-label="Associação Amiga Miau — Página inicial"
+            >
               <div className="relative h-8 w-8 flex-shrink-0">
                 <Image src="/logo.svg" alt="Logo Amiga Miau" fill className="object-contain" />
               </div>
               <span className="text-sm font-bold text-neutral-800">Amiga Miau</span>
-            </div>
+            </Link>
             <div className="flex flex-1 flex-col justify-between">
               {navContent}
               {userInfo}

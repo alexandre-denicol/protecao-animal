@@ -37,32 +37,26 @@ export type PublicAnimalDetail = PublicAnimalRow & {
   photos: PublicAnimalPhoto[]
 }
 
-export async function getPublicAnimals(): Promise<PublicAnimal[]> {
+async function withCoverPhotos(
+  animals: PublicAnimalRow[],
+): Promise<PublicAnimal[]> {
+  if (animals.length === 0) {
+    return []
+  }
+
   const supabase = await createClient()
+  const animalIds = animals.map((animal) => animal.id)
 
-  const { data: animals, error: animalsError } = await supabase
-    .from('animals')
-    .select('id, slug, nome, especie, idade_anos, idade_meses, status, created_at')
-    .neq('status', 'adotado')
-    .order('created_at', { ascending: false })
-
-  if (animalsError || !animals) {
-    return []
-  }
-
-  const animalRows = animals as PublicAnimalRow[]
-  const animalIds = animalRows.map((animal) => animal.id)
-
-  if (animalIds.length === 0) {
-    return []
-  }
-
-  const { data: photos } = await supabase
+  const { data: photos, error } = await supabase
     .from('animal_photos')
     .select('id, animal_id, storage_path, url, is_cover, ordem')
     .in('animal_id', animalIds)
     .order('is_cover', { ascending: false })
     .order('ordem', { ascending: true })
+
+  if (error) {
+    console.error('[PUBLIC ANIMAL PHOTOS ERROR]', error)
+  }
 
   const photosByAnimal = new Map<string, PublicAnimalPhoto>()
 
@@ -72,10 +66,46 @@ export async function getPublicAnimals(): Promise<PublicAnimal[]> {
     }
   }
 
-  return animalRows.map((animal) => ({
+  return animals.map((animal) => ({
     ...animal,
     photoUrl: photosByAnimal.get(animal.id)?.url ?? null,
   }))
+}
+
+export async function getPublicAnimals(): Promise<PublicAnimal[]> {
+  const supabase = await createClient()
+
+  const { data: animals, error } = await supabase
+    .from('animals')
+    .select('id, slug, nome, especie, idade_anos, idade_meses, status, created_at')
+    .neq('status', 'adotado')
+    .order('created_at', { ascending: false })
+
+  if (error || !animals) {
+    if (error) console.error('[PUBLIC ANIMALS ERROR]', error)
+    return []
+  }
+
+  return withCoverPhotos(animals as PublicAnimalRow[])
+}
+
+export async function getFeaturedPublicAnimals(limit = 6): Promise<PublicAnimal[]> {
+  const supabase = await createClient()
+
+  const { data: animals, error } = await supabase
+    .from('animals')
+    .select('id, slug, nome, especie, idade_anos, idade_meses, status, created_at')
+    .neq('status', 'adotado')
+    .eq('destaque', true)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error || !animals) {
+    if (error) console.error('[FEATURED PUBLIC ANIMALS ERROR]', error)
+    return []
+  }
+
+  return withCoverPhotos(animals as PublicAnimalRow[])
 }
 
 export async function getAnimalBySlug(slug: string): Promise<PublicAnimalDetail | null> {

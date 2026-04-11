@@ -29,6 +29,7 @@ export async function salvarConfiguracoesAction(formData: FormData): Promise<voi
   }
 
   revalidatePath('/')
+  revalidatePath('/socios')
   revalidatePath('/admin/configuracoes')
   redirect('/admin/configuracoes?salvo=1')
 }

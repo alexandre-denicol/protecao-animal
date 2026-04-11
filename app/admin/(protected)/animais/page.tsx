@@ -190,7 +190,11 @@ function AnimalCard({
   const capa = animal.fotos.find((f) => f.is_cover) ?? animal.fotos[0]
 
   return (
-    <article className="flex flex-col gap-4 overflow-hidden rounded-2xl bg-white shadow-md transition-shadow hover:shadow-lg sm:flex-row sm:items-center">
+    <article
+      data-testid="admin-animal-row"
+      data-animal-id={animal.id}
+      className="flex flex-col gap-4 overflow-hidden rounded-2xl bg-white shadow-md transition-shadow hover:shadow-lg sm:flex-row sm:items-center"
+    >
       {/* Foto */}
       <div className="relative h-40 w-full shrink-0 overflow-hidden bg-neutral-100 sm:h-28 sm:w-28">
         {capa ? (
@@ -318,7 +322,7 @@ export default async function AnimaisPage({ searchParams }: PageProps) {
   const temFiltro = Boolean(busca || especie || status)
 
   return (
-    <div>
+    <div data-testid="admin-animals-page">
       {/* Cabeçalho */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -331,6 +335,7 @@ export default async function AnimaisPage({ searchParams }: PageProps) {
         {podeAdcionar && (
           <Link
             href="/admin/animais/novo"
+            data-testid="admin-new-animal-link"
             className="inline-flex items-center gap-2 rounded-xl bg-primary-300 px-4 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">

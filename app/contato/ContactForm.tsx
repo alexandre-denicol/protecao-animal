@@ -42,6 +42,7 @@ export default function ContactForm() {
       ref={formRef}
       onSubmit={handleSubmit}
       noValidate
+      data-testid="contact-form"
       className="rounded-2xl bg-white p-6 shadow-md sm:p-8"
     >
       {state.error && (
@@ -123,6 +124,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={isPending}
+        data-testid="contact-submit"
         className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary-300 px-6 py-3 text-sm font-bold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50"
       >
         {isPending && (

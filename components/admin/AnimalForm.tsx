@@ -418,7 +418,7 @@ export default function AnimalForm({ mode, animal, action }: Props) {
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate data-testid="admin-animal-form" className="space-y-8">
       {/* Erro global */}
       {globalError && (
         <div
@@ -700,6 +700,7 @@ export default function AnimalForm({ mode, animal, action }: Props) {
         <button
           type="submit"
           disabled={isPending}
+          data-testid="admin-animal-submit"
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-300 px-6 py-2.5 text-sm font-semibold text-primary-900 transition-colors hover:bg-primary-400 focus:outline-2 focus:outline-primary-300 focus:outline-offset-2 disabled:opacity-50"
         >
           {isPending && (

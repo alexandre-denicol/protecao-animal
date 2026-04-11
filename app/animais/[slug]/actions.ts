@@ -2,6 +2,11 @@
 
 import { sendAdoptionInterestEmail } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
+import {
+  type PhoneCountry,
+  normalizePhoneNumber,
+  validatePhoneNumber,
+} from '@/lib/whatsapp'
 
 type AdoptionInterestField = 'nome' | 'email' | 'telefone' | 'mensagem'
 
@@ -24,7 +29,9 @@ export async function createAdoptionInterestAction(
   const animalId = formValue(formData, 'animal_id')
   const nome = formValue(formData, 'nome')
   const email = formValue(formData, 'email')
-  const telefone = formValue(formData, 'telefone') || null
+  const telefoneRaw = formValue(formData, 'telefone')
+  const telefoneCountry =
+    (formValue(formData, 'telefone_country') as PhoneCountry) || 'BR'
   const mensagem = formValue(formData, 'mensagem') || null
 
   const fieldErrors: Partial<Record<AdoptionInterestField, string>> = {}
@@ -37,8 +44,13 @@ export async function createAdoptionInterestAction(
     fieldErrors.email = 'Informe um email válido.'
   }
 
-  if (telefone && telefone.length > 20) {
-    fieldErrors.telefone = 'Informe um telefone com até 20 caracteres.'
+  const telefoneError = validatePhoneNumber(telefoneRaw, telefoneCountry, {
+    required: false,
+    label: 'um telefone',
+  })
+
+  if (telefoneError) {
+    fieldErrors.telefone = telefoneError
   }
 
   if (mensagem && mensagem.length > 1000) {
@@ -52,6 +64,10 @@ export async function createAdoptionInterestAction(
   if (!animalId) {
     return { error: 'Não foi possível enviar o interesse. Tente novamente.' }
   }
+
+  const telefone = telefoneRaw
+    ? normalizePhoneNumber(telefoneRaw, telefoneCountry)
+    : null
 
   const supabase = await createClient()
 
@@ -81,6 +97,11 @@ export async function createAdoptionInterestAction(
   }
 
   try {
+    console.error('[ADOPTION INTEREST EMAIL] action chamada', { animalId })
+    console.error('[ADOPTION INTEREST EMAIL] destinatario: equipe')
+    console.error('[ADOPTION INTEREST EMAIL] assunto:', `Novo interesse em adoção - ${(animal as { nome: string }).nome}`)
+    console.error('[ADOPTION INTEREST EMAIL] resend configurado:', Boolean(process.env.RESEND_API_KEY))
+
     await sendAdoptionInterestEmail({
       animalNome: (animal as { nome: string }).nome,
       nome,
@@ -88,8 +109,14 @@ export async function createAdoptionInterestAction(
       telefone,
       mensagem,
     })
+
+    console.error('[ADOPTION INTEREST EMAIL SUCCESS]', {
+      animalId,
+      origem: email,
+      assunto: `Novo interesse em adoção - ${(animal as { nome: string }).nome}`,
+    })
   } catch (e) {
-    console.error('Erro ao enviar email de interesse', e)
+    console.error('[ADOPTION INTEREST EMAIL ERROR]', e)
   }
 
   return {
