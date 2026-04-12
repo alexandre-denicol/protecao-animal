@@ -10,6 +10,8 @@ A fullstack web platform designed for animal protection organizations to manage 
 
 ---
 
+![Status](https://img.shields.io/badge/status-production--ready-green)
+
 ## ✨ Overview
 
 This project is a complete digital solution that enables:
