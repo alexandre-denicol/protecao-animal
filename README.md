@@ -1,5 +1,7 @@
 # 🐾 Amiga MiAu — Animal Protection Platform
 
+![Preview](./public/preview.png)
+
 🌐 Live Demo: https://protecao-animal.vercel.app
 
 A fullstack web platform designed for animal protection organizations to manage adoptions, memberships, and communication with the public.
