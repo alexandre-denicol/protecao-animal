@@ -1,85 +1,98 @@
-# 🐾 Associação Amiga MiAu — Plataforma Web
+# 🐾 Amiga MiAu — Animal Protection Platform
 
-Aplicação web para gestão de adoção de animais, captação de sócios e comunicação institucional da Associação Amiga MiAu.
+🌐 Live Demo: https://protecao-animal.vercel.app
 
-> Versão: **v0.9 (Release Candidate)**
+A fullstack web platform designed for animal protection organizations to manage adoptions, memberships, and communication with the public.
 
----
-
-## 🎯 Escopo
-
-- Catálogo público de animais para adoção  
-- Registro de interesse de adoção  
-- Gestão de sócios e contribuições  
-- Controle de pagamentos  
-- Comunicação com usuários (email e WhatsApp)  
-- Painel administrativo completo  
+> Version: **v0.9 (Release Candidate)**
 
 ---
 
-## 🧱 Stack
+## ✨ Overview
 
-- Next.js 14 (App Router)  
-- React 18  
-- Tailwind CSS  
-- Supabase (PostgreSQL, Auth, Storage)  
-- Resend (envio de emails)  
-- Playwright (testes E2E)  
-- Vercel (deploy)  
+This project is a complete digital solution that enables:
 
----
-
-## 🏗️ Arquitetura
-
-- Frontend e backend unificados via Server Actions  
-- Supabase como backend principal (dados, autenticação e storage)  
-- Camada de comunicação desacoplada (`lib/email.ts`)  
-
-### Separação por domínio
-
-- `app/` → rotas  
-- `components/` → UI  
-- `lib/` → integrações e lógica  
+- Public animal adoption catalog  
+- Adoption interest submission  
+- Membership management  
+- Payment tracking  
+- Contact and communication system  
+- Full administrative dashboard  
 
 ---
 
-## 🔐 Segurança
+## 🧱 Tech Stack
 
-- Variáveis sensíveis isoladas via `.env` (não versionado)  
-- Uso controlado de `NEXT_PUBLIC_*`  
-- Chaves administrativas restritas ao server  
-- RLS ativo no banco  
-- Logs sanitizados (sem exposição de dados sensíveis)  
-
----
-
-## 🗄️ Domínio de dados
-
-Principais entidades:
-
-- `animals`  
-- `adoption_interests`  
-- `contact_messages`  
-- `membership_interests`  
-- `members`  
-- `member_payments`  
-- `member_contact_history`  
+- **Next.js 14 (App Router)**
+- **React 18**
+- **Tailwind CSS**
+- **Supabase** (PostgreSQL, Auth, Storage)
+- **Resend** (email delivery)
+- **Playwright** (E2E testing)
+- **Vercel** (deployment)
 
 ---
 
-## 🎨 Direção visual
+## 🏗️ Architecture
 
-- Tema dark premium  
-- Paleta baseada em âmbar e verde petróleo  
-- Ênfase em contraste, hierarquia e legibilidade  
-- Experiência responsiva (mobile-first)  
+- Fullstack architecture using **Server Actions (Next.js)**
+- Supabase as the primary backend (database, authentication, storage)
+- Decoupled communication layer (`lib/email.ts`)
+- Modular structure:
+  - `app/` → routes and pages  
+  - `components/` → UI components  
+  - `lib/` → integrations and core logic  
+
+---
+
+## 🔐 Security
+
+- Environment variables fully isolated (`.env` not committed)
+- Proper use of `NEXT_PUBLIC_*` only for public data
+- Admin keys restricted to server-side execution
+- Row Level Security (RLS) enabled in database
+- Sanitized logs (no sensitive data exposure)
+- No hardcoded secrets in the codebase
+
+---
+
+## 🗄️ Data Model
+
+Core entities:
+
+- `animals`
+- `adoption_interests`
+- `contact_messages`
+- `membership_interests`
+- `members`
+- `member_payments`
+- `member_contact_history`
+
+---
+
+## 🎨 Design
+
+- Dark premium UI  
+- Strong focus on readability and hierarchy  
+- Emotion-driven visual approach  
+- Fully responsive (mobile-first)  
 
 ---
 
 ## 📌 Status
 
-Aplicação funcional e estável, pronta para uso real em ambiente controlado, com base sólida para evolução incremental.
+Production-ready for controlled environments.  
+Solid foundation for scaling and future enhancements.
 
 ---
 
-PIX — CNPJ: `49728609000170`
+## 👨‍💻 Author
+
+Developed by **Alexandre Denicol**
+
+---
+
+## 📄 License
+
+This project was developed for a non-profit organization.  
+For portfolio and demonstration purposes.
