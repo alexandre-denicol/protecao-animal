@@ -1,379 +1,201 @@
-# SECURITY.md — Diretrizes de Segurança Operacional
+# 🔐 Security Policy & Guidelines
 
-## Contexto
-Este arquivo complementa o CLAUDE.md com instruções técnicas concretas de segurança,
-aplicadas especificamente à stack Next.js 14 + Supabase + Vercel deste projeto.
-Deve ser lido e seguido em TODA geração de código que envolva rotas, formulários,
-autenticação, banco de dados, uploads ou exibição de dados ao usuário.
+This document defines the security standards and best practices applied to this project.
 
----
+It is tailored for a modern fullstack architecture using:
+- Next.js 14 (App Router)
+- Supabase (Auth, Database, Storage)
+- Vercel (deployment)
 
-## 1. Error Handling — Nunca expor detalhes internos
-
-### Regra
-Erros internos revelam stack traces, caminhos de arquivo e versões de framework
-para atacantes. NUNCA retornar `error.message` bruto ao cliente.
-
-### Implementação obrigatória em todas as API Routes:
-```typescript
-// ❌ ERRADO — expõe detalhes internos
-catch (error) {
-  return Response.json({ error: error.message }, { status: 500 })
-}
-
-// ✅ CORRETO — resposta genérica ao cliente, log no servidor
-catch (error) {
-  console.error('[ERRO INTERNO]', error) // apenas no servidor
-  return Response.json(
-    { error: 'Ocorreu um erro interno. Tente novamente.' },
-    { status: 500 }
-  )
-}
-```
-
-### Regras adicionais:
-- Nunca usar `JSON.stringify(error)` em respostas ao cliente
-- Nunca retornar códigos de status que revelem estrutura interna
-  (ex: 404 em recursos autenticados — usar 403 para não confirmar existência)
-- Sempre usar try/catch em todas as funções assíncronas de API
+All contributors must follow these guidelines when working with authentication, APIs, forms, file uploads, and user data.
 
 ---
 
-## 2. XSS — Output Encoding e Proibições
+## 1. Error Handling
 
-### Regra
-Todo dado vindo do banco (nomes, descrições, depoimentos) deve ser tratado
-como não confiável ao ser exibido.
+### Rule
+Never expose internal errors to the client.
 
-### Proibições absolutas:
-```typescript
-// ❌ NUNCA usar — abre vetor de XSS
-<div dangerouslySetInnerHTML={{ __html: animal.descricao }} />
-document.innerHTML = dados
-eval(qualquerCoisa)
-element.innerHTML = dados
+### Incorrect
+```ts
+return Response.json({ error: error.message }, { status: 500 })
 ```
 
-### Práticas obrigatórias:
-```typescript
-// ✅ CORRETO — React escapa automaticamente via JSX
-<p>{animal.descricao}</p>
-<h2>{animal.nome}</h2>
+### Correct
+```ts
+console.error('[INTERNAL ERROR]', error)
 
-// ✅ Para manipulação DOM direta, usar textContent
-element.textContent = dados  // nunca innerHTML
+return Response.json(
+  { error: 'An unexpected error occurred. Please try again.' },
+  { status: 500 }
+)
 ```
 
-### Em campos de texto livre (descrições, depoimentos):
-- Sanitizar no servidor antes de salvar no banco
-- Usar biblioteca `DOMPurify` se precisar renderizar HTML formatado
-- Validar comprimento máximo (ex: descrição máx 2000 chars)
+### Requirements
+- Never return raw error messages
+- Never expose stack traces
+- Always use try/catch in async operations
 
 ---
 
-## 3. HTTP Security Headers — Configurar no next.config.js
+## 2. XSS Protection
 
-### Implementação obrigatória:
-```javascript
-// next.config.js
-const securityHeaders = [
-  {
-    key: 'X-DNS-Prefetch-Control',
-    value: 'on'
-  },
-  {
-    key: 'X-Frame-Options',
-    value: 'SAMEORIGIN' // previne clickjacking
-  },
-  {
-    key: 'X-Content-Type-Options',
-    value: 'nosniff' // previne MIME sniffing
-  },
-  {
-    key: 'Referrer-Policy',
-    value: 'strict-origin-when-cross-origin'
-  },
-  {
-    key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()'
-  },
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'", // unsafe-inline necessário para Next.js
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://*.supabase.co",
-      "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co",
-      "frame-ancestors 'none'"
-    ].join('; ')
-  }
-]
+### Rule
+All data must be treated as untrusted.
 
-module.exports = {
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: securityHeaders,
-      },
-    ]
-  },
-}
+### Forbidden
+- dangerouslySetInnerHTML
+- element.innerHTML = data
+- eval(...)
+
+### Correct
+```ts
+<p>{data}</p>
+element.textContent = data
 ```
+
+### Additional
+- Sanitize input on the server when needed
+- Use DOMPurify if rendering HTML
+- Enforce input size limits
 
 ---
 
-## 4. CORS — Configuração Restritiva
+## 3. HTTP Security Headers
 
-### Regra
-Nunca usar `Access-Control-Allow-Origin: *` em rotas que retornam dados
-do banco ou aceitam mutações. Definir origem explícita.
+Configured via next.config.js.
 
-### Implementação em API Routes:
-```typescript
-// lib/cors.ts
-export function setCorsHeaders(response: Response, origin: string): Response {
-  const allowedOrigins = [
-    process.env.NEXT_PUBLIC_SITE_URL!, // URL de produção
-    'http://localhost:3000'             // apenas em desenvolvimento
-  ]
+Includes:
+- X-Frame-Options
+- X-Content-Type-Options
+- Referrer-Policy
+- Permissions-Policy
+- Content-Security-Policy
 
-  if (allowedOrigins.includes(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin)
-  }
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-  return response
-}
-```
-
-### Regras adicionais:
-- Rotas públicas (listagem de animais): podem ter CORS mais permissivo
-- Rotas de escrita (cadastro, edição): CORS restrito à origem do próprio site
-- Nunca usar wildcard `*` em rotas autenticadas
+### Goal
+Prevent clickjacking, MIME sniffing, and XSS vectors.
 
 ---
 
-## 5. Rate Limiting — Formulários e Rotas de Escrita
+## 4. CORS Policy
 
-### Rotas que OBRIGATORIAMENTE precisam de rate limiting:
-- `/api/contact` — formulário de contato
-- `/api/adoption-interest` — formulário "quero adotar"
-- `/api/auth/login` — tentativas de login
-- Qualquer rota POST/PUT/DELETE
+### Rule
+Never use wildcard origins (*) on sensitive routes.
 
-### Implementação via middleware Next.js:
-```typescript
-// middleware.ts
-import { NextRequest, NextResponse } from 'next/server'
+### Guidelines
+- Public endpoints → controlled access
+- Authenticated routes → restricted origin
+- Use environment-based allowlist
 
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+---
 
-function rateLimit(ip: string, limit: number, windowMs: number): boolean {
-  const now = Date.now()
-  const record = rateLimitMap.get(ip)
+## 5. Rate Limiting
 
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs })
-    return true // permitido
-  }
+### Required for:
+- Forms (contact, adoption, membership)
+- Authentication routes
+- All write operations
 
-  if (record.count >= limit) return false // bloqueado
+### Strategy
+- IP-based limiting
+- Time window enforcement
+- Return 429 when exceeded
 
-  record.count++
-  return true // permitido
-}
+---
 
-export function middleware(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for') ?? 'unknown'
+## 6. Authentication (Supabase)
 
-  if (request.method === 'POST') {
-    const allowed = rateLimit(ip, 10, 60 * 1000) // 10 req/min por IP
-    if (!allowed) {
-      return NextResponse.json(
-        { error: 'Muitas requisições. Tente novamente em alguns minutos.' },
-        { status: 429 }
-      )
-    }
-  }
+### Requirements
+- Use @supabase/ssr (cookie-based sessions)
+- Avoid localStorage for tokens
+- Use PKCE flow
 
-  return NextResponse.next()
-}
+### Rules
+- Never expose service role keys
+- Validate user on server
+- Invalidate sessions on logout
+- Set session expiration (recommended: ≤ 8h for admin)
 
-export const config = {
-  matcher: '/api/:path*',
-}
+---
+
+## 7. File Upload Security
+
+### Requirements
+- Max size: 5MB
+- Allowed types: jpeg, png, webp
+- Generate filenames on server (UUID)
+- Validate authentication before processing
+
+### Never
+- Trust user filenames
+- Trust Content-Type blindly
+
+---
+
+## 8. External Links
+
+### Rule
+Prevent tabnabbing.
+
+### Always use
+```html
+target="_blank" rel="noopener noreferrer"
 ```
 
 ---
 
-## 6. Supabase Auth — Sessão e Tokens
+## 9. Password Policy
 
-### Problema
-O Supabase armazena tokens de sessão em localStorage por padrão.
-Um ataque XSS pode roubar esses tokens.
+### Requirements
+- Minimum length: 12 characters
+- Must include uppercase letter
+- Must include number
 
-### Configuração obrigatória do cliente Supabase:
-```typescript
-// lib/supabase/client.ts
-import { createBrowserClient } from '@supabase/ssr'
-
-export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        // Usar cookies em vez de localStorage
-        // O @supabase/ssr faz isso automaticamente
-        flowType: 'pkce', // mais seguro que implicit flow
-      }
-    }
-  )
-}
-```
-
-### Usar obrigatoriamente `@supabase/ssr` (não `@supabase/supabase-js` diretamente)
-O pacote SSR gerencia sessão via cookies HttpOnly automaticamente,
-evitando exposição do token ao JavaScript do cliente.
-
-### Regras adicionais:
-- Renovar sessão após mudança de privilégio (ex: após login)
-- Invalidar sessão no logout (chamar `supabase.auth.signOut()`)
-- Nunca armazenar tokens em localStorage manualmente
-- Configurar expiração de sessão no painel do Supabase (máx 8 horas para área admin)
+### Recommended
+- Email confirmation required
+- Breached password protection enabled
 
 ---
 
-## 7. Upload de Fotos — Proteção Completa
+## 10. Environment Variables
 
-### Regras obrigatórias (além do que está no CLAUDE.md):
-```typescript
-// app/api/upload/route.ts
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+### Never expose
+- SUPABASE_SERVICE_ROLE_KEY
+- Any sensitive API key
 
-export async function POST(request: Request) {
-  const formData = await request.formData()
-  const file = formData.get('file') as File
+### Public variables
+- NEXT_PUBLIC_*
 
-  // 1. Validar autenticação ANTES de qualquer processamento
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return Response.json({ error: 'Não autorizado' }, { status: 401 })
-
-  // 2. Validar tamanho
-  if (file.size > MAX_FILE_SIZE) {
-    return Response.json({ error: 'Arquivo muito grande' }, { status: 400 })
-  }
-
-  // 3. Validar MIME type real (não confiar no Content-Type do request)
-  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-    return Response.json({ error: 'Tipo de arquivo não permitido' }, { status: 400 })
-  }
-
-  // 4. SEMPRE gerar nome de arquivo no servidor — nunca usar nome original do usuário
-  const fileExt = file.type.split('/')[1]
-  const safeFileName = `${crypto.randomUUID()}.${fileExt}`
-  const storagePath = `animals/${user.id}/${safeFileName}` // caminho definido pelo servidor
-
-  // 5. Upload com caminho controlado pelo servidor
-  const { error } = await supabase.storage
-    .from('animal-photos')
-    .upload(storagePath, file, { contentType: file.type })
-
-  if (error) {
-    console.error('[UPLOAD ERROR]', error)
-    return Response.json({ error: 'Falha no upload' }, { status: 500 })
-  }
-
-  return Response.json({ path: storagePath })
-}
-```
+### Rules
+- .env.local must NOT be committed
+- .env.example must not contain real values
 
 ---
 
-## 8. Links Externos — Prevenção de Tabnabbing
+## 11. Logging Policy
 
-### Regra
-Todo link com `target="_blank"` abre vetor de tabnabbing onde a nova aba
-pode redirecionar a aba original via `window.opener`.
-
-### Implementação obrigatória:
-```typescript
-// ❌ ERRADO
-<a href="https://instagram.com/ong" target="_blank">Instagram</a>
-
-// ✅ CORRETO — sempre incluir rel="noopener noreferrer"
-
-  href="https://instagram.com/ong"
-  target="_blank"
-  rel="noopener noreferrer"
->
-  Instagram
-</a>
-```
-
-### Criar componente reutilizável para links externos:
-```typescript
-// components/ExternalLink.tsx
-export function ExternalLink({
-  href,
-  children,
-  ...props
-}: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
-  return (
-    
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      {...props}
-    >
-      {children}
-    </a>
-  )
-}
-```
-Usar `<ExternalLink>` em vez de `<a target="_blank">` em todo o projeto.
+### Rules
+- Do not log full emails or personal data
+- Mask sensitive fields
+- Log only necessary information
 
 ---
 
-## 9. Política de Senhas para Equipe da ONG
+## 12. General Principles
 
-### Configuração no Supabase Auth (painel):
-- Comprimento mínimo: **12 caracteres** (NIST recomenda 15 sem MFA)
-- Habilitar confirmação por email obrigatória
-- Habilitar proteção contra senhas comprometidas (HaveIBeenPwned)
-
-### No formulário de criação/alteração de senha:
-```typescript
-function validatePassword(password: string): string | null {
-  if (password.length < 12) return 'Senha deve ter no mínimo 12 caracteres'
-  if (!/[A-Z]/.test(password)) return 'Senha deve conter ao menos uma letra maiúscula'
-  if (!/[0-9]/.test(password)) return 'Senha deve conter ao menos um número'
-  return null // válida
-}
-```
+- Validate all inputs (client and server)
+- Apply least privilege principle
+- Avoid unnecessary data exposure
+- Prefer server-side execution for sensitive logic
+- Keep dependencies updated
 
 ---
 
-## 10. Variáveis de Ambiente — Checklist
+## Summary
 
-### Nunca expor ao cliente (sem NEXT_PUBLIC_):
-- `SUPABASE_SERVICE_ROLE_KEY` — chave de admin do Supabase
-- Qualquer chave de API de terceiros com permissão de escrita
+This project follows modern security practices suitable for production environments.
 
-### Pode expor ao cliente (com NEXT_PUBLIC_):
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — chave pública, segura para expor
-
-### Arquivo .env.example obrigatório no repositório:
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_SITE_URL=
-```
-O arquivo `.env.local` real deve estar no `.gitignore` — NUNCA commitar.
+All contributions must respect these guidelines to ensure:
+- data integrity
+- user privacy
+- system reliability
