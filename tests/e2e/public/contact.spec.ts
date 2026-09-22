@@ -1,8 +1,10 @@
 import { test } from '@playwright/test'
 import { expectSuccessFeedback, trackPageErrors } from '../utils/assertions'
+import { assertMutationAllowed } from '../utils/mutation-guard'
 import { uniqueEmail, uniqueSuffix } from '../utils/test-data'
 
 test('formulário de contato envia mensagem com sucesso', async ({ page }) => {
+  assertMutationAllowed('Enviar mensagem de contato')
   const assertNoErrors = trackPageErrors(page)
 
   await page.goto('/contato')

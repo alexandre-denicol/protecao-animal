@@ -38,3 +38,9 @@ test-results/
 .mcp.json
 .codex/
 AGENTS.md
+CLAUDE.md
+SETUP.md
+REQUIREMENTS.md
+ROLES.md
+dwyt.sh
+hooks.txt

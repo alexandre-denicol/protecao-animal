@@ -104,7 +104,7 @@ export async function createAdoptionInterestAction(
     })
 
     await sendAdoptionInterestEmail({
-      animalNome: (animal as { nome: string }).nome,
+      animalNome: (animal as { nome: string | null }).nome,
       nome,
       email,
       telefone,

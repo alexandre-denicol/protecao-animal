@@ -49,6 +49,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['var(--font-plus-jakarta-sans)', 'Plus Jakarta Sans', 'sans-serif'],
+        display: ['var(--font-home-display)', 'var(--font-plus-jakarta-sans)', 'sans-serif'],
       },
       fontSize: {
         xs:    ['12px', { lineHeight: '1.5' }],

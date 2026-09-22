@@ -3,10 +3,11 @@
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { excluirAnimalAction } from '@/app/admin/(protected)/animais/actions'
+import { nomeDisplay } from '@/lib/animal-format'
 
 interface Props {
   id: string
-  nome: string
+  nome: string | null
 }
 
 export default function DeleteAnimalButton({ id, nome }: Props) {
@@ -16,7 +17,7 @@ export default function DeleteAnimalButton({ id, nome }: Props) {
   function handleClick() {
     if (
       !confirm(
-        `Excluir "${nome}"? Todas as fotos serão removidas. Esta ação não pode ser desfeita.`
+        `Excluir "${nomeDisplay(nome)}"? Todas as fotos serão removidas. Esta ação não pode ser desfeita.`
       )
     )
       return

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { nomeDisplay } from '@/lib/animal-format'
 import { formatPhoneBR, isValidEmailAddress } from '@/lib/membership'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/auth/roles'
@@ -14,7 +15,7 @@ import SendInterestReplyEmailButton from './SendInterestReplyEmailButton'
 export const metadata: Metadata = { title: 'Interesses em adoção — Amiga Miau Admin' }
 
 interface InteresseComAnimal extends AdoptionInterest {
-  animals: { nome: string } | { nome: string }[] | null
+  animals: { nome: string | null } | { nome: string | null }[] | null
 }
 
 function formatDate(iso: string): string {
@@ -31,12 +32,13 @@ function StatusBadge({ lida }: { lida: boolean }) {
   return <AdminStatusBadge tone={lida ? 'neutral' : 'warning'}>{lida ? 'Lida' : 'Não lida'}</AdminStatusBadge>
 }
 
+/** Distingue "o animal foi removido" (relação ausente) de "o animal ainda não tem nome" (relação existe, nome é null). */
 function animalNome(interesse: InteresseComAnimal): string {
-  if (Array.isArray(interesse.animals)) {
-    return interesse.animals[0]?.nome ?? 'Animal removido'
-  }
+  const relacao = Array.isArray(interesse.animals) ? interesse.animals[0] : interesse.animals
 
-  return interesse.animals?.nome ?? 'Animal removido'
+  if (!relacao) return 'Animal removido'
+
+  return nomeDisplay(relacao.nome)
 }
 
 function buildInterestWhatsAppUrl(interesse: InteresseComAnimal): string | null {

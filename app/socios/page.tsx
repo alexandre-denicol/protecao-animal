@@ -24,7 +24,7 @@ export default async function SociosPage() {
     'Preencha seus dados e nossa equipe entra em contato para combinar a melhor forma de contribuição.'
 
   return (
-    <main className="bg-[var(--color-bg)]">
+    <div className="bg-[var(--color-bg)]">
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,0.7fr)] lg:gap-10 lg:px-8">
         <div>
           <BrandLogo compact className="mb-8" />
@@ -81,6 +81,6 @@ export default async function SociosPage() {
           <MembershipForm />
         </div>
       </section>
-    </main>
+    </div>
   )
 }

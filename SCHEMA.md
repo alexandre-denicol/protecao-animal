@@ -91,30 +91,56 @@ CREATE TRIGGER on_auth_user_created
 
 ## 2. Tabela: animals
 
+> **Atualizado por `supabase/migrations/20260921230631_refine_animal_intake.sql`
+> (ainda NÃO aplicada em produção neste momento).** O bloco abaixo descreve o
+> schema ALVO, após essa migração ser aplicada. Ver seção "Migrações" ao final
+> deste documento para o histórico.
+
 ```sql
 CREATE TABLE animals (
-  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  slug          TEXT UNIQUE NOT NULL,
-  nome          TEXT NOT NULL CHECK (char_length(nome) BETWEEN 1 AND 100),
-  especie       TEXT NOT NULL CHECK (especie IN ('gato', 'cao')),
-  raca          TEXT,
-  idade_anos    INTEGER CHECK (idade_anos >= 0 AND idade_anos <= 30),
-  idade_meses   INTEGER CHECK (idade_meses >= 0 AND idade_meses <= 11),
-  sexo          TEXT NOT NULL CHECK (sexo IN ('macho', 'femea')),
-  peso_kg       DECIMAL(4,2) CHECK (peso_kg > 0),
-  vacinado      BOOLEAN NOT NULL DEFAULT FALSE,
-  castrado      BOOLEAN NOT NULL DEFAULT FALSE,
-  saudavel      BOOLEAN NOT NULL DEFAULT TRUE,
-  obs_saude     TEXT CHECK (char_length(obs_saude) <= 500),
-  temperamento  TEXT CHECK (char_length(temperamento) <= 200),
-  descricao     TEXT CHECK (char_length(descricao) <= 2000),
-  status        TEXT NOT NULL DEFAULT 'disponivel'
-                CHECK (status IN ('disponivel', 'em_processo', 'adotado')),
-  destaque      BOOLEAN NOT NULL DEFAULT FALSE,
-  created_by    UUID REFERENCES profiles(id),
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slug             TEXT UNIQUE NOT NULL,
+  nome             TEXT CHECK (nome IS NULL OR char_length(nome) BETWEEN 1 AND 100),
+  especie          TEXT NOT NULL CHECK (especie IN ('gato', 'cao', 'outro')),
+  especie_detalhe  TEXT CHECK (especie_detalhe IS NULL OR char_length(especie_detalhe) <= 60),
+  raca             TEXT,
+  idade_anos       INTEGER CHECK (idade_anos >= 0 AND idade_anos <= 30),
+  idade_meses      INTEGER CHECK (idade_meses >= 0 AND idade_meses <= 11),
+  idade_estimada   BOOLEAN NOT NULL DEFAULT FALSE,
+  sexo             TEXT NOT NULL CHECK (sexo IN ('macho', 'femea', 'nao_identificado')),
+  peso_kg          DECIMAL(4,2) CHECK (peso_kg > 0),
+  vacinado         BOOLEAN, -- NULL = não informado (tri-state; sem DEFAULT)
+  castrado         BOOLEAN, -- NULL = não informado (tri-state; sem DEFAULT)
+  saudavel         BOOLEAN NOT NULL DEFAULT TRUE,  -- DEPRECATED: coluna preservada por compatibilidade, não usada pela aplicação desde a refinação do formulário de cadastro. Não remover sem migração própria e aprovação explícita.
+  obs_saude        TEXT CHECK (char_length(obs_saude) <= 500), -- DEPRECATED: idem acima.
+  temperamento     TEXT CHECK (char_length(temperamento) <= 200),
+  descricao        TEXT CHECK (char_length(descricao) <= 2000),
+  status           TEXT NOT NULL DEFAULT 'disponivel'
+                   CHECK (status IN ('disponivel', 'em_processo', 'adotado')),
+  destaque         BOOLEAN NOT NULL DEFAULT FALSE,
+  created_by       UUID REFERENCES profiles(id),
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+```
+
+### Notas de negócio (pós-migração)
+
+- **`nome` opcional**: um animal recém-resgatado pode não ter nome ainda. A
+  aplicação nunca grava placeholders como "Sem nome" — grava `NULL` e cada
+  camada de apresentação usa um fallback textual neutro
+  (`lib/animal-format.ts`: `nomeDisplay`/`nomeOuEsteAnimal`).
+- **`slug` é gerado uma única vez, na criação**, e nunca é recalculado em
+  edições — nem quando o nome muda, nem quando um animal sem nome recebe um
+  nome depois. Sem nome, o slug usa um fragmento estável e resistente a
+  colisão (`animal-<fragmento>`), nunca uma contagem sequencial.
+- **`especie_detalhe`** só é preenchido quando `especie = 'outro'`; a
+  aplicação normaliza para `NULL` em qualquer outro caso.
+- **`vacinado`/`castrado`** são tri-state: `TRUE` = Sim, `FALSE` = Não,
+  `NULL` = não informado. `NULL` nunca deve ser apresentado como "Não".
+- **`saudavel`/`obs_saude`** permanecem fisicamente na tabela (dados
+  existentes preservados), mas o formulário e as telas públicas não os leem
+  nem os gravam mais. Ver migração para detalhes.
 
 CREATE INDEX idx_animals_status ON animals(status);
 CREATE INDEX idx_animals_especie ON animals(especie);
@@ -864,3 +890,15 @@ Criar no painel Supabase > Storage > New Bucket:
 - Public: SIM
 - Allowed MIME types: image/jpeg, image/png, image/webp
 - Max file size: 5242880 (5MB)
+
+---
+
+## 10. Migrações
+
+Migrações incrementais ficam em `supabase/migrations/`. O bloco original
+acima (seções 0–9) reflete o schema como foi executado manualmente no início
+do projeto; a partir daqui, mudanças passam a ser versionadas como arquivos.
+
+| Arquivo | Status | Resumo |
+|---|---|---|
+| `20260921230631_refine_animal_intake.sql` | **Criada, NÃO aplicada em produção** | Torna `nome` opcional; adiciona `especie = 'outro'` + `especie_detalhe`; adiciona `sexo = 'nao_identificado'`; adiciona `idade_estimada`; torna `vacinado`/`castrado` tri-state (nullable, sem DEFAULT). Não altera/remove `saudavel`/`obs_saude`, `status`, RLS, policies, foreign keys ou dados existentes. |

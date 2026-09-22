@@ -5,15 +5,9 @@ import {
   type PhoneCountry,
   formatPhoneInput,
 } from '@/lib/whatsapp'
-
-function inputClass(hasError?: boolean) {
-  return `w-full border-0 bg-transparent px-3 py-3 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-0 ${
-    hasError ? 'bg-[rgba(127,29,29,0.18)]' : 'bg-transparent'
-  }`
-}
+import Field from './Field'
 
 export default function PhoneNumberField({
-  id,
   label,
   name,
   countryName,
@@ -24,7 +18,6 @@ export default function PhoneNumberField({
   onValueChange,
   onCountryChange,
 }: {
-  id: string
   label: string
   name: string
   countryName: string
@@ -40,61 +33,48 @@ export default function PhoneNumberField({
     'Número com DDD'
 
   return (
-    <div className="space-y-2">
-      <label htmlFor={id} className="block text-sm font-semibold text-[var(--color-text-main)]">
-        {label}
-        {required && <span className="text-salmon-500"> *</span>}
-      </label>
+    <Field label={label} required={required} hint="Informe o número com DDD." error={error}>
+      {(control) => (
+        <div
+          className={`mt-2 overflow-hidden rounded-[var(--radius-button)] border bg-[rgba(255,255,255,0.03)] transition focus-within:ring-2 focus-within:ring-[rgba(244,184,96,0.35)] ${
+            error ? 'border-salmon-400 bg-[rgba(127,29,29,0.18)]' : 'border-white/35'
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row">
+            <select
+              name={countryName}
+              aria-label="Código do país"
+              value={country}
+              onChange={(event) => {
+                const nextCountry = event.target.value as PhoneCountry
+                onCountryChange(nextCountry)
+                onValueChange(formatPhoneInput(value, nextCountry))
+              }}
+              className="min-w-0 border-b border-white/20 bg-transparent px-3 py-3 text-sm text-[var(--color-text-main)] focus:outline-none focus:ring-0 sm:w-44 sm:border-b-0 sm:border-r"
+            >
+              {PHONE_COUNTRIES.map((option) => (
+                <option key={option.code} value={option.code}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
 
-      <div
-        className={`overflow-hidden rounded-[var(--radius-button)] border bg-[rgba(255,255,255,0.03)] transition focus-within:ring-2 focus-within:ring-[rgba(244,184,96,0.14)] ${
-          error ? 'border-salmon-400 bg-[rgba(127,29,29,0.18)]' : 'border-white/10'
-        }`}
-      >
-        <div className="flex flex-col sm:flex-row">
-          <select
-            name={countryName}
-            value={country}
-            onChange={(event) => {
-              const nextCountry = event.target.value as PhoneCountry
-              onCountryChange(nextCountry)
-              onValueChange(formatPhoneInput(value, nextCountry))
-            }}
-            className={`min-w-0 border-b border-white/10 bg-transparent px-3 py-3 text-sm text-[var(--color-text-main)] focus:outline-none focus:ring-0 sm:w-44 sm:border-b-0 sm:border-r ${
-              error ? 'bg-[rgba(127,29,29,0.18)]' : 'bg-transparent'
-            }`}
-          >
-            {PHONE_COUNTRIES.map((option) => (
-              <option key={option.code} value={option.code}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          <input
-            id={id}
-            name={name}
-            type="tel"
-            inputMode="tel"
-            required={required}
-            value={value}
-            onChange={(event) =>
-              onValueChange(formatPhoneInput(event.target.value, country))
-            }
-            placeholder={placeholder}
-            className={inputClass(Boolean(error))}
-            autoComplete="tel-national"
-          />
+            <input
+              {...control}
+              name={name}
+              type="tel"
+              inputMode="tel"
+              value={value}
+              onChange={(event) =>
+                onValueChange(formatPhoneInput(event.target.value, country))
+              }
+              placeholder={placeholder}
+              className="w-full border-0 bg-transparent px-3 py-3 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-0"
+              autoComplete="tel-national"
+            />
+          </div>
         </div>
-      </div>
-
-      {error ? (
-        <p className="text-xs leading-5 text-salmon-600">{error}</p>
-      ) : (
-        <p className="text-xs leading-5 text-[var(--color-text-muted)]">
-          Informe o número com DDD.
-        </p>
       )}
-    </div>
+    </Field>
   )
 }

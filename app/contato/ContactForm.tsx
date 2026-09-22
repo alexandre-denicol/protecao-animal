@@ -1,28 +1,19 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
+import Field, { fieldInputClass } from '@/components/forms/Field'
+import { useFocusFirstInvalid } from '@/components/forms/useFocusFirstInvalid'
 import {
   createContactMessageAction,
   type ContactMessageState,
 } from './actions'
 
-function FieldError({ msg }: { msg?: string }) {
-  if (!msg) return null
-  return <p className="mt-2 text-xs leading-5 text-salmon-600">{msg}</p>
-}
-
-function inputClass(hasError?: boolean) {
-  return `w-full rounded-[var(--radius-button)] border px-4 py-3 text-sm text-[var(--color-text-main)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] ${
-    hasError
-      ? 'border-salmon-400 bg-[rgba(127,29,29,0.18)]'
-      : 'border-white/10 bg-[rgba(255,255,255,0.03)]'
-  }`
-}
-
 export default function ContactForm() {
   const formRef = useRef<HTMLFormElement>(null)
   const [state, setState] = useState<ContactMessageState>({})
   const [isPending, startTransition] = useTransition()
+
+  useFocusFirstInvalid(formRef, state.fieldErrors)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -66,61 +57,55 @@ export default function ContactForm() {
       )}
 
       <div className="grid gap-4 sm:gap-5">
-        <div>
-          <label htmlFor="nome" className="block text-sm font-semibold text-[var(--color-text-main)]">
-            Nome <span className="text-salmon-500">*</span>
-          </label>
-          <input
-            id="nome"
-            name="nome"
-            type="text"
-            maxLength={100}
-            className={inputClass(Boolean(state.fieldErrors?.nome))}
-          />
-          <FieldError msg={state.fieldErrors?.nome} />
-        </div>
+        <Field label="Nome" required error={state.fieldErrors?.nome}>
+          {(control) => (
+            <input
+              {...control}
+              name="nome"
+              type="text"
+              maxLength={100}
+              autoComplete="name"
+              className={fieldInputClass(Boolean(state.fieldErrors?.nome))}
+            />
+          )}
+        </Field>
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-[var(--color-text-main)]">
-            Email <span className="text-salmon-500">*</span>
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            maxLength={150}
-            className={inputClass(Boolean(state.fieldErrors?.email))}
-          />
-          <FieldError msg={state.fieldErrors?.email} />
-        </div>
+        <Field label="Email" required error={state.fieldErrors?.email}>
+          {(control) => (
+            <input
+              {...control}
+              name="email"
+              type="email"
+              maxLength={150}
+              autoComplete="email"
+              className={fieldInputClass(Boolean(state.fieldErrors?.email))}
+            />
+          )}
+        </Field>
 
-        <div>
-          <label htmlFor="assunto" className="block text-sm font-semibold text-[var(--color-text-main)]">
-            Assunto <span className="text-salmon-500">*</span>
-          </label>
-          <input
-            id="assunto"
-            name="assunto"
-            type="text"
-            maxLength={150}
-            className={inputClass(Boolean(state.fieldErrors?.assunto))}
-          />
-          <FieldError msg={state.fieldErrors?.assunto} />
-        </div>
+        <Field label="Assunto" required error={state.fieldErrors?.assunto}>
+          {(control) => (
+            <input
+              {...control}
+              name="assunto"
+              type="text"
+              maxLength={150}
+              className={fieldInputClass(Boolean(state.fieldErrors?.assunto))}
+            />
+          )}
+        </Field>
 
-        <div>
-          <label htmlFor="mensagem" className="block text-sm font-semibold text-[var(--color-text-main)]">
-            Mensagem <span className="text-salmon-500">*</span>
-          </label>
-          <textarea
-            id="mensagem"
-            name="mensagem"
-            rows={6}
-            maxLength={2000}
-            className={`${inputClass(Boolean(state.fieldErrors?.mensagem))} resize-none`}
-          />
-          <FieldError msg={state.fieldErrors?.mensagem} />
-        </div>
+        <Field label="Mensagem" required error={state.fieldErrors?.mensagem}>
+          {(control) => (
+            <textarea
+              {...control}
+              name="mensagem"
+              rows={6}
+              maxLength={2000}
+              className={`${fieldInputClass(Boolean(state.fieldErrors?.mensagem))} resize-none`}
+            />
+          )}
+        </Field>
       </div>
 
       <button

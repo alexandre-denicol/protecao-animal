@@ -1,3 +1,7 @@
+import { assertMutationAllowed } from '../tests/e2e/utils/mutation-guard'
+
+assertMutationAllowed('Seed E2E (cria/atualiza admin, animal, interesse e mensagem)')
+
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL

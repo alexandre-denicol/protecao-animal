@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { nomeDisplay } from '@/lib/animal-format'
 import { getResendClient } from '@/lib/resend'
 
 // NOTIFICATION_EMAIL deve conter emails separados por vírgula
@@ -18,7 +19,8 @@ function getNotificationEmails(): string[] {
 }
 
 interface AdoptionInterestEmailData {
-  animalNome: string
+  /** Pode ser null: o animal pode ainda não ter nome. */
+  animalNome: string | null
   nome: string
   email: string
   telefone: string | null
@@ -206,7 +208,7 @@ async function sendConfiguredEmail(
 }
 
 function adoptionEmailTemplate(data: AdoptionInterestEmailData): string {
-  const animalNome = escapeHtml(data.animalNome)
+  const animalNome = escapeHtml(nomeDisplay(data.animalNome))
   const nome = escapeHtml(data.nome)
   const email = escapeHtml(data.email)
   const telefone = data.telefone ? escapeHtml(data.telefone) : '-'
@@ -314,7 +316,7 @@ export async function sendAdoptionInterestEmail(
   data: AdoptionInterestEmailData
 ): Promise<void> {
   await sendNotificationEmail({
-    subject: `Novo interesse em adoção - ${data.animalNome}`,
+    subject: `Novo interesse em adoção - ${nomeDisplay(data.animalNome)}`,
     html: adoptionEmailTemplate(data),
   })
 }

@@ -1,21 +1,33 @@
-export type AnimalEspecie = 'gato' | 'cao'
-export type AnimalSexo = 'macho' | 'femea'
+export type AnimalEspecie = 'gato' | 'cao' | 'outro'
+export type AnimalSexo = 'macho' | 'femea' | 'nao_identificado'
 export type AnimalStatus = 'disponivel' | 'em_processo' | 'adotado'
 
 export interface Animal {
   id: string
   slug: string
-  nome: string
+  /** Opcional: um animal recém-resgatado pode ainda não ter nome. */
+  nome: string | null
   created_by: string | null
   especie: AnimalEspecie
+  /** Preenchido só quando especie = 'outro'; a aplicação normaliza para null caso contrário. */
+  especie_detalhe: string | null
   raca: string | null
   idade_anos: number | null
   idade_meses: number | null
+  /** Indica que a idade informada é aproximada, não exata. */
+  idade_estimada: boolean
   sexo: AnimalSexo
   peso_kg: number | null
-  vacinado: boolean
-  castrado: boolean
+  /** Tri-state: true = Sim, false = Não, null = não informado. */
+  vacinado: boolean | null
+  /** Tri-state: true = Sim, false = Não, null = não informado. */
+  castrado: boolean | null
+  /**
+   * @deprecated Coluna preservada por compatibilidade com dados existentes.
+   * Não lida nem gravada pela aplicação desde a refinação do cadastro de animais.
+   */
   saudavel: boolean
+  /** @deprecated Ver `saudavel`. */
   obs_saude: string | null
   temperamento: string | null
   descricao: string | null
