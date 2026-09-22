@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import BrandLogo from './BrandLogo'
@@ -16,6 +16,7 @@ const navLinks = [
 
 export default function Header() {
   const [menuAberto, setMenuAberto] = useState(false)
+  const botaoMenuRef = useRef<HTMLButtonElement>(null)
   const pathname = usePathname()
 
   // Fechar menu ao navegar
@@ -29,13 +30,39 @@ export default function Header() {
     return () => { document.body.style.overflow = '' }
   }, [menuAberto])
 
+  // Escape fecha o menu e devolve o foco ao botão que o abriu
+  useEffect(() => {
+    if (!menuAberto) return
+
+    function fecharComEscape(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      setMenuAberto(false)
+      botaoMenuRef.current?.focus()
+    }
+
+    document.addEventListener('keydown', fecharComEscape)
+    return () => document.removeEventListener('keydown', fecharComEscape)
+  }, [menuAberto])
+
+  // O menu aberto cobre a página; se o foco sair do header, ele fecha
+  function fecharSeFocoSairDoHeader(event: React.FocusEvent<HTMLElement>) {
+    const proximo = event.relatedTarget
+
+    if (menuAberto && proximo instanceof Node && !event.currentTarget.contains(proximo)) {
+      setMenuAberto(false)
+    }
+  }
+
   function isActive(href: string) {
     if (href === '/') return pathname === '/'
     return pathname.startsWith(href)
   }
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-[rgba(13,17,23,0.8)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+    <header
+      onBlur={fecharSeFocoSairDoHeader}
+      className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-[rgba(13,17,23,0.8)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+    >
       <div className="mx-auto flex min-h-[4.75rem] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
 
         <Link
@@ -54,10 +81,10 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition duration-200 focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] ${
+              className={`rounded-[var(--radius-button)] px-3.5 py-2 text-sm font-medium underline-offset-[6px] transition duration-200 focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] ${
                 isActive(link.href)
-                  ? 'bg-[rgba(244,184,96,0.18)] text-[var(--color-primary)] shadow-[inset_0_0_0_1px_rgba(244,184,96,0.18)]'
-                  : 'text-[var(--color-text-muted)] hover:bg-white/6 hover:text-[var(--color-text-main)]'
+                  ? 'text-[var(--color-text-main)] underline decoration-[var(--color-primary)] decoration-2'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
               }`}
               aria-current={isActive(link.href) ? 'page' : undefined}
             >
@@ -73,18 +100,14 @@ export default function Header() {
           >
             Quero adotar
           </Link>
-          <Link
-            href="/admin/login"
-            className="hidden rounded-[var(--radius-button)] border border-[rgba(31,111,107,0.55)] px-3.5 py-2 text-sm font-semibold text-[var(--color-secondary)] transition duration-200 hover:border-[var(--color-secondary)] hover:bg-[rgba(31,111,107,0.12)] hover:text-[#6dd2cb] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] lg:block"
-          >
-            Área da equipe
-          </Link>
 
           <button
+            ref={botaoMenuRef}
+            type="button"
             onClick={() => setMenuAberto((prev) => !prev)}
             aria-expanded={menuAberto}
             aria-controls="mobile-menu"
-            aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
+            aria-label="Menu de navegação"
             className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-button)] border border-white/10 bg-white/5 text-[var(--color-text-main)] transition duration-200 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] xl:hidden"
           >
             {menuAberto ? (
@@ -100,14 +123,11 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Menu mobile — dropdown suave */}
+      {/* Menu mobile: disclosure. Fechado, fica invisible (fora da ordem de Tab e do leitor de tela). */}
       <div
         id="mobile-menu"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Menu de navegação"
-        className={`overflow-hidden transition-all duration-200 ease-out xl:hidden ${
-          menuAberto ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+        className={`overflow-hidden transition-all duration-200 ease-out motion-reduce:transition-none xl:hidden ${
+          menuAberto ? 'visible max-h-screen opacity-100' : 'invisible max-h-0 opacity-0'
         }`}
       >
         <nav
@@ -119,10 +139,10 @@ export default function Header() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`block rounded-[var(--radius-button)] px-4 py-3 text-base font-medium transition duration-200 focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] ${
+                  className={`block rounded-[var(--radius-button)] border-l-2 px-4 py-3 text-base font-medium transition duration-200 focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] ${
                     isActive(link.href)
-                      ? 'bg-[rgba(244,184,96,0.18)] text-[var(--color-primary)]'
-                      : 'text-[var(--color-text-muted)] hover:bg-white/6 hover:text-[var(--color-text-main)]'
+                      ? 'border-[var(--color-primary)] text-[var(--color-text-main)]'
+                      : 'border-transparent text-[var(--color-text-muted)] hover:bg-white/5 hover:text-[var(--color-text-main)]'
                   }`}
                   aria-current={isActive(link.href) ? 'page' : undefined}
                 >
@@ -136,14 +156,6 @@ export default function Header() {
                 className="block rounded-[var(--radius-button)] bg-[var(--color-primary)] px-4 py-3 text-center text-base font-semibold text-neutral-950 transition duration-200 hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
               >
                 Quero adotar
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/admin/login"
-                className="block rounded-[var(--radius-button)] border border-[rgba(31,111,107,0.55)] px-4 py-3 text-center text-sm font-semibold text-[var(--color-secondary)] transition duration-200 hover:bg-[rgba(31,111,107,0.12)] hover:text-[#6dd2cb] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)]"
-              >
-                Área da equipe
               </Link>
             </li>
           </ul>

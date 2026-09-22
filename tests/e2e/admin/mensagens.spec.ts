@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test'
 import { loginAsAdmin } from '../utils/admin'
 import { expectSuccessFeedback } from '../utils/assertions'
+import { assertMutationAllowed } from '../utils/mutation-guard'
 import { uniqueEmail, uniqueSuffix } from '../utils/test-data'
 
 test('mensagens lista registros e permite marcar como lida', async ({ page }) => {
+  assertMutationAllowed('Enviar e marcar como lida uma mensagem de contato')
   const email = uniqueEmail('mensagem-admin')
   const assunto = `Assunto Admin ${uniqueSuffix()}`
 

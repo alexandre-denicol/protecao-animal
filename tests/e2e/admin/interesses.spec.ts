@@ -1,10 +1,12 @@
 import { expect, test } from '@playwright/test'
 import { createAnimalViaAdmin, loginAsAdmin } from '../utils/admin'
 import { expectSuccessFeedback } from '../utils/assertions'
+import { assertMutationAllowed } from '../utils/mutation-guard'
 import { uniqueEmail, uniqueName } from '../utils/test-data'
 import { openAnimalDetailFromCatalog } from '../utils/public'
 
 test('interesses lista registros e permite marcar como lido', async ({ page }) => {
+  assertMutationAllowed('Criar e marcar como lido um interesse de adoção')
   const email = uniqueEmail('interesse-admin')
   const animal = await createAnimalViaAdmin(page, { namePrefix: 'E2E Interesse' })
 

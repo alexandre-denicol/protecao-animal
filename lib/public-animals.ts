@@ -1,13 +1,27 @@
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import type { AnimalEspecie, AnimalSexo, AnimalStatus } from '@/types'
 
-type PublicAnimalRow = {
+const CARD_COLUMNS =
+  'id, slug, nome, especie, especie_detalhe, raca, sexo, idade_anos, idade_meses, idade_estimada, temperamento, vacinado, castrado, status, created_at'
+
+export type PublicAnimalRow = {
   id: string
   slug: string
-  nome: string
-  especie: 'gato' | 'cao'
+  nome: string | null
+  especie: AnimalEspecie
+  especie_detalhe: string | null
+  raca: string | null
+  sexo: AnimalSexo
   idade_anos: number | null
   idade_meses: number | null
-  status: 'disponivel' | 'em_processo' | 'adotado'
+  idade_estimada: boolean
+  temperamento: string | null
+  /** Tri-state: true = Sim, false = Não, null = não informado. */
+  vacinado: boolean | null
+  /** Tri-state: true = Sim, false = Não, null = não informado. */
+  castrado: boolean | null
+  status: AnimalStatus
   created_at: string
 }
 
@@ -25,19 +39,17 @@ export type PublicAnimal = PublicAnimalRow & {
 }
 
 export type PublicAnimalDetail = PublicAnimalRow & {
-  raca: string | null
-  sexo: 'macho' | 'femea'
   peso_kg: number | null
-  vacinado: boolean
-  castrado: boolean
-  saudavel: boolean
-  obs_saude: string | null
-  temperamento: string | null
   descricao: string | null
   photos: PublicAnimalPhoto[]
 }
 
-async function withCoverPhotos(
+export type PublicAnimalRowsResult = {
+  rows: PublicAnimalRow[]
+  failed: boolean
+}
+
+export async function withCoverPhotos(
   animals: PublicAnimalRow[],
 ): Promise<PublicAnimal[]> {
   if (animals.length === 0) {
@@ -72,29 +84,42 @@ async function withCoverPhotos(
   }))
 }
 
-export async function getPublicAnimals(): Promise<PublicAnimal[]> {
-  const supabase = await createClient()
+/**
+ * Animais visíveis no catálogo (todos os não adotados), sem fotos.
+ * Distingue "não há animais" de "a consulta falhou" e é memoizada por
+ * requisição, para que estatísticas e resultados compartilhem uma só consulta.
+ */
+export const getPublicAnimalRows = cache(
+  async (): Promise<PublicAnimalRowsResult> => {
+    try {
+      const supabase = await createClient()
 
-  const { data: animals, error } = await supabase
-    .from('animals')
-    .select('id, slug, nome, especie, idade_anos, idade_meses, status, created_at')
-    .neq('status', 'adotado')
-    .order('created_at', { ascending: false })
+      const { data: animals, error } = await supabase
+        .from('animals')
+        .select(CARD_COLUMNS)
+        .neq('status', 'adotado')
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: true })
 
-  if (error || !animals) {
-    if (error) console.error('[PUBLIC ANIMALS ERROR]', error)
-    return []
-  }
+      if (error || !animals) {
+        if (error) console.error('[PUBLIC ANIMALS ERROR]', error)
+        return { rows: [], failed: true }
+      }
 
-  return withCoverPhotos(animals as PublicAnimalRow[])
-}
+      return { rows: animals as PublicAnimalRow[], failed: false }
+    } catch (error) {
+      console.error('[PUBLIC ANIMALS ERROR]', error)
+      return { rows: [], failed: true }
+    }
+  },
+)
 
 export async function getFeaturedPublicAnimals(limit = 6): Promise<PublicAnimal[]> {
   const supabase = await createClient()
 
   const { data: animals, error } = await supabase
     .from('animals')
-    .select('id, slug, nome, especie, idade_anos, idade_meses, status, created_at')
+    .select(CARD_COLUMNS)
     .neq('status', 'adotado')
     .eq('destaque', true)
     .order('created_at', { ascending: false })
@@ -108,12 +133,12 @@ export async function getFeaturedPublicAnimals(limit = 6): Promise<PublicAnimal[
   return withCoverPhotos(animals as PublicAnimalRow[])
 }
 
-export async function getAnimalBySlug(slug: string): Promise<PublicAnimalDetail | null> {
+export const getAnimalBySlug = cache(async (slug: string): Promise<PublicAnimalDetail | null> => {
   const supabase = await createClient()
 
   const { data: animal, error: animalError } = await supabase
     .from('animals')
-    .select('id, slug, nome, especie, raca, idade_anos, idade_meses, sexo, peso_kg, vacinado, castrado, saudavel, obs_saude, temperamento, descricao, status, created_at')
+    .select('id, slug, nome, especie, especie_detalhe, raca, idade_anos, idade_meses, idade_estimada, sexo, peso_kg, vacinado, castrado, temperamento, descricao, status, created_at')
     .eq('slug', slug)
     .neq('status', 'adotado')
     .maybeSingle()
@@ -135,4 +160,4 @@ export async function getAnimalBySlug(slug: string): Promise<PublicAnimalDetail 
     ...animalRow,
     photos: (photos ?? []) as PublicAnimalPhoto[],
   }
-}
+})

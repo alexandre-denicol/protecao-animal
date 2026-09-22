@@ -1,7 +1,9 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
+import Field, { fieldInputClass } from '@/components/forms/Field'
 import PhoneNumberField from '@/components/forms/PhoneNumberField'
+import { useFocusFirstInvalid } from '@/components/forms/useFocusFirstInvalid'
 import { UF_OPTIONS, onlyDigits } from '@/lib/membership'
 import {
   type PhoneCountry,
@@ -21,19 +23,6 @@ type MembershipField =
   | 'cpf'
   | 'whatsapp'
   | 'mensagem'
-
-function FieldError({ msg }: { msg?: string }) {
-  if (!msg) return null
-  return <p className="mt-2 text-xs leading-5 text-salmon-600">{msg}</p>
-}
-
-function inputClass(hasError?: boolean) {
-  return `w-full rounded-[var(--radius-button)] border px-4 py-3 text-sm text-[var(--color-text-main)] outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] ${
-    hasError
-      ? 'border-salmon-400 bg-[rgba(127,29,29,0.18)]'
-      : 'border-white/10 bg-[rgba(255,255,255,0.03)]'
-  }`
-}
 
 function validateClient(formData: FormData): Partial<Record<MembershipField, string>> {
   const fieldErrors: Partial<Record<MembershipField, string>> = {}
@@ -82,6 +71,8 @@ export default function MembershipForm() {
   const [whatsappCountry, setWhatsappCountry] = useState<PhoneCountry>('BR')
   const [whatsappValue, setWhatsappValue] = useState('')
   const [isPending, startTransition] = useTransition()
+
+  useFocusFirstInvalid(formRef, state.fieldErrors)
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -133,116 +124,103 @@ export default function MembershipForm() {
       )}
 
       <div className="grid gap-4 sm:gap-5">
-        <div>
-          <label htmlFor="nome" className="block text-sm font-semibold text-[var(--color-text-main)]">
-            Nome <span className="text-salmon-500">*</span>
-          </label>
-          <input
-            id="nome"
-            name="nome"
-            type="text"
-            required
-            minLength={2}
-            maxLength={100}
-            className={inputClass(Boolean(state.fieldErrors?.nome))}
-          />
-          <FieldError msg={state.fieldErrors?.nome} />
-        </div>
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-[var(--color-text-main)]">
-            Email <span className="text-salmon-500">*</span>
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            maxLength={160}
-            placeholder="seuemail@exemplo.com"
-            className={inputClass(Boolean(state.fieldErrors?.email))}
-          />
-          <FieldError msg={state.fieldErrors?.email} />
-        </div>
-
-        <div>
-          <label htmlFor="endereco" className="block text-sm font-semibold text-[var(--color-text-main)]">
-            Endereço <span className="text-salmon-500">*</span>
-          </label>
-          <input
-            id="endereco"
-            name="endereco"
-            type="text"
-            required
-            minLength={5}
-            maxLength={200}
-            placeholder="Rua, número e bairro"
-            className={inputClass(Boolean(state.fieldErrors?.endereco))}
-          />
-          <FieldError msg={state.fieldErrors?.endereco} />
-        </div>
-
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="cidade" className="block text-sm font-semibold text-[var(--color-text-main)]">
-              Cidade <span className="text-salmon-500">*</span>
-            </label>
+        <Field label="Nome" required error={state.fieldErrors?.nome}>
+          {(control) => (
             <input
-              id="cidade"
-              name="cidade"
+              {...control}
+              name="nome"
               type="text"
-              required
               minLength={2}
               maxLength={100}
-              className={inputClass(Boolean(state.fieldErrors?.cidade))}
+              autoComplete="name"
+              className={fieldInputClass(Boolean(state.fieldErrors?.nome))}
             />
-            <FieldError msg={state.fieldErrors?.cidade} />
-          </div>
+          )}
+        </Field>
 
-          <div>
-            <label htmlFor="estado" className="block text-sm font-semibold text-[var(--color-text-main)]">
-              Estado <span className="text-salmon-500">*</span>
-            </label>
-            <select
-              id="estado"
-              name="estado"
-              required
-              className={inputClass(Boolean(state.fieldErrors?.estado))}
-            >
-              <option value="">Selecione</option>
-              {UF_OPTIONS.map((uf) => (
-                <option key={uf} value={uf}>
-                  {uf}
-                </option>
-              ))}
-            </select>
-            <FieldError msg={state.fieldErrors?.estado} />
-          </div>
+        <Field label="Email" required error={state.fieldErrors?.email}>
+          {(control) => (
+            <input
+              {...control}
+              name="email"
+              type="email"
+              maxLength={160}
+              autoComplete="email"
+              placeholder="seuemail@exemplo.com"
+              className={fieldInputClass(Boolean(state.fieldErrors?.email))}
+            />
+          )}
+        </Field>
+
+        <Field label="Endereço" required error={state.fieldErrors?.endereco}>
+          {(control) => (
+            <input
+              {...control}
+              name="endereco"
+              type="text"
+              minLength={5}
+              maxLength={200}
+              autoComplete="address-line1"
+              placeholder="Rua, número e bairro"
+              className={fieldInputClass(Boolean(state.fieldErrors?.endereco))}
+            />
+          )}
+        </Field>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Cidade" required error={state.fieldErrors?.cidade}>
+            {(control) => (
+              <input
+                {...control}
+                name="cidade"
+                type="text"
+                minLength={2}
+                maxLength={100}
+                autoComplete="address-level2"
+                className={fieldInputClass(Boolean(state.fieldErrors?.cidade))}
+              />
+            )}
+          </Field>
+
+          <Field label="Estado" required error={state.fieldErrors?.estado}>
+            {(control) => (
+              <select
+                {...control}
+                name="estado"
+                autoComplete="address-level1"
+                className={fieldInputClass(Boolean(state.fieldErrors?.estado))}
+              >
+                <option value="">Selecione</option>
+                {UF_OPTIONS.map((uf) => (
+                  <option key={uf} value={uf}>
+                    {uf}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Field>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="cpf" className="block text-sm font-semibold text-[var(--color-text-main)]">
-              CPF <span className="text-salmon-500">*</span>
-            </label>
-            <input
-              id="cpf"
-              name="cpf"
-              type="text"
-              inputMode="numeric"
-              required
-              pattern="\d{3}\.?\d{3}\.?\d{3}-?\d{2}"
-              maxLength={14}
-              placeholder="000.000.000-00"
-              value={cpfValue}
-              onChange={(event) => setCpfValue(formatCpfInput(event.target.value))}
-              className={inputClass(Boolean(state.fieldErrors?.cpf))}
-            />
-            <FieldError msg={state.fieldErrors?.cpf} />
-          </div>
+          <Field label="CPF" required error={state.fieldErrors?.cpf}>
+            {(control) => (
+              <input
+                {...control}
+                name="cpf"
+                type="text"
+                inputMode="numeric"
+                pattern="\d{3}\.?\d{3}\.?\d{3}-?\d{2}"
+                maxLength={14}
+                autoComplete="off"
+                placeholder="000.000.000-00"
+                value={cpfValue}
+                onChange={(event) => setCpfValue(formatCpfInput(event.target.value))}
+                className={fieldInputClass(Boolean(state.fieldErrors?.cpf))}
+              />
+            )}
+          </Field>
 
           <PhoneNumberField
-            id="whatsapp"
             label="WhatsApp"
             name="whatsapp"
             countryName="whatsapp_country"
@@ -255,19 +233,17 @@ export default function MembershipForm() {
           />
         </div>
 
-        <div>
-          <label htmlFor="mensagem" className="block text-sm font-semibold text-[var(--color-text-main)]">
-            Mensagem adicional
-          </label>
-          <textarea
-            id="mensagem"
-            name="mensagem"
-            rows={4}
-            maxLength={1000}
-            className={`${inputClass(Boolean(state.fieldErrors?.mensagem))} resize-none`}
-          />
-          <FieldError msg={state.fieldErrors?.mensagem} />
-        </div>
+        <Field label="Mensagem adicional" error={state.fieldErrors?.mensagem}>
+          {(control) => (
+            <textarea
+              {...control}
+              name="mensagem"
+              rows={4}
+              maxLength={1000}
+              className={`${fieldInputClass(Boolean(state.fieldErrors?.mensagem))} resize-none`}
+            />
+          )}
+        </Field>
       </div>
 
       <button

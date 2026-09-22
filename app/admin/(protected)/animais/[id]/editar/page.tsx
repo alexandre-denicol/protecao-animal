@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/auth/roles'
 import type { Animal, AnimalPhoto } from '@/types'
+import { nomeDisplay } from '@/lib/animal-format'
 import AdminPanel from '@/components/admin/AdminPanel'
 import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
 import AnimalForm from '@/components/admin/AnimalForm'
@@ -53,7 +54,7 @@ export default async function EditarAnimalPage({ params }: PageProps) {
 
       <AdminSectionHeading
         eyebrow="Cadastro"
-        title={`Editar: ${animal.nome}`}
+        title={`Editar: ${nomeDisplay(animal.nome)}`}
         description="Atualize dados, fotos, status e destaque sem perder o contexto do cadastro."
       />
 

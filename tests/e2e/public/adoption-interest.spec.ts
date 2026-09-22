@@ -1,10 +1,12 @@
 import { test } from '@playwright/test'
 import { createAnimalViaAdmin } from '../utils/admin'
 import { expectSuccessFeedback, trackPageErrors } from '../utils/assertions'
+import { assertMutationAllowed } from '../utils/mutation-guard'
 import { uniqueEmail, uniqueName } from '../utils/test-data'
 import { openAnimalDetailFromCatalog } from '../utils/public'
 
 test('formulário Quero adotar envia interesse com sucesso', async ({ page }) => {
+  assertMutationAllowed('Enviar interesse de adoção')
   const assertNoErrors = trackPageErrors(page)
   const animal = await createAnimalViaAdmin(page, { namePrefix: 'E2E Adoção' })
 

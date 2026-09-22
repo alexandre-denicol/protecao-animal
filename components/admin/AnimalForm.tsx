@@ -30,6 +30,20 @@ interface Props {
 
 const MAX_FOTOS = 5
 
+type TriStateValue = 'sim' | 'nao' | 'indefinido'
+
+function boolParaTriState(value: boolean | null | undefined): TriStateValue {
+  if (value === true) return 'sim'
+  if (value === false) return 'nao'
+  return 'indefinido'
+}
+
+function triStateParaBool(value: FormDataEntryValue | null): boolean | null {
+  if (value === 'sim') return true
+  if (value === 'nao') return false
+  return null
+}
+
 // ─── Helpers de UI ────────────────────────────────────────────────────────────
 
 function FieldError({ msg }: { msg?: string }) {
@@ -63,6 +77,50 @@ function isNextRedirectError(err: unknown): boolean {
   }
 
   return String((err as { digest: unknown }).digest).startsWith('NEXT_REDIRECT')
+}
+
+// ─── Controle tri-state (Sim / Não / Não informado) ────────────────────────────
+
+const TRI_STATE_OPTIONS: { value: TriStateValue; label: string }[] = [
+  { value: 'sim', label: 'Sim' },
+  { value: 'nao', label: 'Não' },
+  { value: 'indefinido', label: 'Não informado' },
+]
+
+function TriStateField({
+  name,
+  label,
+  defaultValue,
+}: {
+  name: string
+  label: string
+  defaultValue: TriStateValue
+}) {
+  return (
+    <div>
+      <span className={labelClass()}>{label}</span>
+      <div
+        role="radiogroup"
+        aria-label={label}
+        className="mt-2 inline-flex flex-wrap gap-1 rounded-xl border border-white/10 bg-[rgba(13,17,23,0.56)] p-1"
+      >
+        {TRI_STATE_OPTIONS.map((option) => (
+          <label key={option.value} className="relative">
+            <input
+              type="radio"
+              name={name}
+              value={option.value}
+              defaultChecked={defaultValue === option.value}
+              className="peer sr-only"
+            />
+            <span className="block cursor-pointer select-none rounded-lg px-3 py-1.5 text-xs font-semibold text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-main)] peer-checked:bg-[var(--color-primary)] peer-checked:text-[#1f1406] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-primary)]">
+              {option.label}
+            </span>
+          </label>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 // ─── Seção de Fotos ────────────────────────────────────────────────────────────
@@ -233,6 +291,9 @@ export default function AnimalForm({ mode, animal, action }: Props) {
   const [isPending, setIsPending] = useState(false)
   const [globalError, setGlobalError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({})
+  const [especieSelecionada, setEspecieSelecionada] = useState<AnimalEspecie | ''>(
+    animal?.especie ?? ''
+  )
 
   // ─── Handlers de fotos ──────────────────────────────────────────────────────
 
@@ -375,18 +436,21 @@ export default function AnimalForm({ mode, animal, action }: Props) {
         ordem: i,
       }))
 
+      const especieValue = fd.get('especie') as AnimalEspecie
+      const especieDetalheRaw = (fd.get('especie_detalhe') as string | null)?.trim() || null
+
       const input: AnimalFormInput = {
-        nome: (fd.get('nome') as string | null)?.trim() ?? '',
-        especie: (fd.get('especie') as AnimalEspecie) ?? 'gato',
+        nome: (fd.get('nome') as string | null)?.trim() || null,
+        especie: especieValue,
+        especie_detalhe: especieValue === 'outro' ? especieDetalheRaw : null,
         raca: (fd.get('raca') as string | null)?.trim() || null,
         idade_anos: numOrNull('idade_anos'),
         idade_meses: numOrNull('idade_meses'),
+        idade_estimada: fd.get('idade_estimada') === 'on',
         sexo: (fd.get('sexo') as AnimalSexo) ?? 'macho',
         peso_kg: numOrNull('peso_kg'),
-        vacinado: fd.get('vacinado') === 'on',
-        castrado: fd.get('castrado') === 'on',
-        saudavel: fd.get('saudavel') === 'on',
-        obs_saude: (fd.get('obs_saude') as string | null)?.trim() || null,
+        vacinado: triStateParaBool(fd.get('vacinado')),
+        castrado: triStateParaBool(fd.get('castrado')),
         temperamento: (fd.get('temperamento') as string | null)?.trim() || null,
         descricao: (fd.get('descricao') as string | null)?.trim() || null,
         status: (fd.get('status') as AnimalStatus) ?? 'disponivel',
@@ -431,23 +495,22 @@ export default function AnimalForm({ mode, animal, action }: Props) {
         </div>
       )}
 
-      {/* ── Informações básicas ── */}
+      {/* ── Identidade ── */}
       <section>
-        <SectionTitle>Informações básicas</SectionTitle>
+        <SectionTitle>Identidade</SectionTitle>
         <div className="grid gap-5 sm:grid-cols-2">
           {/* Nome */}
           <div className="sm:col-span-2">
             <label htmlFor="nome" className={labelClass()}>
-              Nome <span className="text-salmon-500">*</span>
+              Nome
             </label>
             <input
               id="nome"
               name="nome"
               type="text"
-              required
               maxLength={100}
               defaultValue={animal?.nome ?? ''}
-              placeholder="Ex: Bolinha"
+              placeholder="Ex: Bolinha — deixe em branco se ainda não tem nome"
               className={inputClass(Boolean(fieldErrors.nome))}
             />
             <FieldError msg={fieldErrors.nome} />
@@ -463,28 +526,15 @@ export default function AnimalForm({ mode, animal, action }: Props) {
               name="especie"
               required
               defaultValue={animal?.especie ?? ''}
+              onChange={(e) => setEspecieSelecionada(e.target.value as AnimalEspecie)}
               className={inputClass(Boolean(fieldErrors.especie))}
             >
               <option value="">Selecione…</option>
               <option value="gato">Gato</option>
               <option value="cao">Cão</option>
+              <option value="outro">Outro</option>
             </select>
             <FieldError msg={fieldErrors.especie} />
-          </div>
-
-          {/* Raça */}
-          <div>
-            <label htmlFor="raca" className={labelClass()}>
-              Raça
-            </label>
-            <input
-              id="raca"
-              name="raca"
-              type="text"
-              defaultValue={animal?.raca ?? ''}
-              placeholder="Ex: SRD, Persa, Labrador…"
-              className={inputClass()}
-            />
           </div>
 
           {/* Sexo */}
@@ -502,8 +552,91 @@ export default function AnimalForm({ mode, animal, action }: Props) {
               <option value="">Selecione…</option>
               <option value="macho">Macho</option>
               <option value="femea">Fêmea</option>
+              <option value="nao_identificado">Não identificado</option>
             </select>
             <FieldError msg={fieldErrors.sexo} />
+          </div>
+
+          {/* Qual espécie? — só quando "Outro" está selecionado */}
+          {especieSelecionada === 'outro' && (
+            <div className="sm:col-span-2">
+              <label htmlFor="especie_detalhe" className={labelClass()}>
+                Qual espécie? <span className="text-salmon-500">*</span>
+              </label>
+              <input
+                id="especie_detalhe"
+                name="especie_detalhe"
+                type="text"
+                maxLength={60}
+                defaultValue={animal?.especie_detalhe ?? ''}
+                placeholder="Ex: Coelho, Ave, Porquinho-da-índia…"
+                className={inputClass(Boolean(fieldErrors.especie_detalhe))}
+              />
+              <FieldError msg={fieldErrors.especie_detalhe} />
+            </div>
+          )}
+
+          {/* Raça */}
+          <div className="sm:col-span-2">
+            <label htmlFor="raca" className={labelClass()}>
+              Raça
+            </label>
+            <input
+              id="raca"
+              name="raca"
+              type="text"
+              defaultValue={animal?.raca ?? ''}
+              placeholder="Ex: SRD, Persa, Labrador…"
+              className={inputClass()}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Fotos ── */}
+      <section>
+        <SectionTitle>Fotos</SectionTitle>
+        <PhotoGrid
+          photos={photos}
+          onAdd={handleAddFiles}
+          onRemove={handleRemove}
+          onSetCover={handleSetCover}
+          error={fieldErrors.photos}
+        />
+      </section>
+
+      {/* ── Personalidade e descrição ── */}
+      <section>
+        <SectionTitle>Personalidade e descrição</SectionTitle>
+        <div className="space-y-5">
+          <div>
+            <label htmlFor="temperamento" className={labelClass()}>
+              Temperamento
+            </label>
+            <input
+              id="temperamento"
+              name="temperamento"
+              type="text"
+              maxLength={200}
+              defaultValue={animal?.temperamento ?? ''}
+              placeholder="Ex: Brincalhão, carinhoso, tímido com estranhos…"
+              className={inputClass()}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="descricao" className={labelClass()}>
+              Descrição completa
+            </label>
+            <textarea
+              id="descricao"
+              name="descricao"
+              rows={6}
+              maxLength={2000}
+              defaultValue={animal?.descricao ?? ''}
+              placeholder="Conte a história deste animal, sua personalidade, o que busca em um novo lar…"
+              className={`${inputClass()} resize-none`}
+            />
           </div>
         </div>
       </section>
@@ -565,81 +698,37 @@ export default function AnimalForm({ mode, animal, action }: Props) {
             />
             <FieldError msg={fieldErrors.peso_kg} />
           </div>
-        </div>
-      </section>
 
-      {/* ── Saúde ── */}
-      <section>
-        <SectionTitle>Saúde</SectionTitle>
-        <div className="mb-5 flex flex-wrap gap-6">
-          {(
-            [
-              { name: 'vacinado', label: 'Vacinado', checked: animal?.vacinado ?? false },
-              { name: 'castrado', label: 'Castrado / Castrada', checked: animal?.castrado ?? false },
-              { name: 'saudavel', label: 'Saudável', checked: animal?.saudavel ?? true },
-            ] as const
-          ).map((item) => (
-            <label key={item.name} className="flex cursor-pointer items-center gap-2.5 select-none">
+          <div className="sm:col-span-3">
+            <label className="flex cursor-pointer items-center gap-2.5 select-none">
               <input
                 type="checkbox"
-                name={item.name}
-                defaultChecked={item.checked}
+                name="idade_estimada"
+                defaultChecked={animal?.idade_estimada ?? false}
                 className="h-4 w-4 rounded border-neutral-300 accent-primary-400 focus:ring-2 focus:ring-primary-100"
               />
-              <span className="text-sm font-semibold text-[var(--color-text-main)]">{item.label}</span>
+              <span className="text-sm font-semibold text-[var(--color-text-main)]">
+                Idade é uma estimativa (não exata)
+              </span>
             </label>
-          ))}
-        </div>
-
-        <div>
-          <label htmlFor="obs_saude" className={labelClass()}>
-            Observações de saúde
-          </label>
-          <textarea
-            id="obs_saude"
-            name="obs_saude"
-            rows={3}
-            maxLength={500}
-            defaultValue={animal?.obs_saude ?? ''}
-            placeholder="Descreva condições especiais, medicamentos, histórico médico…"
-            className={`${inputClass()} resize-none`}
-          />
+          </div>
         </div>
       </section>
 
-      {/* ── Personalidade e descrição ── */}
+      {/* ── Cuidados ── */}
       <section>
-        <SectionTitle>Personalidade e descrição</SectionTitle>
-        <div className="space-y-5">
-          <div>
-            <label htmlFor="temperamento" className={labelClass()}>
-              Temperamento
-            </label>
-            <input
-              id="temperamento"
-              name="temperamento"
-              type="text"
-              maxLength={200}
-              defaultValue={animal?.temperamento ?? ''}
-              placeholder="Ex: Brincalhão, carinhoso, tímido com estranhos…"
-              className={inputClass()}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="descricao" className={labelClass()}>
-              Descrição completa
-            </label>
-            <textarea
-              id="descricao"
-              name="descricao"
-              rows={5}
-              maxLength={2000}
-              defaultValue={animal?.descricao ?? ''}
-              placeholder="Conte a história deste animal, sua personalidade, o que busca em um novo lar…"
-              className={`${inputClass()} resize-none`}
-            />
-          </div>
+        <SectionTitle>Cuidados</SectionTitle>
+        <div className="flex flex-wrap gap-8">
+          <TriStateField
+            name="vacinado"
+            label="Vacinado"
+            defaultValue={boolParaTriState(animal?.vacinado)}
+          />
+          <TriStateField
+            name="castrado"
+            label="Castrado / Castrada"
+            defaultValue={boolParaTriState(animal?.castrado)}
+          />
         </div>
       </section>
 
@@ -677,18 +766,6 @@ export default function AnimalForm({ mode, animal, action }: Props) {
             </span>
           </label>
         </div>
-      </section>
-
-      {/* ── Fotos ── */}
-      <section>
-        <SectionTitle>Fotos</SectionTitle>
-        <PhotoGrid
-          photos={photos}
-          onAdd={handleAddFiles}
-          onRemove={handleRemove}
-          onSetCover={handleSetCover}
-          error={fieldErrors.photos}
-        />
       </section>
 
       {/* ── Ações ── */}

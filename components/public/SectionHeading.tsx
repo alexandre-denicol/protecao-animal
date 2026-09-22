@@ -3,11 +3,13 @@ export default function SectionHeading({
   title,
   description,
   align = 'left',
+  id,
 }: {
   eyebrow?: string
   title: string
   description?: string
   align?: 'left' | 'center'
+  id?: string
 }) {
   const alignment =
     align === 'center'
@@ -15,17 +17,18 @@ export default function SectionHeading({
       : 'text-left items-start'
 
   return (
-    <div className={`flex max-w-3xl flex-col ${alignment}`}>
+    <div className={`flex max-w-2xl flex-col ${alignment}`}>
       {eyebrow && (
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)] sm:text-xs sm:tracking-[0.28em]">
-          {eyebrow}
-        </p>
+        <p className="text-sm font-semibold text-[var(--color-primary)]">{eyebrow}</p>
       )}
-      <h2 className="mt-3 max-w-[16ch] text-2xl font-extrabold tracking-tight text-[var(--color-text-main)] sm:text-3xl lg:text-4xl">
+      <h2
+        id={id}
+        className="mt-1.5 text-balance font-display text-2xl font-bold leading-tight tracking-[-0.01em] text-[var(--color-text-main)] sm:text-3xl"
+      >
         {title}
       </h2>
       {description && (
-        <p className="mt-4 max-w-[62ch] text-sm leading-7 text-[var(--color-text-muted)] sm:text-base">
+        <p className="mt-3 max-w-[60ch] text-base leading-7 text-[var(--color-text-soft)]">
           {description}
         </p>
       )}

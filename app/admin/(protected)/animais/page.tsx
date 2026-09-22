@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/auth/roles'
 import type { Animal, AnimalPhoto, AnimalEspecie, AnimalStatus } from '@/types'
+import { especieLabel, idadeLabel, nomeDisplay, sexoLabel } from '@/lib/animal-format'
 import AdminEmptyState from '@/components/admin/AdminEmptyState'
 import AdminSectionHeading from '@/components/admin/AdminSectionHeading'
 import AdminStatusBadge from '@/components/admin/StatusBadge'
@@ -25,8 +26,12 @@ interface PageProps {
 
 // ─── Helpers visuais ──────────────────────────────────────────────────────────
 
-function EspecieBadge({ especie }: { especie: AnimalEspecie }) {
-  return <AdminStatusBadge tone={especie === 'gato' ? 'primary' : 'warning'}>{especie === 'gato' ? 'Gato' : 'Cão'}</AdminStatusBadge>
+function EspecieBadge({ especie, detalhe }: { especie: AnimalEspecie; detalhe: string | null }) {
+  return (
+    <AdminStatusBadge tone={especie === 'gato' ? 'primary' : 'warning'}>
+      {especieLabel(especie, detalhe)}
+    </AdminStatusBadge>
+  )
 }
 
 function StatusBadge({ status }: { status: AnimalStatus }) {
@@ -110,6 +115,7 @@ function Filtros({
         <option value="">Todas as espécies</option>
         <option value="gato">Gato</option>
         <option value="cao">Cão</option>
+        <option value="outro">Outro</option>
       </select>
 
       {/* Status */}
@@ -165,7 +171,7 @@ function AnimalCard({
         {capa ? (
           <Image
             src={capa.url}
-            alt={animal.nome}
+            alt={nomeDisplay(animal.nome)}
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, 112px"
@@ -196,9 +202,9 @@ function AnimalCard({
               href={`/admin/animais/${animal.id}/editar`}
               className="font-semibold text-[var(--color-text-main)] hover:text-[var(--color-primary)]"
             >
-              {animal.nome}
+              {nomeDisplay(animal.nome)}
             </Link>
-            <EspecieBadge especie={animal.especie} />
+            <EspecieBadge especie={animal.especie} detalhe={animal.especie_detalhe} />
             {animal.destaque && (
                 <AdminStatusBadge tone="warning">Destaque</AdminStatusBadge>
             )}
@@ -207,11 +213,9 @@ function AnimalCard({
             <span className="text-xs text-[var(--color-text-muted)]">{animal.raca}</span>
           )}
           <span className="text-xs text-[var(--color-text-muted)]">
-            {animal.sexo === 'macho' ? 'Macho' : 'Fêmea'}
-            {animal.idade_anos !== null &&
-              ` · ${animal.idade_anos} ano${animal.idade_anos !== 1 ? 's' : ''}${
-                animal.idade_meses ? ` e ${animal.idade_meses} ${animal.idade_meses === 1 ? 'mês' : 'meses'}` : ''
-              }`}
+            {sexoLabel(animal.sexo)}
+            {(animal.idade_anos !== null || animal.idade_meses !== null) &&
+              ` · ${idadeLabel(animal.idade_anos, animal.idade_meses, animal.idade_estimada)}`}
           </span>
         </div>
 
@@ -264,7 +268,7 @@ export default async function AnimaisPage({ searchParams }: PageProps) {
 
   // Filtros
   if (busca) query = query.ilike('nome', `%${busca}%`)
-  if (especie === 'gato' || especie === 'cao') {
+  if (especie === 'gato' || especie === 'cao' || especie === 'outro') {
     query = query.eq('especie', especie as AnimalEspecie)
   }
   if (status === 'disponivel' || status === 'em_processo' || status === 'adotado') {

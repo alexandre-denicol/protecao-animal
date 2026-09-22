@@ -13,6 +13,7 @@
   --color-secondary: #1f6f6b;
   --color-text-main: #f9fafb;
   --color-text-muted: #9ca3af;
+  --color-text-soft: #d1d5db;
 
   --radius-card: 16px;
   --radius-button: 10px;
@@ -229,6 +230,11 @@
 }
 
 @layer utilities {
+  /* Plus Jakarta Sans tem espaço entre palavras estreito; compensa nos títulos */
+  .font-display {
+    word-spacing: 0.1em;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
@@ -384,5 +390,20 @@
 
   .backdrop-blur {
     backdrop-filter: blur(18px);
+  }
+}
+
+/*
+ * Movimento reduzido: as mudanças de estado (cor, foco, abrir/fechar) continuam
+ * acontecendo, mas sem transições animadas. O spinner de envio (animate-spin)
+ * é feedback essencial e por isso não é desligado.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function SobrePage() {
   return (
-    <main className="bg-[var(--color-bg)]">
+    <div className="bg-[var(--color-bg)]">
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <BrandLogo className="mb-8" />
 
@@ -71,6 +71,6 @@ export default function SobrePage() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   )
 }

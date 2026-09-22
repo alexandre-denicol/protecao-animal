@@ -1,5 +1,6 @@
 'use server'
 
+import { randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireRole, getUserProfile } from '@/lib/auth/roles'
@@ -18,17 +19,21 @@ export interface PhotoInput {
 }
 
 export interface AnimalFormInput {
-  nome: string
+  /** Opcional: null quando o animal ainda não tem nome. */
+  nome: string | null
   especie: AnimalEspecie
+  /** Obrigatório (não vazio) quando especie = 'outro'; ignorado/normalizado para null nos demais casos. */
+  especie_detalhe: string | null
   raca: string | null
   idade_anos: number | null
   idade_meses: number | null
+  idade_estimada: boolean
   sexo: AnimalSexo
   peso_kg: number | null
-  vacinado: boolean
-  castrado: boolean
-  saudavel: boolean
-  obs_saude: string | null
+  /** Tri-state: true = Sim, false = Não, null = não informado. */
+  vacinado: boolean | null
+  /** Tri-state: true = Sim, false = Não, null = não informado. */
+  castrado: boolean | null
   temperamento: string | null
   descricao: string | null
   status: AnimalStatus
@@ -44,6 +49,10 @@ export interface AnimalFormState {
 }
 
 // ─── Slug ────────────────────────────────────────────────────────────────────
+//
+// O slug é gerado UMA ÚNICA VEZ, na criação, e nunca recalculado em edições —
+// nem quando o nome muda, nem quando um animal sem nome recebe um nome depois.
+// Isso mantém a URL pública estável ao longo da vida do registro.
 
 function toSlugBase(text: string): string {
   return text
@@ -54,39 +63,65 @@ function toSlugBase(text: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
+/** Fragmento curto, aleatório e com entropia suficiente para evitar colisão. */
+function randomSlugFragment(): string {
+  return randomUUID().replace(/-/g, '').slice(0, 8)
+}
+
+/**
+ * Gera um slug único para um animal recém-criado.
+ * - Com nome: usa a base legível derivada do nome (estratégia existente),
+ *   com sufixo numérico em caso de colisão.
+ * - Sem nome: usa `animal-<fragmento>` (nunca uma contagem sequencial, nunca
+ *   um nome inventado), gerando um novo fragmento em caso de colisão.
+ */
 async function generateUniqueSlug(
-  nome: string,
+  nome: string | null,
   supabase: Awaited<ReturnType<typeof createClient>>,
-  excludeId?: string
 ): Promise<string> {
-  const base = toSlugBase(nome)
-  let slug = base
-  let attempt = 0
+  const nomeBase = nome?.trim() ? toSlugBase(nome.trim()) : ''
+
+  if (nomeBase) {
+    let slug = nomeBase
+    let attempt = 0
+
+    for (;;) {
+      const { data } = await supabase.from('animals').select('id').eq('slug', slug).maybeSingle()
+      if (!data) return slug
+      attempt++
+      slug = `${nomeBase}-${attempt}`
+    }
+  }
 
   for (;;) {
-    let q = supabase.from('animals').select('id').eq('slug', slug)
-    if (excludeId) q = q.neq('id', excludeId)
-    const { data } = await q.maybeSingle()
+    const slug = `animal-${randomSlugFragment()}`
+    const { data } = await supabase.from('animals').select('id').eq('slug', slug).maybeSingle()
     if (!data) return slug
-    attempt++
-    slug = `${base}-${attempt}`
   }
 }
 
 // ─── Validação ────────────────────────────────────────────────────────────────
 
-const ESPECIES_VALIDAS: AnimalEspecie[] = ['gato', 'cao']
-const SEXOS_VALIDOS: AnimalSexo[] = ['macho', 'femea']
+const ESPECIES_VALIDAS: AnimalEspecie[] = ['gato', 'cao', 'outro']
+const SEXOS_VALIDOS: AnimalSexo[] = ['macho', 'femea', 'nao_identificado']
 const STATUS_VALIDOS: AnimalStatus[] = ['disponivel', 'em_processo', 'adotado']
 
 function validar(input: AnimalFormInput): Partial<Record<string, string>> {
   const erros: Partial<Record<string, string>> = {}
 
-  if (!input.nome.trim() || input.nome.length > 100) {
-    erros.nome = 'Nome é obrigatório (máx. 100 caracteres).'
+  if (input.nome !== null && input.nome.trim().length > 100) {
+    erros.nome = 'Nome deve ter no máximo 100 caracteres.'
   }
   if (!ESPECIES_VALIDAS.includes(input.especie)) {
     erros.especie = 'Selecione uma espécie válida.'
+  }
+  if (input.especie === 'outro') {
+    const detalhe = input.especie_detalhe?.trim() ?? ''
+    if (!detalhe) {
+      erros.especie_detalhe = 'Informe a espécie do animal.'
+    } else if (detalhe.length > 60) {
+      erros.especie_detalhe = 'Espécie deve ter no máximo 60 caracteres.'
+    }
   }
   if (!SEXOS_VALIDOS.includes(input.sexo)) {
     erros.sexo = 'Selecione o sexo.'
@@ -112,21 +147,37 @@ function validar(input: AnimalFormInput): Partial<Record<string, string>> {
   return erros
 }
 
+/** Monta o payload de colunas comuns a criar/atualizar (nunca inclui slug nem saúde/saudável — ver actions abaixo). */
+function buildAnimalPayload(input: AnimalFormInput) {
+  return {
+    nome: input.nome?.trim() || null,
+    especie: input.especie,
+    especie_detalhe: input.especie === 'outro' ? input.especie_detalhe?.trim() || null : null,
+    raca: input.raca || null,
+    idade_anos: input.idade_anos,
+    idade_meses: input.idade_meses,
+    idade_estimada: input.idade_estimada,
+    sexo: input.sexo,
+    peso_kg: input.peso_kg,
+    vacinado: input.vacinado,
+    castrado: input.castrado,
+    temperamento: input.temperamento || null,
+    descricao: input.descricao || null,
+    status: input.status,
+    destaque: input.destaque,
+  }
+}
+
 // ─── Criar Animal ─────────────────────────────────────────────────────────────
 
 export async function criarAnimalAction(
   input: AnimalFormInput
 ): Promise<AnimalFormState> {
-  console.log('[CRIAR ANIMAL] action chamada, nome:', input.nome)
-  
   try {
     await requireRole(['admin', 'editor'])
   } catch {
-    console.log('[CRIAR ANIMAL] acesso negado no requireRole')
     return { error: 'Acesso negado.' }
   }
-  
-  console.log('[CRIAR ANIMAL] passou requireRole')
 
   const fieldErrors = validar(input)
   if (Object.keys(fieldErrors).length > 0) return { fieldErrors }
@@ -141,21 +192,7 @@ export async function criarAnimalAction(
     .from('animals')
     .insert({
       slug,
-      nome: input.nome.trim(),
-      especie: input.especie,
-      raca: input.raca || null,
-      idade_anos: input.idade_anos,
-      idade_meses: input.idade_meses,
-      sexo: input.sexo,
-      peso_kg: input.peso_kg,
-      vacinado: input.vacinado,
-      castrado: input.castrado,
-      saudavel: input.saudavel,
-      obs_saude: input.obs_saude || null,
-      temperamento: input.temperamento || null,
-      descricao: input.descricao || null,
-      status: input.status,
-      destaque: input.destaque,
+      ...buildAnimalPayload(input),
       created_by: profile.id,
     })
     .select('id')
@@ -208,41 +245,30 @@ export async function atualizarAnimalAction(
 
   const supabase = await createClient()
 
-  // Editor só pode editar os próprios animais
-  if (profile.role === 'editor') {
-    const { data: animalAtual } = await supabase
-      .from('animals')
-      .select('created_by')
-      .eq('id', id)
-      .single()
+  const { data: animalAtual } = await supabase
+    .from('animals')
+    .select('created_by, slug')
+    .eq('id', id)
+    .single()
 
-    if (!animalAtual || (animalAtual as { created_by: string }).created_by !== profile.id) {
-      return { error: 'Você não tem permissão para editar este animal.' }
-    }
+  if (!animalAtual) {
+    return { error: 'Animal não encontrado.' }
   }
 
-  const slug = await generateUniqueSlug(input.nome, supabase, id)
+  const { created_by: donoAtual, slug: slugAtual } = animalAtual as {
+    created_by: string | null
+    slug: string
+  }
 
+  // Editor só pode editar os próprios animais
+  if (profile.role === 'editor' && donoAtual !== profile.id) {
+    return { error: 'Você não tem permissão para editar este animal.' }
+  }
+
+  // Slug nunca é recalculado aqui — a URL pública permanece estável.
   const { error: updateError } = await supabase
     .from('animals')
-    .update({
-      slug,
-      nome: input.nome.trim(),
-      especie: input.especie,
-      raca: input.raca || null,
-      idade_anos: input.idade_anos,
-      idade_meses: input.idade_meses,
-      sexo: input.sexo,
-      peso_kg: input.peso_kg,
-      vacinado: input.vacinado,
-      castrado: input.castrado,
-      saudavel: input.saudavel,
-      obs_saude: input.obs_saude || null,
-      temperamento: input.temperamento || null,
-      descricao: input.descricao || null,
-      status: input.status,
-      destaque: input.destaque,
-    })
+    .update(buildAnimalPayload(input))
     .eq('id', id)
 
   if (updateError) {
@@ -291,7 +317,7 @@ export async function atualizarAnimalAction(
   }
 
   revalidatePath('/admin/animais')
-  revalidatePath(`/animais/${slug}`)
+  revalidatePath(`/animais/${slugAtual}`)
   redirect('/admin/animais')
 }
 

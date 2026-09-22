@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { loginAsAdmin } from '../utils/admin'
 import { trackPageErrors } from '../utils/assertions'
+import { assertMutationAllowed } from '../utils/mutation-guard'
 import { uniqueName } from '../utils/test-data'
 
 const pngBuffer = Buffer.from(
@@ -31,6 +32,7 @@ test.describe.serial('gestão admin de animais', () => {
   })
 
   test('criar animal pelo admin funciona', async ({ page }) => {
+    assertMutationAllowed('Criar animal pela interface administrativa')
     const assertNoErrors = trackPageErrors(page)
 
     await loginAsAdmin(page)
@@ -58,6 +60,7 @@ test.describe.serial('gestão admin de animais', () => {
   })
 
   test('editar animal pelo admin funciona', async ({ page }) => {
+    assertMutationAllowed('Editar animal pela interface administrativa')
     const assertNoErrors = trackPageErrors(page)
 
     await loginAsAdmin(page)

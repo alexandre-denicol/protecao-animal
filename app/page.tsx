@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import { getPublicSiteSettings } from '@/lib/site-settings'
 import HeroSection from '@/components/home/HeroSection'
-import ContadoresSection from '@/components/home/ContadoresSection'
 import AnimaisDestaque from '@/components/home/AnimaisDestaque'
+import ComoCuidamos from '@/components/home/ComoCuidamos'
+import ContadoresSection from '@/components/home/ContadoresSection'
+import HistoriasAdocao from '@/components/home/HistoriasAdocao'
 import SobreSection from '@/components/home/SobreSection'
 import PixSection from '@/components/home/PixSection'
+import { homeDisplayFont } from '@/components/home/home-font'
 
 export const metadata: Metadata = {
   title: 'Associação Amiga Miau — Adoção Responsável',
@@ -19,26 +22,22 @@ function parseCounter(value: string): number {
 
 export default async function HomePage() {
   const settings = await getPublicSiteSettings()
-  const resgatados = parseCounter(settings.animais_resgatados)
-  const adotados = parseCounter(settings.animais_adotados)
-  const emEspera = parseCounter(settings.animais_em_espera)
 
   return (
-    <main className="bg-[var(--color-bg)]">
+    <div className={`${homeDisplayFont.variable} bg-[var(--color-bg)]`}>
       <HeroSection
         titulo={settings.hero_titulo}
         subtitulo={settings.hero_subtitulo}
         imagemUrl={settings.hero_imagem_url}
-        resgatados={resgatados}
-        adotados={adotados}
-        emEspera={emEspera}
-      />
-      <ContadoresSection
-        resgatados={resgatados}
-        adotados={adotados}
-        emEspera={emEspera}
       />
       <AnimaisDestaque />
+      <ComoCuidamos />
+      <ContadoresSection
+        resgatados={parseCounter(settings.animais_resgatados)}
+        adotados={parseCounter(settings.animais_adotados)}
+        emEspera={parseCounter(settings.animais_em_espera)}
+      />
+      <HistoriasAdocao />
       <SobreSection missao={settings.missao} />
       <PixSection
         pixChave={settings.pix_chave}
@@ -46,6 +45,6 @@ export default async function HomePage() {
         facebookUrl={settings.facebook_url}
         whatsappNumero={settings.whatsapp_numero}
       />
-    </main>
+    </div>
   )
 }

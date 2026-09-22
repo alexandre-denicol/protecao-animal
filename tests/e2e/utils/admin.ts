@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test'
+import { assertMutationAllowed } from './mutation-guard'
 import { uniqueName } from './test-data'
 
 const pngBuffer = Buffer.from(
@@ -47,6 +48,8 @@ export async function createAnimalViaAdmin(
     namePrefix?: string
   },
 ): Promise<{ name: string }> {
+  assertMutationAllowed('Criar animal pela interface administrativa')
+
   const animalName = uniqueName(options?.namePrefix ?? 'E2E Animal')
 
   await loginAsAdmin(page)
